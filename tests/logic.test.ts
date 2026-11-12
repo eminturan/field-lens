@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildWiql, busiestDay, chunk, countStates, previousRange, weekBuckets, csvRows, filterRows, sortRows, Field, formatCell, moveItem, pageSlice, presetRange, Query, sanitizeSettings, searchFields, toCsv } from "../src/hub/logic";
+import { buildWiql, chunk, countStates, previousRange, weekBuckets, csvRows, filterRows, sortRows, Field, formatCell, moveItem, pageSlice, presetRange, Query, sanitizeSettings, searchFields, toCsv } from "../src/hub/logic";
 
 const q: Query = {
   type: "Kart",
@@ -214,14 +214,5 @@ describe("weekBuckets", () => {
       ["2026-10-29", "2026-10-31", 1],
     ]);
     expect(b[0].counts).toEqual({ A: 1, B: 1 });
-  });
-});
-
-describe("busiestDay", () => {
-  it("the local day with the most items, earliest on ties; undefined when empty", () => {
-    const at = (d: string, h: number) => new Date(`${d}T${String(h).padStart(2, "0")}:00:00`).toISOString();
-    const rows = [{ D: at("2026-10-05", 9) }, { D: at("2026-10-03", 9) }, { D: at("2026-10-05", 23) }, { D: at("2026-10-03", 1) }, { D: at("2026-10-09", 1) }];
-    expect(busiestDay(rows, "D")).toEqual({ day: "2026-10-03", count: 2 });
-    expect(busiestDay([], "D")).toBeUndefined();
   });
 });

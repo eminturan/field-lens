@@ -244,18 +244,6 @@ export function weekBuckets(rows: Row[], dateField: string, from: string, to: st
   return out;
 }
 
-/** En çok kaydın düştüğü yerel gün; eşitlikte en erken gün. */
-export function busiestDay(rows: Row[], dateField: string): { day: string; count: number } | undefined {
-  const counts = new Map<string, number>();
-  for (const r of rows) {
-    const day = localDay(r[dateField]);
-    if (day) counts.set(day, (counts.get(day) ?? 0) + 1);
-  }
-  let best: { day: string; count: number } | undefined;
-  for (const [day, count] of counts) if (!best || count > best.count || (count === best.count && day < best.day)) best = { day, count };
-  return best;
-}
-
 export function chunk<T>(list: T[], size: number): T[][] {
   const out: T[][] = [];
   for (let i = 0; i < list.length; i += size) out.push(list.slice(i, i + size));

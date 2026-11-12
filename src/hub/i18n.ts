@@ -65,9 +65,7 @@ export interface Strings {
   edit: string;
   statesN: (n: number) => string;
   prevPeriod: (n: number) => string;
-  busiest: string;
   prevTip: (from: string, to: string) => string;
-  busiestTip: (day: string, n: number, field: string) => string;
   weekly: string;
   weekTip: (from: string, to: string, n: number) => string;
   density: string;
@@ -123,10 +121,8 @@ export const STRINGS: Record<Lang, Strings> = {
     edit: "Düzenle",
     statesN: (n) => `${n} state`,
     prevPeriod: (n) => `önceki dönem ${n}`,
-    busiest: "En yoğun gün",
     prevTip: (f, to) =>
       `Önceki dönem: ${f} – ${to}. Aynı tür, state'ler ve tarih alanıyla sayıldı. Arama ya da kolon filtresi açıkken karşılaştırma gizlenir.`,
-    busiestTip: (d, n, f) => `${f} değeri en çok ${d} gününe düşüyor: ${n} kayıt. Eşitlikte en erken gün gösterilir.`,
     weekly: "Haftalara göre",
     weekTip: (f, to, n) => `${f}–${to}: ${n} kayıt`,
     density: "Satır yoğunluğu",
@@ -186,10 +182,8 @@ export const STRINGS: Record<Lang, Strings> = {
     edit: "Edit",
     statesN: (n) => `${n} ${n === 1 ? "state" : "states"}`,
     prevPeriod: (n) => `previous period ${n}`,
-    busiest: "Busiest day",
     prevTip: (f, to) =>
       `Previous period: ${f} – ${to}, counted with the same type, states and date field. Hidden while a search or column filter is on.`,
-    busiestTip: (d, n, f) => `The day with the most ${f} values: ${d}, ${n} items. On a tie the earliest day is shown.`,
     weekly: "By week",
     weekTip: (f, to, n) => `${f}–${to}: ${n} items`,
     density: "Row density",

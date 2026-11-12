@@ -6,7 +6,7 @@ Monthly reports from your work items, by any date field.
 - Pick one **work item type**, search and pick any **Date/Time field** (custom fields included) and a **date range** (last 15 / 30 / 90 days, this month, last month or custom).
 - Narrow by one or more **states**.
 - Choose the **columns** you want — search by display name or reference name, reorder by drag and drop (or Alt + ←/→).
-- After a run the filters fold into a one-line **report header**; the report shows the total compared with the **previous period**, the **busiest day** and a **by-week chart** in the board's state colors.
+- After a run the filters fold into a one-line **report header**; the report shows the total compared with the **previous period** and a **by-week chart** in the board's state colors.
 - A **state summary** above the table shows counts in the board's state colors; click a card to show only that state (table and CSV).
 - **Comfortable / compact** row density.
 - **Search** the results across all columns or **filter each column**, and **sort** by clicking a column header.

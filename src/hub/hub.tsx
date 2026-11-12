@@ -18,7 +18,6 @@ import { createRestSource, DataSource, RunResult } from "./api";
 import { FieldPicker } from "./fieldPicker";
 import { firstOf, pickLang, Strings, STRINGS } from "./i18n";
 import {
-  busiestDay,
   countStates,
   csvRows,
   filterRows,
@@ -369,7 +368,6 @@ function App({ source, store, mock, t, itemUrl }: Props) {
   };
   const shown = pageSlice(visible, page, PAGE_SIZE);
   const textFiltered = matched.length !== allRows.length;
-  const peak = result ? busiestDay(matched, result.query.dateField) : undefined;
   const buckets = React.useMemo(
     () => (result ? weekBuckets(matched, result.query.dateField, result.query.from, result.query.to) : []),
     [matched, result],
@@ -600,16 +598,6 @@ function App({ source, store, mock, t, itemUrl }: Props) {
                 </span>
               </button>
             ))}
-            {peak && (
-              <div
-                className="fl-card fl-card-static"
-                title={t.busiestTip(fullDay(peak.day), peak.count, byRef.get(result.query.dateField)?.name ?? result.query.dateField)}
-              >
-                <span className="fl-card-num">{shortDay(peak.day)}</span>
-                <span className="fl-card-label">{t.busiest}</span>
-                <span className="fl-card-sub">{t.count(peak.count)}</span>
-              </div>
-            )}
           </div>
         )}
         {!running && result && allRows.length > 0 && buckets.length > 1 && (
