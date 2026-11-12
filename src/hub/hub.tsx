@@ -399,8 +399,8 @@ function App({ source, store, mock, t, itemUrl }: Props) {
               <button className="fl-button" disabled={!!missing || running} onClick={run}>
                 {running ? t.running : t.run}
               </button>
-              <button className="fl-button" disabled={!result || result.data.rows.length === 0} onClick={exportCsv}>
-                {t.exportCsv}
+              <button className="fl-button" disabled={!result || visible.length === 0} onClick={exportCsv}>
+                {filtering ? `${t.exportCsv} (${visible.length})` : t.exportCsv}
               </button>
               {missing && <span className="fl-muted">{missing}</span>}
               {result && !missing && <span className="fl-muted">{t.count(result.data.rows.length)}</span>}
