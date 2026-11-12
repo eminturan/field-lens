@@ -2,6 +2,10 @@
 
 [Türkçe](CHANGELOG.tr.md)
 
+## 0.2.17
+
+- Fix: a widget whose **Source** is a saved query couldn't be saved ("You have errors in your configuration settings"). Saving checked the widget's own type, date field and states, which are empty when they come from the query. Now only what the widget still sets itself is checked: the Monthly trend's custom month range and the breakdown rule.
+
 ## 0.2.16
 
 - Fix: searches ignored case only partly. Turkish lower-casing turns "I" into "ı", so "GIT.BOA" did not match "git.boa". Project search, field search, result filters and the duplicate-name check now treat I, ı, İ and i alike.
