@@ -14,4 +14,14 @@ Monthly reports from your work items, by any date field.
 - **Export to CSV** (opens directly in Excel, Turkish characters intact).
 - Your selections are remembered.
 
+## Dashboard widget
+Add **Field Lens** from the widget catalog and pick a view in its settings:
+1. **Summary**: total, change against the previous period and the share of each state.
+2. **Monthly trend**: the last 3, 6 or 12 months, stacked by state.
+3. **Weekly**: items per week in the chosen range.
+4. **Distribution**: counts by any field (system, assignee, …).
+5. **Upcoming**: items whose date falls in the next 7–60 days, with links.
+
+Ranges are relative (last month, last 90 days, …), so the dashboard stays current on its own.
+
 Built for Azure DevOps Server 2022.

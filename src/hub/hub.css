@@ -312,54 +312,6 @@ section > .fl-button {
   vertical-align: top;
 }
 
-/* Kolon seçici */
-.fl-picker {
-  position: relative;
-}
-
-.fl-picker-list {
-  position: absolute;
-  z-index: 10;
-  top: calc(100% + 2px);
-  left: 0;
-  width: max(100%, 360px);
-  max-width: calc(100vw - 32px);
-  max-height: 320px;
-  overflow-y: auto;
-  margin: 0;
-  padding: 4px 0;
-  list-style: none;
-  background: var(--callout-background-color, #fff);
-  border: 1px solid var(--component-grid-cell-bottom-border-color, rgba(0, 0, 0, 0.2));
-  border-radius: 4px;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
-}
-
-.fl-picker-item {
-  display: flex;
-  flex-direction: column;
-  padding: 6px 12px;
-  cursor: pointer;
-}
-
-.fl-picker-active {
-  background: var(--component-grid-row-hover-color, rgba(0, 0, 0, 0.06));
-}
-
-.fl-picker-name {
-  font-size: 14px;
-}
-
-.fl-picker-ref,
-.fl-picker-empty {
-  font-size: 12px;
-  color: var(--text-secondary-color, rgba(0, 0, 0, 0.55));
-}
-
-.fl-picker-empty {
-  padding: 6px 12px;
-}
-
 @media (max-width: 600px) {
   .fl-content {
     padding: 8px 16px 24px;
@@ -606,26 +558,6 @@ section > .fl-button {
   margin: 0 0 8px;
   font-size: 14px;
   font-weight: 600;
-}
-
-.fl-chart {
-  display: block;
-  width: 100%;
-  max-height: 220px;
-}
-
-.fl-axis {
-  stroke: var(--component-grid-cell-bottom-border-color, rgba(0, 0, 0, 0.2));
-}
-
-.fl-chart-num,
-.fl-chart-label {
-  font-size: 11px;
-  fill: var(--text-secondary-color, rgba(0, 0, 0, 0.6));
-}
-
-.fl-chart-num {
-  fill: var(--text-primary-color, rgba(0, 0, 0, 0.9));
 }
 
 /* Rahat / Sıkı */

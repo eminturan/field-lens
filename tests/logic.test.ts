@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildWiql, chunk, countStates, previousRange, weekBuckets, csvRows, filterRows, sortRows, Field, formatCell, moveItem, pageSlice, presetRange, Query, sanitizeSettings, searchFields, toCsv } from "../src/hub/logic";
+import { buildWiql, chunk, countBy, monthBuckets, monthsRange, upcomingRange, countStates, previousRange, weekBuckets, csvRows, filterRows, sortRows, Field, formatCell, moveItem, pageSlice, presetRange, Query, sanitizeSettings, searchFields, toCsv } from "../src/hub/logic";
 
 const q: Query = {
   type: "Kart",
@@ -214,5 +214,56 @@ describe("weekBuckets", () => {
       ["2026-10-29", "2026-10-31", 1],
     ]);
     expect(b[0].counts).toEqual({ A: 1, B: 1 });
+  });
+});
+
+describe("widget ranges", () => {
+  const now = new Date(2026, 10, 12, 15, 0);
+  it("monthsRange starts on the first day N-1 months back and ends today", () => {
+    expect(monthsRange(6, now)).toEqual({ from: "2026-06-01", to: "2026-11-12" });
+    expect(monthsRange(12, now)).toEqual({ from: "2025-12-01", to: "2026-11-12" });
+  });
+  it("upcomingRange covers today and the next N-1 days", () => {
+    expect(upcomingRange(7, now)).toEqual({ from: "2026-11-12", to: "2026-11-18" });
+    expect(upcomingRange(30, new Date(2026, 11, 20))).toEqual({ from: "2026-12-20", to: "2027-01-18" });
+  });
+});
+
+describe("monthBuckets", () => {
+  const at = (d: string) => new Date(`${d}T10:00:00`).toISOString();
+  it("one bucket per calendar month, ends cut at the range, counted per state", () => {
+    const rows = [
+      { D: at("2026-09-15"), "System.State": "A" },
+      { D: at("2026-11-02"), "System.State": "B" },
+      { D: at("2026-11-03"), "System.State": "A" },
+      { D: at("2026-12-01"), "System.State": "A" },
+    ];
+    const b = monthBuckets(rows, "D", "2026-09-10", "2026-11-12");
+    expect(b.map((x) => [x.start, x.end, x.total])).toEqual([
+      ["2026-09-10", "2026-09-30", 1],
+      ["2026-10-01", "2026-10-31", 0],
+      ["2026-11-01", "2026-11-12", 2],
+    ]);
+    expect(b[2].counts).toEqual({ A: 1, B: 1 });
+  });
+});
+
+describe("countBy", () => {
+  const col: Field = { referenceName: "S", name: "Sistem", type: "string" };
+  const rows = ["Mobil", "Core", "Mobil", undefined, "Web", "Core", "Mobil", "Kiosk"].map((S) => ({ S }));
+  it("counts displayed values, biggest first, ties by name, rest summed into other", () => {
+    expect(countBy(rows, col, 3)).toEqual({
+      items: [
+        { value: "Mobil", count: 3 },
+        { value: "Core", count: 2 },
+        { value: "", count: 1 },
+      ],
+      other: 2,
+    });
+    expect(countBy(rows, col, 10).other).toBe(0);
+  });
+  it("identity values count by display name", () => {
+    const people = [{ P: { displayName: "Ayşe" } }, { P: { displayName: "Ayşe" } }];
+    expect(countBy(people, { referenceName: "P", name: "P", type: "identity" }, 5).items).toEqual([{ value: "Ayşe", count: 2 }]);
   });
 });

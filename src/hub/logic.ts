@@ -1,3 +1,7 @@
+/** Dashboard widget görünümleri, oluşturulma sırasıyla. */
+export type View = "summary" | "trend" | "weekly" | "distribution" | "upcoming";
+export const VIEWS: View[] = ["summary", "trend", "weekly", "distribution", "upcoming"];
+
 export type Preset = "last15" | "last30" | "last90" | "thisMonth" | "lastMonth" | "custom";
 export const PRESETS: Preset[] = ["last15", "last30", "last90", "thisMonth", "lastMonth", "custom"];
 
@@ -242,6 +246,51 @@ export function weekBuckets(rows: Row[], dateField: string, from: string, to: st
     b.counts[s] = (b.counts[s] ?? 0) + 1;
   }
   return out;
+}
+
+/** Son N takvim ayı: (N-1) ay önceki ayın ilk günü – bugün. */
+export function monthsRange(months: number, now: Date): { from: string; to: string } {
+  return { from: toDateInput(new Date(now.getFullYear(), now.getMonth() - (months - 1), 1)), to: toDateInput(now) };
+}
+
+/** Bugün ve sonraki N-1 gün. */
+export function upcomingRange(days: number, now: Date): { from: string; to: string } {
+  return { from: toDateInput(now), to: toDateInput(new Date(now.getFullYear(), now.getMonth(), now.getDate() + days - 1)) };
+}
+
+/** Takvim ayı başına bir dilim (ilk ve son dilim aralıkla kesilir); her dilimde state başına sayı. */
+export function monthBuckets(rows: Row[], dateField: string, from: string, to: string): WeekBucket[] {
+  const out: WeekBucket[] = [];
+  const index = new Map<string, WeekBucket>();
+  for (let d = parseDay(from); toDateInput(d) <= to; d = new Date(d.getFullYear(), d.getMonth() + 1, 1)) {
+    const start = toDateInput(d);
+    const end = toDateInput(new Date(d.getFullYear(), d.getMonth() + 1, 0));
+    const b: WeekBucket = { start, end: end > to ? to : end, total: 0, counts: {} };
+    out.push(b);
+    index.set(start.slice(0, 7), b);
+  }
+  for (const r of rows) {
+    const day = localDay(r[dateField]);
+    const b = day && day >= from && day <= to ? index.get(day.slice(0, 7)) : undefined;
+    if (!b) continue;
+    const s = String(r["System.State"] ?? "");
+    b.total++;
+    b.counts[s] = (b.counts[s] ?? 0) + 1;
+  }
+  return out;
+}
+
+/** Görünen değere göre sayım: çoktan aza (eşitlikte ada göre), ilk `top` tanesi; kalanların toplamı other. Boş değer "". */
+export function countBy(rows: Row[], col: Field, top: number): { items: { value: string; count: number }[]; other: number } {
+  const counts = new Map<string, number>();
+  for (const r of rows) {
+    const v = formatCell(r[col.referenceName], col.type);
+    counts.set(v, (counts.get(v) ?? 0) + 1);
+  }
+  const all = [...counts]
+    .map(([value, count]) => ({ value, count }))
+    .sort((a, b) => b.count - a.count || a.value.localeCompare(b.value, "tr"));
+  return { items: all.slice(0, top), other: all.slice(top).reduce((n, x) => n + x.count, 0) };
 }
 
 export function chunk<T>(list: T[], size: number): T[][] {

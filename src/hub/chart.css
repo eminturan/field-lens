@@ -1,0 +1,19 @@
+.fl-chart {
+  display: block;
+  width: 100%;
+  max-height: 220px;
+}
+
+.fl-axis {
+  stroke: var(--component-grid-cell-bottom-border-color, rgba(0, 0, 0, 0.2));
+}
+
+.fl-chart-num,
+.fl-chart-label {
+  font-size: 11px;
+  fill: var(--text-secondary-color, rgba(0, 0, 0, 0.6));
+}
+
+.fl-chart-num {
+  fill: var(--text-primary-color, rgba(0, 0, 0, 0.9));
+}

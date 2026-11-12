@@ -1,3 +1,5 @@
+import "./picker.css";
+
 import * as React from "react";
 import { Field, searchFields } from "./logic";
 

@@ -15,6 +15,7 @@ import { MessageCard, MessageCardSeverity } from "azure-devops-ui/MessageCard";
 import { Page } from "azure-devops-ui/Page";
 
 import { createRestSource, DataSource, RunResult } from "./api";
+import { shortDay, StackChart } from "./chart";
 import { FieldPicker } from "./fieldPicker";
 import { firstOf, pickLang, Strings, STRINGS } from "./i18n";
 import {
@@ -35,7 +36,6 @@ import {
   sortRows,
   Settings,
   toCsv,
-  WeekBucket,
   weekBuckets,
 } from "./logic";
 import { mockSource } from "./mock";
@@ -112,53 +112,8 @@ const readDense = () => {
   }
 };
 
-/** "2026-10-07" → "07.10" */
-const shortDay = (d: string) => `${d.slice(8, 10)}.${d.slice(5, 7)}`;
 /** "2026-10-07" → "07.10.2026" */
 const fullDay = (d: string) => `${shortDay(d)}.${d.slice(0, 4)}`;
-
-/** Haftalara göre yığılmış çubuklar; renkler panodaki state renkleri, sıra sorgudaki state sırası. */
-function WeekChart({ buckets, states, colors, t }: { buckets: WeekBucket[]; states: string[]; colors: Record<string, string>; t: Strings }) {
-  const W = 640;
-  const H = 150;
-  const top = 18;
-  const bottom = 22;
-  const max = Math.max(1, ...buckets.map((b) => b.total));
-  const slot = W / buckets.length;
-  const bar = Math.min(48, slot * 0.7);
-  const labelEvery = Math.ceil(buckets.length / 12);
-  const scale = (n: number) => (n / max) * (H - top - bottom);
-  return (
-    <svg className="fl-chart" viewBox={`0 0 ${W} ${H}`} role="img" aria-label={t.weekly}>
-      <line x1={0} x2={W} y1={H - bottom} y2={H - bottom} className="fl-axis" />
-      {buckets.map((b, i) => {
-        const x = i * slot + (slot - bar) / 2;
-        let y = H - bottom;
-        return (
-          <g key={b.start}>
-            <title>{t.weekTip(shortDay(b.start), shortDay(b.end), b.total)}</title>
-            {states.map((s) => {
-              const h = scale(b.counts[s] ?? 0);
-              if (!h) return null;
-              y -= h;
-              return <rect key={s} x={x} y={y} width={bar} height={h} fill={colors[s] || "#8a8a8a"} />;
-            })}
-            {b.total > 0 && (
-              <text x={x + bar / 2} y={y - 4} textAnchor="middle" className="fl-chart-num">
-                {b.total}
-              </text>
-            )}
-            {i % labelEvery === 0 && (
-              <text x={x + bar / 2} y={H - 6} textAnchor="middle" className="fl-chart-label">
-                {shortDay(b.start)}
-              </text>
-            )}
-          </g>
-        );
-      })}
-    </svg>
-  );
-}
 
 function App({ source, store, mock, t, itemUrl }: Props) {
   const [reload, setReload] = React.useState(0);
@@ -606,7 +561,12 @@ function App({ source, store, mock, t, itemUrl }: Props) {
               {t.weekly}
               <span className="fl-muted">{byRef.get(result.query.dateField)?.name ?? result.query.dateField}</span>
             </h3>
-            <WeekChart buckets={buckets} states={result.query.states} colors={stateColors} t={t} />
+            <StackChart
+              bars={buckets.map((b) => ({ ...b, label: shortDay(b.start), tip: t.weekTip(shortDay(b.start), shortDay(b.end), b.total) }))}
+              states={result.query.states}
+              colors={stateColors}
+              label={t.weekly}
+            />
           </section>
         )}
         {!running && result && allRows.length > 0 && (

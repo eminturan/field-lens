@@ -17,12 +17,13 @@ const PEOPLE = ["Ayşe Yılmaz", "Mehmet Öztürk", "Can Şahin", undefined];
 const SYSTEMS = ["Core Banking", "Mobil", "İnternet Şube"];
 const DAY = 86400000;
 
-/** `npm run dev` için örnek veri: son 120 güne yayılmış 240 kart ve 60 bug (sayfalama denenebilsin). */
+/** `npm run dev` için örnek veri: son 120 ve sonraki 30 güne yayılmış 240 kart ve 60 bug (sayfalama denenebilsin). */
 function build(): Row[] {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   return Array.from({ length: 300 }, (_, i) => {
-    const planned = new Date(today.getTime() - ((i * 37) % 120) * DAY);
+    // Bugünden 120 gün geriye ve 30 gün ileriye yayılır (widget'ın "Yaklaşanlar" görünümü için).
+    const planned = new Date(today.getTime() - (((i * 37) % 150) - 30) * DAY);
     const person = PEOPLE[i % PEOPLE.length];
     return {
       "System.Id": 5000 + i,

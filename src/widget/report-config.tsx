@@ -1,0 +1,151 @@
+import * as React from "react";
+
+import { FieldPicker } from "../hub/fieldPicker";
+import { Field, Preset, PRESETS, VIEWS } from "../hub/logic";
+import { DAYS, DEFAULTS, Env, inHost, MONTHS, startConfig, WidgetConfig } from "./shared";
+
+const RELATIVE = PRESETS.filter((p): p is Exclude<Preset, "custom"> => p !== "custom");
+
+function Form({ value, onChange, env }: { value: WidgetConfig; onChange: (v: WidgetConfig) => void; env: Env }) {
+  const { source, t } = env;
+  const [types, setTypes] = React.useState<string[]>([]);
+  const [fields, setFields] = React.useState<Field[]>([]);
+  const [stateList, setStateList] = React.useState<string[]>();
+  const [error, setError] = React.useState<string>();
+  const set = (patch: Partial<WidgetConfig>) => onChange({ ...value, ...patch });
+
+  React.useEffect(() => {
+    Promise.all([source.types(), source.fields()]).then(([ts, fs]) => {
+      setTypes(ts);
+      setFields(fs);
+    }, (e) => setError(String(e?.message ?? e)));
+  }, [source]);
+
+  // Tür değişince state listesi yenilenir; bu türde olmayan seçimler düşer, hiç seçim yoksa hepsi seçilir.
+  React.useEffect(() => {
+    if (!value.type) return setStateList([]);
+    let live = true;
+    setStateList(undefined);
+    source.states(value.type).then((info) => {
+      if (!live) return;
+      const names = info.map((s) => s.name);
+      setStateList(names);
+      const kept = value.states.filter((s) => names.includes(s));
+      if (kept.length !== value.states.length || kept.length === 0) set({ states: kept.length ? kept : names });
+    }, (e) => live && setError(String(e?.message ?? e)));
+    return () => {
+      live = false;
+    };
+  }, [source, value.type]);
+
+  const byRef = new Map(fields.map((f) => [f.referenceName, f]));
+  const toggle = (s: string) =>
+    set({ states: value.states.includes(s) ? value.states.filter((x) => x !== s) : (stateList ?? []).filter((x) => x === s || value.states.includes(x)) });
+
+  return (
+    <div className="flc">
+      {error && <div className="flw-error">{t.loadError(error)}</div>}
+      <label className="flc-field">
+        <span>{t.w.cfgView}</span>
+        <select value={value.view} onChange={(e) => set({ view: e.target.value as WidgetConfig["view"] })}>
+          {VIEWS.map((v) => (
+            <option key={v} value={v}>
+              {t.w.views[v]}
+            </option>
+          ))}
+        </select>
+      </label>
+      <label className="flc-field">
+        <span>{t.type}</span>
+        <select value={value.type} onChange={(e) => set({ type: e.target.value, states: [] })}>
+          <option value="">{t.choose}</option>
+          {types.map((x) => (
+            <option key={x} value={x}>
+              {x}
+            </option>
+          ))}
+        </select>
+      </label>
+      <div className="flc-field">
+        <span>{t.dateField}</span>
+        <FieldPicker
+          id="flc-date"
+          single
+          fields={fields.filter((f) => f.type === "dateTime")}
+          selected={byRef.get(value.dateField)}
+          placeholder={t.searchDateField}
+          empty={t.noMatch}
+          onPick={(ref) => set({ dateField: ref })}
+        />
+      </div>
+      {(value.view === "summary" || value.view === "weekly" || value.view === "distribution") && (
+        <label className="flc-field">
+          <span>{t.w.cfgRange}</span>
+          <select value={value.preset} onChange={(e) => set({ preset: e.target.value as WidgetConfig["preset"] })}>
+            {RELATIVE.map((p) => (
+              <option key={p} value={p}>
+                {t.presets[p]}
+              </option>
+            ))}
+          </select>
+        </label>
+      )}
+      {value.view === "trend" && (
+        <label className="flc-field">
+          <span>{t.w.cfgMonths}</span>
+          <select value={value.months} onChange={(e) => set({ months: Number(e.target.value) })}>
+            {MONTHS.map((n) => (
+              <option key={n} value={n}>
+                {t.w.months(n)}
+              </option>
+            ))}
+          </select>
+        </label>
+      )}
+      {value.view === "upcoming" && (
+        <label className="flc-field">
+          <span>{t.w.cfgDays}</span>
+          <select value={value.days} onChange={(e) => set({ days: Number(e.target.value) })}>
+            {DAYS.map((n) => (
+              <option key={n} value={n}>
+                {t.w.nextDays(n)}
+              </option>
+            ))}
+          </select>
+        </label>
+      )}
+      {value.view === "distribution" && (
+        <div className="flc-field">
+          <span>{t.w.cfgGroup}</span>
+          <FieldPicker
+            id="flc-group"
+            single
+            fields={fields}
+            selected={byRef.get(value.groupField)}
+            placeholder={t.w.searchField}
+            empty={t.noMatch}
+            onPick={(ref) => set({ groupField: ref })}
+          />
+        </div>
+      )}
+      <fieldset className="flc-states">
+        <legend>{t.states}</legend>
+        {!value.type ? (
+          <span className="flc-hint">{t.need.type}</span>
+        ) : !stateList ? (
+          <span className="flc-hint">{t.loading}</span>
+        ) : (
+          stateList.map((s) => (
+            <label key={s} className="flc-check">
+              <input type="checkbox" checked={value.states.includes(s)} onChange={() => toggle(s)} />
+              {s}
+            </label>
+          ))
+        )}
+      </fieldset>
+    </div>
+  );
+}
+
+// Dashboard dışında (npm run dev) form örnek bir türle açılır.
+startConfig("report-widget-config", inHost ? DEFAULTS : { ...DEFAULTS, type: "Kart", dateField: "Custom.TargetDate" }, Form);
