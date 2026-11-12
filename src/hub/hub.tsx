@@ -115,6 +115,8 @@ const readDense = () => {
 
 /** "2026-10-07" → "07.10" */
 const shortDay = (d: string) => `${d.slice(8, 10)}.${d.slice(5, 7)}`;
+/** "2026-10-07" → "07.10.2026" */
+const fullDay = (d: string) => `${shortDay(d)}.${d.slice(0, 4)}`;
 
 /** Haftalara göre yığılmış çubuklar; renkler panodaki state renkleri, sıra sorgudaki state sırası. */
 function WeekChart({ buckets, states, colors, t }: { buckets: WeekBucket[]; states: string[]; colors: Record<string, string>; t: Strings }) {
@@ -555,7 +557,15 @@ function App({ source, store, mock, t, itemUrl }: Props) {
         {!running && result && result.data.rows.length === 0 && <div className="fl-empty">{t.empty}</div>}
         {!running && result && allRows.length > 0 && (
           <div className="fl-summary" role="group" aria-label={t.summary}>
-            <button className="fl-card" aria-pressed={!stateFilter} onClick={() => filterBy(undefined)}>
+            <button
+              className="fl-card"
+              aria-pressed={!stateFilter}
+              onClick={() => filterBy(undefined)}
+              title={(() => {
+                const p = previousRange(result.query.from, result.query.to);
+                return prevCount !== undefined ? t.prevTip(fullDay(p.from), fullDay(p.to)) : undefined;
+              })()}
+            >
               <span className="fl-card-num">{matched.length}</span>
               <span className="fl-card-label">{t.total}</span>
               {prevCount !== undefined && !textFiltered && (
@@ -591,7 +601,10 @@ function App({ source, store, mock, t, itemUrl }: Props) {
               </button>
             ))}
             {peak && (
-              <div className="fl-card fl-card-static">
+              <div
+                className="fl-card fl-card-static"
+                title={t.busiestTip(fullDay(peak.day), peak.count, byRef.get(result.query.dateField)?.name ?? result.query.dateField)}
+              >
                 <span className="fl-card-num">{shortDay(peak.day)}</span>
                 <span className="fl-card-label">{t.busiest}</span>
                 <span className="fl-card-sub">{t.count(peak.count)}</span>
