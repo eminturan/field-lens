@@ -2,6 +2,10 @@
 
 [Türkçe](CHANGELOG.tr.md)
 
+## 0.2.16
+
+- Fix: searches ignored case only partly. Turkish lower-casing turns "I" into "ı", so "GIT.BOA" did not match "git.boa". Project search, field search, result filters and the duplicate-name check now treat I, ı, İ and i alike.
+
 ## 0.2.15
 
 - Report page: **Projects** filter for querying across projects: this project (default), all projects you can see, or chosen projects from a searchable list. Types and states are merged from the projects in scope, a Team Project column is added, and IDs open items in their own project. The scope is part of saved queries and query links.

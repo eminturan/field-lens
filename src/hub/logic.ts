@@ -163,11 +163,17 @@ export function sanitizeSettings(s: Settings | undefined, types: string[], field
   return out;
 }
 
+/**
+ * Arama için harf katlama: Türkçe küçük harfe çevirir, sonra ı'yı i yapar. Böylece "GIT" (→ "gıt") ile "git",
+ * "İSTANBUL" ile "istanbul" eşleşir; proje ve alan adları çoğunlukla İngilizce harflerle yazıldığı için.
+ */
+export const fold = (s: string) => s.toLocaleLowerCase("tr").replace(/ı/g, "i");
+
 /** Görünen ad ya da referans adında geçenler; adı aramayla başlayanlar önce, sonra mevcut sıra. */
 export function searchFields(fields: Field[], text: string): Field[] {
-  const q = text.trim().toLocaleLowerCase("tr");
+  const q = fold(text.trim());
   if (!q) return fields;
-  const low = (s: string) => s.toLocaleLowerCase("tr");
+  const low = fold;
   const hits = fields.filter((f) => low(f.name).includes(q) || low(f.referenceName).includes(q));
   return [...hits.filter((f) => low(f.name).startsWith(q)), ...hits.filter((f) => !low(f.name).startsWith(q))];
 }
@@ -199,7 +205,7 @@ export function countStates(rows: Row[], states: string[]): { state: string; cou
   return [...counts].map(([state, count]) => ({ state, count }));
 }
 
-const lowTr = (s: string) => s.toLocaleLowerCase("tr");
+const lowTr = fold;
 
 /** Tabloda görünen metinde arar (Türkçe büyük/küçük harf duyarsız). global her kolonda, byCol yalnızca kendi kolonunda; hepsi sağlanmalı. */
 export function filterRows(rows: Row[], columns: Field[], global: string, byCol: Record<string, string>): Row[] {
@@ -399,8 +405,8 @@ export function nameError(name: string, list: SavedQuery[], exceptId?: string): 
   const n = name.trim();
   if (!n) return "empty";
   if (n.length > QUERY_NAME_MAX) return "long";
-  const low = n.toLocaleLowerCase("tr");
-  if (list.some((q) => q.id !== exceptId && q.name.toLocaleLowerCase("tr") === low)) return "duplicate";
+  const low = fold(n);
+  if (list.some((q) => q.id !== exceptId && fold(q.name) === low)) return "duplicate";
   return undefined;
 }
 

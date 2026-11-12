@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { applyQuery, canEdit, DEFAULT_COLUMNS, nameError, parseQueries, SavedQuery, settingsKey } from "../src/hub/logic";
+import { applyQuery, canEdit, DEFAULT_COLUMNS, filterRows, fold, nameError, searchFields, parseQueries, SavedQuery, settingsKey } from "../src/hub/logic";
 
 const q = (over: Partial<SavedQuery>): SavedQuery => ({ id: "1", name: "A", shared: false, ownerId: "me", ownerName: "Ben", settings: {}, ...over });
 
@@ -79,5 +79,22 @@ describe("applyQuery (widget linked to a saved query)", () => {
   it("copies a custom range's dates and defaults missing values", () => {
     expect(applyQuery(base, { preset: "custom", from: "2026-01-01", to: "2026-01-31" })).toMatchObject({ preset: "custom", from: "2026-01-01", to: "2026-01-31", type: "", states: [], assignee: undefined });
     expect(applyQuery(base, {}).preset).toBe("thisMonth");
+  });
+});
+
+describe("case-insensitive search with Turkish I/ı", () => {
+  it("fold treats I, ı, İ and i alike", () => {
+    expect(fold("GIT.BOA")).toBe(fold("git.boa"));
+    expect(fold("İSTANBUL")).toBe(fold("istanbul"));
+    expect(fold("Işık")).toBe(fold("IŞIK"));
+  });
+  it("searchFields and filterRows match across I/i", () => {
+    const fs = [{ referenceName: "Custom.IsKodu", name: "IŞ KODU", type: "string" }];
+    expect(searchFields(fs, "iş kodu")).toHaveLength(1);
+    const rows = [{ P: "GIT.BOA.Core" }];
+    expect(filterRows(rows, [{ referenceName: "P", name: "P", type: "string" }], "git.boa", {})).toHaveLength(1);
+  });
+  it("nameError sees GIT and git as the same name", () => {
+    expect(nameError("git", [{ id: "1", name: "GIT", shared: false, ownerId: "", ownerName: "", settings: {} }])).toBe("duplicate");
   });
 });

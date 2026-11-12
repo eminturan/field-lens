@@ -2,6 +2,10 @@
 
 [English](CHANGELOG.md)
 
+## 0.2.16
+
+- Düzeltme: aramalar büyük/küçük harfi tam yok saymıyordu. Türkçe küçük harfe çevirmede "I" harfi "ı" olduğu için "GIT.BOA" ile "git.boa" eşleşmiyordu. Proje araması, alan araması, sonuç filtreleri ve aynı ad kontrolü artık I, ı, İ ve i'yi aynı sayıyor.
+
 ## 0.2.15
 
 - Rapor sayfası: projeler arası sorgu için **Projeler** filtresi: bu proje (varsayılan), görebildiğiniz tüm projeler ya da aranabilir listeden seçili projeler. Türler ve state'ler kapsamdaki projelerden birleştirilir, Team Project kolonu eklenir ve ID'ler kaydı kendi projesinde açar. Kapsam kayıtlı sorgulara ve sorgu bağlantılarına girer.

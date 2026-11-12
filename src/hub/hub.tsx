@@ -25,6 +25,7 @@ import {
   countStates,
   csvRows,
   filterRows,
+  fold,
   DEFAULT_COLUMNS,
   DEFAULT_PRESET,
   Field,
@@ -533,7 +534,7 @@ function App({ source, store, queries, initialQueryId, linkFor, mock, t, itemUrl
                   />
                   <div className="fl-project-list">
                     {projectNames
-                      .filter((n) => n.toLocaleLowerCase("tr").includes(projectSearch.trim().toLocaleLowerCase("tr")))
+                      .filter((n) => fold(n).includes(fold(projectSearch.trim())))
                       .map((n) => (
                         <label key={n} className="fl-check">
                           <input type="checkbox" checked={projects.includes(n)} onChange={() => toggleProject(n)} />

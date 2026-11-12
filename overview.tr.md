@@ -44,6 +44,8 @@ Bir proje açın → **Boards** → **Field Lens**. Widget: **Dashboards → Edi
 
 ## Sürüm notları
 
+**0.2.16**: aramalar I ve ı dahil büyük/küçük harften bağımsız eşleşiyor.
+
 **0.2.15**: projeler arası sorgu (tümü ya da seçili olanlar).
 
 **0.2.14**: atanan filtresi, sorgu bağlantıları ve kayıtlı sorguyu kullanan widget'lar.

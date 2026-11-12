@@ -44,6 +44,8 @@ Open a project → **Boards** → **Field Lens**. The widget is under **Dashboar
 
 ## Release notes
 
+**0.2.16**: searches match regardless of case, including I and ı.
+
 **0.2.15**: query across projects (all or chosen).
 
 **0.2.14**: an assigned-to filter, query links, and widgets that use a saved query.
