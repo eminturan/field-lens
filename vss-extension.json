@@ -2,9 +2,9 @@
   "manifestVersion": 1,
   "id": "field-lens",
   "publisher": "turanemin",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "name": "Field Lens",
-  "description": "Lists work items of one type whose chosen date field falls in a date range, with selectable states and columns, exportable as CSV.",
+  "description": "Monthly reports by any date field: list, summarise and export work items of one type whose chosen Date/Time field falls in a range, plus a dashboard widget.",
   "public": true,
   "categories": [
     "Azure Boards"

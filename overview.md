@@ -1,27 +1,46 @@
 # Field Lens
 
-Monthly reports from your work items, by any date field.
+Monthly reports from your work items, built on **any date field**. Pick a work item type, a Date/Time field (custom fields included) and a range. Field Lens lists every item whose date falls in that range, summarises it, and puts it on your dashboard.
 
-## Features
-- Pick one **work item type**, search and pick any **Date/Time field** (custom fields included) and a **date range** (last 15 / 30 / 90 days, this month, last month or custom).
-- Narrow by one or more **states**.
-- Choose the **columns** you want — search by display name or reference name, reorder by drag and drop (or Alt + ←/→).
-- After a run the filters fold into a one-line **report header**; the report shows the total compared with the **previous period** and a **by-week chart** in the board's state colors.
-- A **state summary** above the table shows counts in the board's state colors; click a card to show only that state (table and CSV).
-- **Comfortable / compact** row density.
-- **Search** the results across all columns or **filter each column**, and **sort** by clicking a column header.
-- Results are shown **100 per page** with a sticky header; CSV contains all rows of the current view.
-- **Export to CSV** (opens directly in Excel, Turkish characters intact).
+## Report page
+
+- **Filters**:
+  - one work item type
+  - any Date/Time field, searchable by display name or reference name
+  - one or more states
+  - a range: last 15 / 30 / 90 days, this month, last month, or a custom from–to
+- **Columns of your choice**: search by display name or reference name, drag to reorder (or Alt + ←/→).
+- **Report header**: after a run the filters fold into one line ("Change report · Planned date · 2026-10-01 – 2026-10-31 · 3 states"), with Edit and CSV next to it.
+- **Totals**:
+  - the total compared with the previous period (+/− %)
+  - one card per state in the board's state colors; click a card to show only that state
+- **By-week chart**: Monday-to-Sunday weeks stacked by state.
+- **Results table**:
+  - search across all columns, filter each column, and sort by clicking a header
+  - 100 rows per page with a sticky header
+  - comfortable or compact rows
+  - the ID opens the work item
+- **CSV export** of the current view: UTF-8 so Excel keeps Turkish characters, with `;` or `,` as separator depending on the interface language.
 - Your selections are remembered.
 
 ## Dashboard widget
-Add **Field Lens** from the widget catalog and pick a view in its settings:
-1. **Summary**: total, change against the previous period and the share of each state.
-2. **Monthly trend**: the last 3, 6 or 12 months, stacked by state.
-3. **Weekly**: items per calendar week (Monday–Sunday) in the chosen range.
+
+Add **Field Lens** from the widget catalog and choose a view in its settings:
+
+1. **Summary**: total, change against the previous period, and the share of each state.
+2. **Monthly trend**: the last 3, 6 or 12 months (or a custom range), stacked by state.
+3. **Weekly**: items per calendar week in the chosen range.
 4. **By date**: one bar for every day that has items, labelled with its date.
-5. **Upcoming**: items whose date falls in the next 7–60 days, with links.
+5. **Upcoming**: items whose date falls in the next 7 / 14 / 30 / 60 days, earliest first, with links.
 
-Ranges can be relative (last month, last 90 days, …), so the dashboard stays current on its own, or a fixed custom range.
+Use relative ranges such as "last month" so the dashboard stays current on its own, or set a fixed custom range. Add the widget several times with different views to build a report page. **Open report** takes you to the full report.
 
-Built for Azure DevOps Server 2022.
+## Where to find it
+
+Open a project → **Boards** → **Field Lens**. The widget is under **Dashboards → Edit → Add a widget**.
+
+## Permissions
+
+Read-only: `vso.work`.
+
+English and Turkish interface; follows the Azure DevOps theme. Built for Azure DevOps Server 2022.
