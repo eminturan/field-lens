@@ -23,6 +23,8 @@ export interface DataSource {
   states(type: string): Promise<StateInfo[]>;
   fields(): Promise<Field[]>;
   run(q: Query): Promise<RunResult>;
+  /** Yalnızca WIQL: eşleşen kayıt sayısı (önceki dönem karşılaştırması için). */
+  count(q: Query): Promise<number>;
 }
 
 type Fetch = (url: string, init?: RequestInit) => Promise<Response>;
@@ -78,6 +80,11 @@ export function createRestSource(
     return out;
   }
 
+  async function wiqlIds(q: Query): Promise<number[]> {
+    const found = await call<{ workItems?: { id: number }[] }>(`${proj}_apis/wit/wiql?$top=${QUERY_LIMIT}&${API}`, { query: buildWiql(q) });
+    return (found.workItems ?? []).map((w) => w.id);
+  }
+
   return {
     async types() {
       const r = await call<{ value?: { name: string; isDisabled?: boolean }[] }>(`${proj}_apis/wit/workitemtypes?${API}`);
@@ -96,9 +103,9 @@ export function createRestSource(
         .map(({ referenceName, name, type }) => ({ referenceName, name, type }))
         .sort((a, b) => a.name.localeCompare(b.name, "tr"));
     },
+    count: async (q) => (await wiqlIds(q)).length,
     async run(q) {
-      const found = await call<{ workItems?: { id: number }[] }>(`${proj}_apis/wit/wiql?$top=${QUERY_LIMIT}&${API}`, { query: buildWiql(q) });
-      const ids = (found.workItems ?? []).map((w) => w.id);
+      const ids = await wiqlIds(q);
       const fields = [...new Set(["System.Id", ...q.columns])];
       const byId = new Map<number, Row>();
       for (const part of await batches(chunk(ids, BATCH), fields)) for (const w of part) byId.set(w.id, { ...w.fields, "System.Id": w.id });

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildWiql, chunk, countStates, csvRows, filterRows, sortRows, Field, formatCell, moveItem, pageSlice, presetRange, Query, sanitizeSettings, searchFields, toCsv } from "../src/hub/logic";
+import { buildWiql, busiestDay, chunk, countStates, previousRange, weekBuckets, csvRows, filterRows, sortRows, Field, formatCell, moveItem, pageSlice, presetRange, Query, sanitizeSettings, searchFields, toCsv } from "../src/hub/logic";
 
 const q: Query = {
   type: "Kart",
@@ -177,5 +177,51 @@ describe("sortRows", () => {
     expect(ids(sortRows(rows, d, "asc"))).toEqual([100, 10, 9]);
     expect(ids(sortRows(rows, d, "desc"))).toEqual([10, 100, 9]);
     expect(ids(rows)).toEqual([10, 9, 100]);
+  });
+});
+
+describe("previousRange", () => {
+  it("a full calendar month compares with the month before", () => {
+    expect(previousRange("2026-10-01", "2026-10-31")).toEqual({ from: "2026-09-01", to: "2026-09-30" });
+    expect(previousRange("2026-03-01", "2026-03-31")).toEqual({ from: "2026-02-01", to: "2026-02-28" });
+    expect(previousRange("2026-01-01", "2026-01-31")).toEqual({ from: "2025-12-01", to: "2025-12-31" });
+  });
+
+  it("any other range compares with the same number of days right before it", () => {
+    expect(previousRange("2026-10-18", "2026-11-01")).toEqual({ from: "2026-10-03", to: "2026-10-17" });
+    expect(previousRange("2026-11-01", "2026-11-12")).toEqual({ from: "2026-10-20", to: "2026-10-31" });
+  });
+});
+
+describe("weekBuckets", () => {
+  // Yerel gece yarısı; formatCell/toDateInput yerel güne çevirir.
+  const at = (d: string) => new Date(`${d}T10:00:00`).toISOString();
+  const rows = [
+    { D: at("2026-10-01"), "System.State": "A" },
+    { D: at("2026-10-07"), "System.State": "B" },
+    { D: at("2026-10-08"), "System.State": "A" },
+    { D: at("2026-10-31"), "System.State": "A" },
+    { D: undefined, "System.State": "A" },
+  ];
+
+  it("7-day buckets from the range start, last one cut at the range end, counted per state", () => {
+    const b = weekBuckets(rows, "D", "2026-10-01", "2026-10-31");
+    expect(b.map((x) => [x.start, x.end, x.total])).toEqual([
+      ["2026-10-01", "2026-10-07", 2],
+      ["2026-10-08", "2026-10-14", 1],
+      ["2026-10-15", "2026-10-21", 0],
+      ["2026-10-22", "2026-10-28", 0],
+      ["2026-10-29", "2026-10-31", 1],
+    ]);
+    expect(b[0].counts).toEqual({ A: 1, B: 1 });
+  });
+});
+
+describe("busiestDay", () => {
+  it("the local day with the most items, earliest on ties; undefined when empty", () => {
+    const at = (d: string, h: number) => new Date(`${d}T${String(h).padStart(2, "0")}:00:00`).toISOString();
+    const rows = [{ D: at("2026-10-05", 9) }, { D: at("2026-10-03", 9) }, { D: at("2026-10-05", 23) }, { D: at("2026-10-03", 1) }, { D: at("2026-10-09", 1) }];
+    expect(busiestDay(rows, "D")).toEqual({ day: "2026-10-03", count: 2 });
+    expect(busiestDay([], "D")).toBeUndefined();
   });
 });

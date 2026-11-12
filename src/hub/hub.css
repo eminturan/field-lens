@@ -389,14 +389,14 @@ section > .fl-button {
 }
 
 /* Ana eylem: Çalıştır */
-.fl-actions .fl-button:first-child:not(:disabled) {
+.fl-panel .fl-actions .fl-button:first-child:not(:disabled) {
   background: var(--communication-background, #0078d4);
   border-color: transparent;
   color: #fff;
   font-weight: 600;
 }
 
-.fl-actions .fl-button:first-child:hover:not(:disabled) {
+.fl-panel .fl-actions .fl-button:first-child:hover:not(:disabled) {
   filter: brightness(0.92);
 }
 
@@ -413,7 +413,7 @@ section > .fl-button {
   flex-direction: column;
   align-items: flex-start;
   gap: 4px;
-  min-width: 120px;
+  min-width: 100px;
   padding: 10px 14px 12px;
   border: 1px solid var(--component-grid-cell-bottom-border-color, rgba(0, 0, 0, 0.12));
   border-top: 3px solid var(--fl-state);
@@ -554,4 +554,127 @@ section > .fl-button {
   overflow: hidden;
   clip: rect(0 0 0 0);
   white-space: nowrap;
+}
+
+/* Rapor başlığı (filtre paneli kapalıyken) */
+.fl-report {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.fl-report-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.fl-report-title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.fl-card-static {
+  cursor: default;
+}
+
+.fl-card-static:hover {
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+  transform: none;
+}
+
+.fl-card-sub {
+  font-size: 11px;
+  color: var(--text-secondary-color, rgba(0, 0, 0, 0.55));
+}
+
+.fl-up {
+  color: var(--status-success-foreground, #107c10);
+}
+
+.fl-down {
+  color: var(--status-error-foreground, #a4262c);
+}
+
+/* Haftalık grafik */
+.fl-box {
+  padding: 14px 16px;
+  border: 1px solid var(--component-grid-cell-bottom-border-color, rgba(0, 0, 0, 0.1));
+  border-radius: 4px;
+  background: var(--callout-background-color, #fff);
+}
+
+.fl-box-title {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0 0 8px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.fl-chart {
+  display: block;
+  width: 100%;
+  max-height: 220px;
+}
+
+.fl-axis {
+  stroke: var(--component-grid-cell-bottom-border-color, rgba(0, 0, 0, 0.2));
+}
+
+.fl-chart-num,
+.fl-chart-label {
+  font-size: 11px;
+  fill: var(--text-secondary-color, rgba(0, 0, 0, 0.6));
+}
+
+.fl-chart-num {
+  fill: var(--text-primary-color, rgba(0, 0, 0, 0.9));
+}
+
+/* Rahat / Sıkı */
+.fl-segment {
+  display: inline-flex;
+  border: 1px solid var(--component-grid-cell-bottom-border-color, rgba(0, 0, 0, 0.25));
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.fl-segment button {
+  height: 30px;
+  padding: 0 10px;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.fl-segment button + button {
+  border-left: 1px solid var(--component-grid-cell-bottom-border-color, rgba(0, 0, 0, 0.25));
+}
+
+.fl-segment button[aria-pressed="true"] {
+  background: var(--communication-background, #0078d4);
+  color: #fff;
+}
+
+.fl-segment button:focus-visible {
+  outline: 2px solid var(--communication-foreground, #0078d4);
+  outline-offset: -2px;
+}
+
+.fl-dense td {
+  padding-top: 3px;
+  padding-bottom: 3px;
+}
+
+.fl-dense .fl-clip {
+  max-height: 1.45em;
 }

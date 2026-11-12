@@ -80,6 +80,13 @@ describe("createRestSource", () => {
     expect(calls[0].url).toBe(`https://s/tfs/C/My%20Proj/_apis/wit/workitemtypes/${encodeURIComponent("Ürün Kartı")}/states?api-version=7.0`);
   });
 
+  it("count runs only the WIQL for the given range", async () => {
+    const { source, calls } = fake(() => json({ workItems: ids(7) }));
+    expect(await source.count({ ...q, from: "2026-09-01", to: "2026-09-30" })).toBe(7);
+    expect(calls).toHaveLength(1);
+    expect(calls[0].body.query).toContain("'2026-09-30'");
+  });
+
   it("http error message", async () => {
     const { source } = fake(() => json({ message: "TF51005: field does not exist" }, 400));
     await expect(source.run(q)).rejects.toThrow("HTTP 400: TF51005: field does not exist");

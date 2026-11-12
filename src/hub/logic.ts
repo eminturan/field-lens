@@ -191,6 +191,71 @@ export function sortRows(rows: Row[], col: Field, dir: "asc" | "desc"): Row[] {
     .map(([r]) => r);
 }
 
+const parseDay = (d: string) => {
+  const [y, m, day] = d.split("-").map(Number);
+  return new Date(y, m - 1, day);
+};
+const addDays = (d: string, n: number) => {
+  const x = parseDay(d);
+  return toDateInput(new Date(x.getFullYear(), x.getMonth(), x.getDate() + n));
+};
+const daysBetween = (from: string, to: string) => Math.round((parseDay(to).getTime() - parseDay(from).getTime()) / 86400000);
+/** Değerin yerel günü ("YYYY-MM-DD"); boş ya da geçersizse undefined. */
+const localDay = (v: unknown) => {
+  if (v === null || v === undefined || v === "") return undefined;
+  const d = new Date(String(v));
+  return isNaN(d.getTime()) ? undefined : toDateInput(d);
+};
+
+/** Karşılaştırma dönemi: tam takvim ayıysa bir önceki ay, değilse hemen önceki aynı uzunlukta aralık. */
+export function previousRange(from: string, to: string): { from: string; to: string } {
+  const f = parseDay(from);
+  const monthEnd = toDateInput(new Date(f.getFullYear(), f.getMonth() + 1, 0));
+  if (f.getDate() === 1 && to === monthEnd) {
+    return { from: toDateInput(new Date(f.getFullYear(), f.getMonth() - 1, 1)), to: toDateInput(new Date(f.getFullYear(), f.getMonth(), 0)) };
+  }
+  const days = daysBetween(from, to) + 1;
+  return { from: addDays(from, -days), to: addDays(from, -1) };
+}
+
+export interface WeekBucket {
+  start: string;
+  end: string;
+  total: number;
+  counts: Record<string, number>;
+}
+
+/** Aralığın başından itibaren 7 günlük dilimler (sonuncusu aralık sonunda kesilir); her dilimde state başına sayı. */
+export function weekBuckets(rows: Row[], dateField: string, from: string, to: string): WeekBucket[] {
+  const out: WeekBucket[] = [];
+  for (let i = 0; i <= daysBetween(from, to); i += 7) {
+    const start = addDays(from, i);
+    const end = addDays(from, i + 6);
+    out.push({ start, end: end > to ? to : end, total: 0, counts: {} });
+  }
+  for (const r of rows) {
+    const day = localDay(r[dateField]);
+    if (!day || day < from || day > to) continue;
+    const b = out[Math.floor(daysBetween(from, day) / 7)];
+    const s = String(r["System.State"] ?? "");
+    b.total++;
+    b.counts[s] = (b.counts[s] ?? 0) + 1;
+  }
+  return out;
+}
+
+/** En çok kaydın düştüğü yerel gün; eşitlikte en erken gün. */
+export function busiestDay(rows: Row[], dateField: string): { day: string; count: number } | undefined {
+  const counts = new Map<string, number>();
+  for (const r of rows) {
+    const day = localDay(r[dateField]);
+    if (day) counts.set(day, (counts.get(day) ?? 0) + 1);
+  }
+  let best: { day: string; count: number } | undefined;
+  for (const [day, count] of counts) if (!best || count > best.count || (count === best.count && day < best.day)) best = { day, count };
+  return best;
+}
+
 export function chunk<T>(list: T[], size: number): T[][] {
   const out: T[][] = [];
   for (let i = 0; i < list.length; i += size) out.push(list.slice(i, i + size));

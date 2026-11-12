@@ -18,6 +18,7 @@ import { createRestSource, DataSource, RunResult } from "./api";
 import { FieldPicker } from "./fieldPicker";
 import { firstOf, pickLang, Strings, STRINGS } from "./i18n";
 import {
+  busiestDay,
   countStates,
   csvRows,
   filterRows,
@@ -29,11 +30,14 @@ import {
   Preset,
   PRESETS,
   presetRange,
+  previousRange,
   Query,
   sanitizeSettings,
   sortRows,
   Settings,
   toCsv,
+  WeekBucket,
+  weekBuckets,
 } from "./logic";
 import { mockSource } from "./mock";
 
@@ -100,6 +104,61 @@ function Skeleton({ cards, cols, label }: { cards: number; cols: number; label: 
   );
 }
 
+const DENSITY_KEY = "field-lens-density";
+const readDense = () => {
+  try {
+    return localStorage.getItem(DENSITY_KEY) === "compact";
+  } catch {
+    return false;
+  }
+};
+
+/** "2026-10-07" → "07.10" */
+const shortDay = (d: string) => `${d.slice(8, 10)}.${d.slice(5, 7)}`;
+
+/** Haftalara göre yığılmış çubuklar; renkler panodaki state renkleri, sıra sorgudaki state sırası. */
+function WeekChart({ buckets, states, colors, t }: { buckets: WeekBucket[]; states: string[]; colors: Record<string, string>; t: Strings }) {
+  const W = 640;
+  const H = 150;
+  const top = 18;
+  const bottom = 22;
+  const max = Math.max(1, ...buckets.map((b) => b.total));
+  const slot = W / buckets.length;
+  const bar = Math.min(48, slot * 0.7);
+  const labelEvery = Math.ceil(buckets.length / 12);
+  const scale = (n: number) => (n / max) * (H - top - bottom);
+  return (
+    <svg className="fl-chart" viewBox={`0 0 ${W} ${H}`} role="img" aria-label={t.weekly}>
+      <line x1={0} x2={W} y1={H - bottom} y2={H - bottom} className="fl-axis" />
+      {buckets.map((b, i) => {
+        const x = i * slot + (slot - bar) / 2;
+        let y = H - bottom;
+        return (
+          <g key={b.start}>
+            <title>{t.weekTip(shortDay(b.start), shortDay(b.end), b.total)}</title>
+            {states.map((s) => {
+              const h = scale(b.counts[s] ?? 0);
+              if (!h) return null;
+              y -= h;
+              return <rect key={s} x={x} y={y} width={bar} height={h} fill={colors[s] || "#8a8a8a"} />;
+            })}
+            {b.total > 0 && (
+              <text x={x + bar / 2} y={y - 4} textAnchor="middle" className="fl-chart-num">
+                {b.total}
+              </text>
+            )}
+            {i % labelEvery === 0 && (
+              <text x={x + bar / 2} y={H - 6} textAnchor="middle" className="fl-chart-label">
+                {shortDay(b.start)}
+              </text>
+            )}
+          </g>
+        );
+      })}
+    </svg>
+  );
+}
+
 function App({ source, store, mock, t, itemUrl }: Props) {
   const [reload, setReload] = React.useState(0);
   const [loadError, setLoadError] = React.useState<string>();
@@ -129,6 +188,19 @@ function App({ source, store, mock, t, itemUrl }: Props) {
   const [search, setSearch] = React.useState("");
   const [colFilters, setColFilters] = React.useState<Record<string, string>>({});
   const [sort, setSort] = React.useState<{ ref: string; dir: "asc" | "desc" }>();
+  /** Sonuç gelince filtre paneli tek satırlık rapor başlığına iner. */
+  const [collapsed, setCollapsed] = React.useState(false);
+  const [prevCount, setPrevCount] = React.useState<number>();
+  const runId = React.useRef(0);
+  const [dense, setDense] = React.useState(readDense);
+  const chooseDense = (v: boolean) => {
+    setDense(v);
+    try {
+      localStorage.setItem(DENSITY_KEY, v ? "compact" : "comfortable");
+    } catch {
+      // saklanamıyor; seçim bu oturumla sınırlı
+    }
+  };
   const [drag, setDrag] = React.useState<{ from: number; over: number }>();
   /** Klavyeyle taşınan etiket; yeniden çizimden sonra odak onda kalsın. */
   const focusChip = React.useRef<string>();
@@ -226,10 +298,18 @@ function App({ source, store, mock, t, itemUrl }: Props) {
     store.save({ type, dateField, preset, from, to, states, columns }).catch(() => undefined);
     setRunning(true);
     setRunError(undefined);
+    setPrevCount(undefined);
+    const id = ++runId.current;
+    // Önceki dönem yalnızca sayı için; başarısız olursa karşılaştırma gösterilmez.
+    source
+      .count({ ...query, ...previousRange(from, to) })
+      .then((n) => id === runId.current && setPrevCount(n))
+      .catch(() => undefined);
     source
       .run(query)
       .then((data) => {
         setResult({ query, data });
+        setCollapsed(true);
         setPage(0);
         setStateFilter(undefined);
         setSearch("");
@@ -286,6 +366,17 @@ function App({ source, store, mock, t, itemUrl }: Props) {
     setPage(0);
   };
   const shown = pageSlice(visible, page, PAGE_SIZE);
+  const textFiltered = matched.length !== allRows.length;
+  const peak = result ? busiestDay(matched, result.query.dateField) : undefined;
+  const buckets = React.useMemo(
+    () => (result ? weekBuckets(matched, result.query.dateField, result.query.from, result.query.to) : []),
+    [matched, result],
+  );
+  const csvButton = (
+    <button className="fl-button" disabled={!result || visible.length === 0} onClick={exportCsv}>
+      {filtering ? `${t.exportCsv} (${visible.length})` : t.exportCsv}
+    </button>
+  );
 
   return (
     <Page className="fl-page">
@@ -301,7 +392,27 @@ function App({ source, store, mock, t, itemUrl }: Props) {
           </MessageCard>
         )}
         {!types && !loadError && <div className="fl-empty">{t.loading}</div>}
-        {types && (
+        {types && result && collapsed && !running && (
+          <section className="fl-report">
+            <div className="fl-report-text">
+              <h2 className="fl-report-title">{t.reportTitle(result.query.type)}</h2>
+              <span className="fl-muted">
+                {[
+                  byRef.get(result.query.dateField)?.name ?? result.query.dateField,
+                  `${result.query.from} – ${result.query.to}`,
+                  t.statesN(result.query.states.length),
+                ].join(" · ")}
+              </span>
+            </div>
+            <div className="fl-actions">
+              <button className="fl-button" onClick={() => setCollapsed(false)}>
+                {t.edit}
+              </button>
+              {csvButton}
+            </div>
+          </section>
+        )}
+        {types && !(result && collapsed && !running) && (
           <section className="fl-panel">
             <div className="fl-toolbar">
               <label className="fl-field">
@@ -431,9 +542,7 @@ function App({ source, store, mock, t, itemUrl }: Props) {
               <button className="fl-button" disabled={!!missing || running} onClick={run}>
                 {running ? t.running : t.run}
               </button>
-              <button className="fl-button" disabled={!result || visible.length === 0} onClick={exportCsv}>
-                {filtering ? `${t.exportCsv} (${visible.length})` : t.exportCsv}
-              </button>
+              {csvButton}
               {missing && <span className="fl-muted">{missing}</span>}
               {result && !missing && <span className="fl-muted">{t.count(result.data.rows.length)}</span>}
             </div>
@@ -449,6 +558,17 @@ function App({ source, store, mock, t, itemUrl }: Props) {
             <button className="fl-card" aria-pressed={!stateFilter} onClick={() => filterBy(undefined)}>
               <span className="fl-card-num">{matched.length}</span>
               <span className="fl-card-label">{t.total}</span>
+              {prevCount !== undefined && !textFiltered && (
+                <span className="fl-card-sub">
+                  {t.prevPeriod(prevCount)}
+                  {prevCount > 0 && (
+                    <span className={allRows.length >= prevCount ? "fl-up" : "fl-down"}>
+                      {" · "}
+                      {allRows.length >= prevCount ? "+" : "−"}%{Math.round((Math.abs(allRows.length - prevCount) / prevCount) * 100)}
+                    </span>
+                  )}
+                </span>
+              )}
             </button>
             {summary.map(({ state, count }) => (
               <button
@@ -470,7 +590,23 @@ function App({ source, store, mock, t, itemUrl }: Props) {
                 </span>
               </button>
             ))}
+            {peak && (
+              <div className="fl-card fl-card-static">
+                <span className="fl-card-num">{shortDay(peak.day)}</span>
+                <span className="fl-card-label">{t.busiest}</span>
+                <span className="fl-card-sub">{t.count(peak.count)}</span>
+              </div>
+            )}
           </div>
+        )}
+        {!running && result && allRows.length > 0 && buckets.length > 1 && (
+          <section className="fl-box">
+            <h3 className="fl-box-title">
+              {t.weekly}
+              <span className="fl-muted">{byRef.get(result.query.dateField)?.name ?? result.query.dateField}</span>
+            </h3>
+            <WeekChart buckets={buckets} states={result.query.states} colors={stateColors} t={t} />
+          </section>
         )}
         {!running && result && allRows.length > 0 && (
           <div className="fl-actions">
@@ -485,6 +621,14 @@ function App({ source, store, mock, t, itemUrl }: Props) {
                 setPage(0);
               }}
             />
+            <span className="fl-segment" role="group" aria-label={t.density}>
+              <button aria-pressed={!dense} onClick={() => chooseDense(false)}>
+                {t.comfortable}
+              </button>
+              <button aria-pressed={dense} onClick={() => chooseDense(true)}>
+                {t.compact}
+              </button>
+            </span>
             {filtering && (
               <>
                 <span className="fl-muted" aria-live="polite">
@@ -499,7 +643,7 @@ function App({ source, store, mock, t, itemUrl }: Props) {
         )}
         {!running && result && allRows.length > 0 && (
           <div className="fl-scroll">
-            <table className="fl-table">
+            <table className={dense ? "fl-table fl-dense" : "fl-table"}>
               <thead>
                 <tr>
                   {shownCols.map((c) => {

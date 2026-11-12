@@ -1,5 +1,5 @@
 import { DataSource } from "./api";
-import { Field, Row } from "./logic";
+import { Field, Query, Row } from "./logic";
 
 const FIELDS: Field[] = [
   { referenceName: "System.Id", name: "ID", type: "integer" },
@@ -46,17 +46,19 @@ const day = (iso: unknown) => {
 export function mockSource(): DataSource {
   const rows = build();
   const later = <T>(v: T) => new Promise<T>((r) => setTimeout(() => r(v), 200));
+  const match = (q: Query) =>
+    rows
+      .filter((r) => r["System.WorkItemType"] === q.type && q.states.includes(String(r["System.State"])))
+      .filter((r) => r[q.dateField] !== undefined && day(r[q.dateField]) >= q.from && day(r[q.dateField]) <= q.to);
   return {
     types: () => later(["Bug", "Kart"]),
     states: () => later(STATES.map((name, i) => ({ name, color: ["#b2b2b2", "#007acc", "#ff9d00", "#339933"][i] }))),
     fields: () => later(FIELDS),
     run: (q) =>
       later({
-        rows: rows
-          .filter((r) => r["System.WorkItemType"] === q.type && q.states.includes(String(r["System.State"])))
-          .filter((r) => r[q.dateField] !== undefined && day(r[q.dateField]) >= q.from && day(r[q.dateField]) <= q.to)
-          .sort((a, b) => String(a[q.dateField]).localeCompare(String(b[q.dateField]))),
+        rows: match(q).sort((a, b) => String(a[q.dateField]).localeCompare(String(b[q.dateField]))),
         truncated: false,
       }),
+    count: (q) => later(match(q).length),
   };
 }

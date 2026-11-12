@@ -61,6 +61,16 @@ export interface Strings {
   shownOf: (shown: number, total: number) => string;
   noFiltered: string;
   sortHint: string;
+  reportTitle: (type: string) => string;
+  edit: string;
+  statesN: (n: number) => string;
+  prevPeriod: (n: number) => string;
+  busiest: string;
+  weekly: string;
+  weekTip: (from: string, to: string, n: number) => string;
+  density: string;
+  comfortable: string;
+  compact: string;
   empty: string;
   need: { type: string; dateField: string; states: string; range: string; columns: string };
 }
@@ -107,6 +117,16 @@ export const STRINGS: Record<Lang, Strings> = {
     shownOf: (s, n) => `${s} / ${n} kayıt gösteriliyor`,
     noFiltered: "Filtrelere uyan kayıt yok.",
     sortHint: "Sıralamak için tıklayın",
+    reportTitle: (ty) => `${ty} raporu`,
+    edit: "Düzenle",
+    statesN: (n) => `${n} state`,
+    prevPeriod: (n) => `önceki dönem ${n}`,
+    busiest: "En yoğun gün",
+    weekly: "Haftalara göre",
+    weekTip: (f, to, n) => `${f}–${to}: ${n} kayıt`,
+    density: "Satır yoğunluğu",
+    comfortable: "Rahat",
+    compact: "Sıkı",
     empty: "Bu filtrelerle kayıt bulunamadı.",
     need: {
       type: "Work item türü seçin.",
@@ -157,6 +177,16 @@ export const STRINGS: Record<Lang, Strings> = {
     shownOf: (s, n) => `Showing ${s} of ${n}`,
     noFiltered: "No items match the filters.",
     sortHint: "Click to sort",
+    reportTitle: (ty) => `${ty} report`,
+    edit: "Edit",
+    statesN: (n) => `${n} ${n === 1 ? "state" : "states"}`,
+    prevPeriod: (n) => `previous period ${n}`,
+    busiest: "Busiest day",
+    weekly: "By week",
+    weekTip: (f, to, n) => `${f}–${to}: ${n} items`,
+    density: "Row density",
+    comfortable: "Comfortable",
+    compact: "Compact",
     empty: "No items match these filters.",
     need: {
       type: "Choose a work item type.",
