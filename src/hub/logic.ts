@@ -307,9 +307,16 @@ export function monthBuckets(rows: Row[], dateField: string, from: string, to: s
   return out;
 }
 
+// İç içe tekrar ((a+)+, (\w*)*) üstel geri izlemeyle sekmeyi dondurabilir; widget kuralı panoyu açan herkesin tarayıcısında çalışır.
+// shortcut: yaygın biçimleri yakalar, (a|aa)+ gibi çakışan seçenekler geçer; gerekirse kuralı zaman aşımlı bir Worker'da çalıştır.
+const NESTED = /\([^()]*(?:[+*]|\{\d+,\d*\})[^()]*\)(?:[+*]|\{\d+,)/;
+/** Kurala yalnızca değerin bu kadar karakteri verilir. */
+const RULE_TEXT_MAX = 500;
+
 /** Kuralı derler; geçersizse (ya da boşsa) hata metnini döner. Kullanıcının kendi tarayıcısında çalışır. */
 export function compileRule(pattern: string): RegExp | string {
   if (!pattern.trim()) return "empty";
+  if (NESTED.test(pattern.replace(/\\./g, "_").replace(/\[[^\]]*\]/g, "_"))) return "Nested quantifiers like (a+)+ are not allowed: they can freeze the browser";
   try {
     return new RegExp(pattern, "u");
   } catch (e) {
@@ -319,7 +326,7 @@ export function compileRule(pattern: string): RegExp | string {
 
 /** Metinde kurala uyan ilk kısım (kırpılmış); eşleşme yoksa undefined. */
 export function applyRule(text: string, re: RegExp): string | undefined {
-  const m = re.exec(text);
+  const m = re.exec(text.slice(0, RULE_TEXT_MAX));
   return m ? m[0].trim() : undefined;
 }
 

@@ -2,6 +2,11 @@
 
 [Türkçe](CHANGELOG.tr.md)
 
+## 0.2.11
+
+- Security: rules (the derived column and the widget breakdown) refuse nested repeats such as `(a+)+`, which could freeze the browser of everyone who opens the dashboard. A rule only looks at the first 500 characters of a value. A widget saved with such a rule asks to be configured again.
+- Build: the packaging tool's `glob` dependency is pinned to a version without known vulnerabilities (`npm audit`: 0).
+
 ## 0.2.10
 
 - The sample data and the examples in the documentation now use made-up names, units and fields.

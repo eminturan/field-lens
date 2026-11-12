@@ -1,6 +1,6 @@
 {
   "name": "field-lens",
-  "version": "0.2.10",
+  "version": "0.2.11",
   "private": true,
   "description": "Azure DevOps Server 2022 icin secilen tarih alanina gore work item listesi ve CSV",
   "scripts": {
@@ -37,5 +37,8 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/eminturan/field-lens.git"
+  },
+  "overrides": {
+    "glob": "^14.0.6"
   }
 }

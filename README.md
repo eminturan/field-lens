@@ -27,7 +27,7 @@ Under **Column derived by a rule**, pick a source field, write a rule (a JavaScr
 - The new column holds the first part of the source field's **displayed** value that matches the rule. For identity fields this is the display name.
 - Values that don't match show `(no match)`, and empty values stay empty.
 - Example: `\b(ABC|XY)\b.*` keeps everything from the word ABC or XY to the end, so "Deniz Arslan ABC Ödeme Hizmetleri" becomes "ABC Ödeme Hizmetleri".
-- After a run, a preview shows the rule applied to up to six real values. An invalid rule shows its error, and the column is left out until the rule is fixed.
+- After a run, a preview shows the rule applied to up to six real values. An invalid rule shows its error, and the column is left out until the rule is fixed. Nested repeats such as `(a+)+` are refused because they can freeze the browser, and a rule only looks at the first 500 characters of a value.
 - The column is computed in the browser (the source field is fetched instead), can be searched, filtered and sorted, goes into the CSV, and is saved with your selections.
 
 ### Results

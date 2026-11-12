@@ -27,7 +27,7 @@ Seçilen tarih alanı kolonlara kendiliğinden eklenir. Seçimler kullanıcı ba
 - Yeni kolona, kaynak alanın **görünen** değerinde kurala uyan ilk kısım yazılır. Kişi (identity) alanlarında bu görünen addır.
 - Eşleşmeyen değerler `(eşleşmedi)` olarak görünür, boş değerler boş kalır.
 - Örnek: `\b(ABC|XY)\b.*` kuralı ABC ya da XY kelimesinden başlayıp sonuna kadar olan kısmı alır; "Deniz Arslan ABC Ödeme Hizmetleri" değeri "ABC Ödeme Hizmetleri" olur.
-- Çalıştırdıktan sonra önizleme, kuralı en fazla altı gerçek değer üzerinde gösterir. Geçersiz kuralda hata yazılır ve kural düzelene kadar kolon raporda yer almaz.
+- Çalıştırdıktan sonra önizleme, kuralı en fazla altı gerçek değer üzerinde gösterir. Geçersiz kuralda hata yazılır ve kural düzelene kadar kolon raporda yer almaz. `(a+)+` gibi iç içe tekrarlar tarayıcıyı dondurabileceği için kabul edilmez; kural bir değerin yalnızca ilk 500 karakterine bakar.
 - Kolon tarayıcıda hesaplanır (sunucudan kaynak alan istenir). Kolonda arama, filtre ve sıralama yapılabilir; kolon CSV'ye girer ve seçimlerle birlikte saklanır.
 
 ### Sonuçlar

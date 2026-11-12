@@ -2,6 +2,11 @@
 
 [English](CHANGELOG.md)
 
+## 0.2.11
+
+- Güvenlik: kurallar (türetilen kolon ve widget kırılımı) `(a+)+` gibi iç içe tekrarları kabul etmiyor; bunlar panoyu açan herkesin tarayıcısını dondurabilirdi. Kural bir değerin yalnızca ilk 500 karakterine bakar. Böyle bir kuralla kaydedilmiş widget yeniden ayarlanmak ister.
+- Derleme: paketleme aracının `glob` bağımlılığı bilinen açığı olmayan bir sürüme sabitlendi (`npm audit`: 0).
+
 ## 0.2.10
 
 - Örnek veri ve belgelerdeki örnekler artık uydurma kişi, birim ve alan adları kullanıyor.

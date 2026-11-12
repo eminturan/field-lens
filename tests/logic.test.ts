@@ -275,6 +275,15 @@ describe("rules", () => {
     expect(typeof compileRule("")).toBe("string");
   });
 
+  it("compileRule rejects nested quantifiers that can freeze the browser", () => {
+    for (const p of ["(a+)+$", "(\\w+\\s?)*$", "([a-z]*)*x", "(a{1,}){2,}", "(?:x+)+y"]) expect(typeof compileRule(p)).toBe("string");
+    for (const p of ["(ABC|XY) .+", "\\(a+\\)+", "(a)+", "[(a+)]+"]) expect(compileRule(p)).toBeInstanceOf(RegExp);
+  });
+
+  it("applyRule only looks at the first 500 characters", () => {
+    expect(applyRule("a".repeat(600) + "XY", /XY/u)).toBeUndefined();
+  });
+
   it("applyRule keeps the first matching part; undefined when nothing matches", () => {
     const re = compileRule("\\b(ABC|XY)\\b.*") as RegExp;
     expect(applyRule("Deniz Arslan ABC Ödeme Hizmetleri", re)).toBe("ABC Ödeme Hizmetleri");
