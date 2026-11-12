@@ -2,6 +2,11 @@
 
 [Türkçe](CHANGELOG.tr.md)
 
+## 0.2.15
+
+- Report page: **Projects** filter for querying across projects: this project (default), all projects you can see, or chosen projects from a searchable list. Types and states are merged from the projects in scope, a Team Project column is added, and IDs open items in their own project. The scope is part of saved queries and query links.
+- Widget: a widget linked to a saved query also takes the query's projects.
+
 ## 0.2.14
 
 - Report page: an **Assigned to** filter (anyone, assigned to me via `@Me`, unassigned). It is part of saved queries, so one shared query shows each person their own items.

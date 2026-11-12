@@ -41,6 +41,7 @@ import {
   deriveRows,
   Rule,
   Assignee,
+  Projects,
   sanitizeSettings,
   SavedQuery,
   sortRows,
@@ -66,7 +67,8 @@ interface Props {
   linkFor(id: string): string;
   mock: boolean;
   t: Strings;
-  itemUrl: (id: number) => string;
+  /** project: kaydın projesi (proje-arası sorguda); yoksa hub'ın projesi. */
+  itemUrl: (id: number, project?: string) => string;
 }
 
 const message = (e: unknown) => (e instanceof Error ? e.message : String(e));
@@ -143,6 +145,13 @@ function App({ source, store, queries, initialQueryId, linkFor, mock, t, itemUrl
   const [to, setTo] = React.useState("");
   const [states, setStates] = React.useState<string[]>([]);
   const [assignee, setAssignee] = React.useState<Assignee>();
+  const [projects, setProjects] = React.useState<Projects>();
+  const projectsKey = JSON.stringify(projects ?? null);
+  /** Koleksiyondaki projeler (okunamazsa boş: seçili projeler o zaman doğrulanmaz). */
+  const [projectNames, setProjectNames] = React.useState<string[]>([]);
+  const [projectSearch, setProjectSearch] = React.useState("");
+  /** types listesinin hangi kapsam için yüklendiği; aynı kapsam için yeniden istenmez. */
+  const typesFor = React.useRef<string>();
   const [columns, setColumns] = React.useState<string[]>(DEFAULT_COLUMNS);
 
   const [running, setRunning] = React.useState(false);
@@ -191,6 +200,7 @@ function App({ source, store, queries, initialQueryId, linkFor, mock, t, itemUrl
     setTo(range.to);
     setStates(s.states ?? []);
     setAssignee(s.assignee);
+    setProjects(s.projects);
     setColumns(s.columns?.length ? s.columns : DEFAULT_COLUMNS);
     setRule(s.derived ?? { source: "", pattern: "", name: "" });
   };
@@ -210,10 +220,16 @@ function App({ source, store, queries, initialQueryId, linkFor, mock, t, itemUrl
   const [queryId, setQueryId] = React.useState<string>();
   /** Bağlantıyla açılan sorgu, form hazır olunca (state listesi yüklenince) bir kez çalıştırılır. */
   const [autoRun, setAutoRun] = React.useState(false);
-  const pickQuery = (q: SavedQuery | undefined, run?: boolean) => {
+  const knownProjects = () => (projectNames.length ? projectNames : undefined);
+  /** Sorgunun kapsamındaki türleri yükleyip formu doldurur (tür, kapsamdaki listeye göre doğrulanır). */
+  const pickQuery = async (q: SavedQuery | undefined, run?: boolean) => {
     setQueryId(q?.id);
     if (!q || !types) return;
-    applySettings(sanitizeSettings(q.settings, types, fields), types);
+    const p = sanitizeSettings(q.settings, [], fields, knownProjects()).projects;
+    const ts = await source.types(p).catch(() => types);
+    typesFor.current = JSON.stringify(p ?? null);
+    setTypes(ts);
+    applySettings(sanitizeSettings(q.settings, ts, fields, knownProjects()), ts);
     clearResults();
     setAutoRun(!!run);
   };
@@ -223,13 +239,18 @@ function App({ source, store, queries, initialQueryId, linkFor, mock, t, itemUrl
     let live = true;
     setLoadError(undefined);
     setTypes(undefined);
-    Promise.all([source.types(), source.fields(), store.load().catch(() => undefined)])
-      .then(([ts, fs, saved]) => {
+    Promise.all([source.fields(), store.load().catch(() => undefined), source.projects().catch(() => [] as string[])])
+      .then(async ([fs, saved, names]) => {
+        const known = names.length ? names : undefined;
+        const p = sanitizeSettings(saved, [], fs, known).projects;
+        const ts = await source.types(p);
         if (!live) return;
+        typesFor.current = JSON.stringify(p ?? null);
         // Önce alanlar: sorgu çubuğu türler gelince açılır ve bağlantıdaki sorguyu alan listesiyle doğrular.
         setFields(fs);
+        setProjectNames(names);
         setTypes(ts);
-        applySettings(sanitizeSettings(saved, ts, fs), ts);
+        applySettings(sanitizeSettings(saved, ts, fs, known), ts);
       })
       .catch((e) => live && setLoadError(message(e)));
     return () => {
@@ -237,12 +258,31 @@ function App({ source, store, queries, initialQueryId, linkFor, mock, t, itemUrl
     };
   }, [source, store, reload]);
 
-  // Tür değişince state listesi yenilenir; seçimde yalnızca bu türde olanlar kalır.
+  // Kapsam değişince tür listesi yenilenir; kapsamda olmayan tür seçimi düşer.
   React.useEffect(() => {
-    if (!type) return setStateList([]);
+    if (!types || typesFor.current === projectsKey || (Array.isArray(projects) && projects.length === 0)) return;
+    typesFor.current = projectsKey;
     let live = true;
     source
-      .states(type)
+      .types(projects)
+      .then((ts) => {
+        if (!live) return;
+        setTypes(ts);
+        setType((cur) => (ts.includes(cur) ? cur : ""));
+      })
+      .catch((e) => live && setLoadError(message(e)));
+    return () => {
+      live = false;
+    };
+  }, [source, projectsKey, types]);
+
+  // Tür ya da kapsam değişince state listesi yenilenir; seçimde yalnızca listede olanlar kalır.
+  React.useEffect(() => {
+    if (!type) return setStateList([]);
+    if (Array.isArray(projects) && projects.length === 0) return;
+    let live = true;
+    source
+      .states(type, projects)
       .then((info) => {
         if (!live) return;
         const list = info.map((s) => s.name);
@@ -255,7 +295,7 @@ function App({ source, store, queries, initialQueryId, linkFor, mock, t, itemUrl
     return () => {
       live = false;
     };
-  }, [source, type, reload]);
+  }, [source, type, projectsKey, reload]);
 
   const ruleRe = compileRule(rule.pattern);
   const ruleReady = !!rule.source && typeof ruleRe !== "string" && !!rule.name.trim();
@@ -270,6 +310,18 @@ function App({ source, store, queries, initialQueryId, linkFor, mock, t, itemUrl
   }, [fields, rule.name, t]);
   const dateFields = React.useMemo(() => fields.filter((f) => f.type === "dateTime"), [fields]);
   const columnFields = columns.map((c) => byRef.get(c) ?? { referenceName: c, name: c, type: "string" });
+
+  /** Proje-arası kapsamda Proje kolonu ID'nin hemen arkasına eklenir (kaldırılabilir). */
+  const chooseProjects = (p: Projects | undefined) => {
+    setProjects(p);
+    if (p && !columns.includes("System.TeamProject")) {
+      const at = columns.indexOf("System.Id") + 1;
+      setColumns([...columns.slice(0, at), "System.TeamProject", ...columns.slice(at)]);
+    }
+  };
+  const toggleProject = (name: string) =>
+    Array.isArray(projects) &&
+    setProjects(projects.includes(name) ? projects.filter((x) => x !== name) : projectNames.filter((x) => x === name || projects.includes(x)));
 
   const choosePreset = (p: Preset) => {
     setPreset(p);
@@ -287,7 +339,9 @@ function App({ source, store, queries, initialQueryId, linkFor, mock, t, itemUrl
   const toggleState = (s: string) =>
     setStates((prev) => (prev.includes(s) ? prev.filter((x) => x !== s) : stateList.filter((x) => x === s || prev.includes(x))));
 
-  const missing = !type
+  const missing = Array.isArray(projects) && projects.length === 0
+    ? t.need.projects
+    : !type
     ? t.need.type
     : statesType !== type
       ? t.loading
@@ -313,7 +367,7 @@ function App({ source, store, queries, initialQueryId, linkFor, mock, t, itemUrl
     chooseDense(false);
   };
 
-  const current: Settings = { assignee, type, dateField, preset, from, to, states, columns, derived: rule.source || rule.pattern ? rule : undefined };
+  const current: Settings = { projects, assignee, type, dateField, preset, from, to, states, columns, derived: rule.source || rule.pattern ? rule : undefined };
 
   React.useEffect(() => {
     if (!autoRun || missing === t.loading) return;
@@ -323,7 +377,7 @@ function App({ source, store, queries, initialQueryId, linkFor, mock, t, itemUrl
 
   const run = () => {
     if (missing) return;
-    const query: Query = { assignee, type, dateField, from, to, states, columns };
+    const query: Query = { projects, assignee, type, dateField, from, to, states, columns };
     const activeRule = ruleReady && columns.includes(DERIVED) ? rule : undefined;
     // Türetilmiş kolon sunucudan istenmez; yerine kaynak alanı istenir.
     const fetched = [...new Set([...columns.filter((c) => c !== DERIVED), ...(activeRule ? [activeRule.source] : [])])];
@@ -441,6 +495,7 @@ function App({ source, store, queries, initialQueryId, linkFor, mock, t, itemUrl
                   `${result.query.from} – ${result.query.to}`,
                   t.statesN(result.query.states.length),
                   ...(result.query.assignee ? [t.assignees[result.query.assignee]] : []),
+                  ...(result.query.projects ? [t.scope(result.query.projects)] : []),
                 ].join(" · ")}
               </span>
             </div>
@@ -454,6 +509,41 @@ function App({ source, store, queries, initialQueryId, linkFor, mock, t, itemUrl
         )}
         {types && !(result && collapsed && !running) && (
           <section className="fl-panel">
+            <div className="fl-field">
+              <span className="fl-muted">{t.projects}</span>
+              <span className="fl-segment fl-assignee" role="group" aria-label={t.projects}>
+                <button aria-pressed={projects === undefined} onClick={() => chooseProjects(undefined)}>
+                  {t.projectModes.this}
+                </button>
+                <button aria-pressed={projects === "all"} onClick={() => chooseProjects("all")}>
+                  {t.projectModes.all}
+                </button>
+                <button aria-pressed={Array.isArray(projects)} disabled={!projectNames.length} onClick={() => !Array.isArray(projects) && chooseProjects([])}>
+                  {t.projectModes.some}
+                </button>
+              </span>
+              {projects === "all" && <span className="fl-muted">{t.allProjectsHint}</span>}
+              {Array.isArray(projects) && (
+                <div className="fl-projects">
+                  <input
+                    className="fl-input"
+                    placeholder={t.searchProject}
+                    value={projectSearch}
+                    onChange={(e) => setProjectSearch(e.target.value)}
+                  />
+                  <div className="fl-project-list">
+                    {projectNames
+                      .filter((n) => n.toLocaleLowerCase("tr").includes(projectSearch.trim().toLocaleLowerCase("tr")))
+                      .map((n) => (
+                        <label key={n} className="fl-check">
+                          <input type="checkbox" checked={projects.includes(n)} onChange={() => toggleProject(n)} />
+                          {n}
+                        </label>
+                      ))}
+                  </div>
+                </div>
+              )}
+            </div>
             <div className="fl-toolbar">
               <label className="fl-field">
                 <span className="fl-muted">{t.type}</span>
@@ -781,7 +871,7 @@ function App({ source, store, queries, initialQueryId, linkFor, mock, t, itemUrl
                         className={c.type === "dateTime" || c.referenceName === "System.Id" || c.referenceName === "System.State" ? "fl-nowrap" : "fl-cell"}
                       >
                         {c.referenceName === "System.Id" ? (
-                          <a className="fl-link" href={itemUrl(Number(r["System.Id"]))} target="_top" rel="noopener noreferrer">
+                          <a className="fl-link" href={itemUrl(Number(r["System.Id"]), r["System.TeamProject"] ? String(r["System.TeamProject"]) : undefined)} target="_top" rel="noopener noreferrer">
                             {String(r["System.Id"])}
                           </a>
                         ) : c.referenceName === "System.State" ? (
@@ -897,7 +987,7 @@ async function start() {
         initialQueryId: params.query || undefined,
         linkFor: (id) => `${base}${encodeURIComponent(project)}/_apps/hub/turanemin.field-lens.hub?query=${encodeURIComponent(id)}`,
         mock: false,
-        itemUrl: (id) => `${base}${encodeURIComponent(project)}/_workitems/edit/${id}`,
+        itemUrl: (id, p) => `${base}${encodeURIComponent(p ?? project)}/_workitems/edit/${id}`,
       },
       culture,
     );

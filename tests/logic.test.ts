@@ -25,6 +25,10 @@ describe("buildWiql", () => {
   it("accepts Turkish letters in field ref", () =>
     expect(buildWiql({ ...q, dateField: "Custom.GeçişTarihi" })).toContain("[Custom.GeçişTarihi] >= '2026-10-01'"));
   it("rejects empty states",() => expect(() => buildWiql({ ...q, states: [] })).toThrow());
+  it("all projects: no project condition", () => expect(buildWiql({ ...q, projects: "all" })).not.toContain("TeamProject"));
+  it("chosen projects: IN list, escaped", () =>
+    expect(buildWiql({ ...q, projects: ["A", "O'B"] })).toContain("[System.TeamProject] IN ('A', 'O''B')"));
+  it("rejects an empty project list", () => expect(() => buildWiql({ ...q, projects: [] })).toThrow());
   it("adds no assignee condition by default", () => expect(buildWiql(q)).not.toContain("AssignedTo"));
   it("filters to the current user", () => expect(buildWiql({ ...q, assignee: "me" })).toContain("AND [System.AssignedTo] = @Me"));
   it("filters to unassigned items", () => expect(buildWiql({ ...q, assignee: "none" })).toContain("AND [System.AssignedTo] = ''"));
@@ -82,6 +86,11 @@ describe("sanitizeSettings", () => {
   it("keeps valid values", () => {
     const s = { type: "Kart", dateField: "Custom.P", preset: "custom" as const, from: "2026-01-01", to: "2026-01-31", states: ["A"], columns: ["Custom.P"] };
     expect(sanitizeSettings(s, ["Kart"], fields)).toEqual(s);
+  });
+  it("keeps only known projects; none left means this project", () => {
+    expect(sanitizeSettings({ projects: ["A", "Gone"] }, [], fields, ["A", "B"]).projects).toEqual(["A"]);
+    expect(sanitizeSettings({ projects: ["Gone"] }, [], fields, ["A"]).projects).toBeUndefined();
+    expect(sanitizeSettings({ projects: "all" }, [], fields, ["A"]).projects).toBe("all");
   });
   it("rejects non-date dateField", () => expect(sanitizeSettings({ dateField: "System.Id" }, [], fields).dateField).toBeUndefined());
 });

@@ -58,14 +58,14 @@ function Form({ value, onChange, env }: { value: WidgetConfig; onChange: (v: Wid
   // Kural önizlemesi için kırılım alanının gerçek değerleri: widget'ın filtreleriyle tek sorgu.
   const [samples, setSamples] = React.useState<{ key: string; values: string[] }>();
   const req = plan(r, new Date());
-  const sampleKey = JSON.stringify([r.type, r.dateField, r.states, r.assignee, value.breakdown, req.from, req.to]);
+  const sampleKey = JSON.stringify([r.projects, r.type, r.dateField, r.states, r.assignee, value.breakdown, req.from, req.to]);
   const wantSamples = value.view === "summary" && !!value.breakdown && !!r.type && !!r.dateField && r.states.length > 0;
   React.useEffect(() => {
     if (!wantSamples || samples?.key === sampleKey) return;
     let live = true;
     const timer = window.setTimeout(() => {
       source
-        .run({ assignee: r.assignee, type: r.type, dateField: r.dateField, states: r.states, from: req.from, to: req.to, columns: [value.breakdown] })
+        .run({ projects: r.projects, assignee: r.assignee, type: r.type, dateField: r.dateField, states: r.states, from: req.from, to: req.to, columns: [value.breakdown] })
         .then(
           (r) => live && setSamples({ key: sampleKey, values: r.rows.map((row) => formatCell(row[value.breakdown], byRef.get(value.breakdown)?.type)) }),
           () => undefined,
@@ -115,6 +115,7 @@ function Form({ value, onChange, env }: { value: WidgetConfig; onChange: (v: Wid
               r.states.join(", "),
               ...(ranged ? [r.preset === "custom" ? `${r.from} – ${r.to}` : t.presets[r.preset]] : []),
               ...(r.assignee ? [t.assignees[r.assignee]] : []),
+              ...(r.projects ? [t.scope(r.projects)] : []),
             ].join(" · ")}
           </span>
         </div>

@@ -16,6 +16,7 @@ Bir proje açın → **Boards** → **Field Lens**.
 | **Tarih alanı** | Özel alanlar dahil herhangi bir Date/Time alanı (örneğin `Custom.TargetDate`). Görünen ad ya da referans adıyla aranır; hiçbir alan sabit yazılmaz. |
 | **Aralık** | Son 15 / 30 / 90 gün, bu ay, geçen ay ya da özel başlangıç–bitiş. İki uç da dahildir. |
 | **State** | Bir ya da birkaç. Kaydın **şu anki** state'i bunlardan biriyse sayılır. |
+| **Projeler** | **Bu proje** (varsayılan), görebildiğiniz **Tüm projeler** ya da aranabilir listeden **Seçili projeler**. Proje-arası kapsamda türler ve state'ler kapsamdaki projelerden birleştirilir (state rengi o state'i içeren ilk projeden gelir), ID'nin arkasına **Team Project** kolonu eklenir ve ID kaydı kendi projesinde açar. Sonuçlar yetkilerinize göre gelir. |
 | **Atanan** | Herkes (varsayılan), **Bana atananlar** (raporu çalıştıran kişi, `@Me`) ya da **Atanmamış**. "Bana atananlar" ayarlı paylaşılan bir sorgu herkese kendi kayıtlarını gösterir. |
 | **Kolonlar** | İstenen alanlar. Görünen ad (büyük) ya da referans adıyla (küçük) aranır. Etiketi sürükleyerek ya da Tab ile seçip Alt + ←/→ ile sıralanır. |
 
@@ -82,7 +83,7 @@ Dashboard'da **Edit → Add a widget → Field Lens**, ardından ayarlar için d
 | **Tarihe göre** | Kayıt olan her gün için tarihiyle etiketlenmiş bir çubuk | Göreli aralık ya da özel |
 | **Yaklaşanlar** | Tarihi bugünden önümüzdeki 7 / 14 / 30 / 60 güne düşen kayıtlar, en yakın önce; en fazla 100 kayıt listelenir, ID kaydı açar | Her zaman bugünden itibaren |
 
-- **Kaynak**: widget'ın kendi ayarları ya da projeyle paylaşılmış bir kayıtlı sorgu. Sorgu seçilirse tür, tarih alanı, state'ler, atanan ve (Özet, Haftalık, Tarihe göre için) aralık sorgudan gelir ve sorgu değiştikçe güncellenir; Aylık trend ay sayısını, Yaklaşanlar gün sayısını korur. Sorgu silinirse widget bunu yazar.
+- **Kaynak**: widget'ın kendi ayarları ya da projeyle paylaşılmış bir kayıtlı sorgu. Sorgu seçilirse projeler, tür, tarih alanı, state'ler, atanan ve (Özet, Haftalık, Tarihe göre için) aralık sorgudan gelir ve sorgu değiştikçe güncellenir; Aylık trend ay sayısını, Yaklaşanlar gün sayısını korur. Sorgu silinirse widget bunu yazar.
 - Kendi ayarlarıyla diğer ayarlar work item türü, tarih alanı ve state'lerdir. State'ler önceden seçili gelmez, siz seçersiniz.
 - Göreli aralıklar takvimle birlikte ilerler; "Geçen ay" ayarlı bir dashboard hep güncel kalır. Özel aralık sabittir.
 - Widget 2–6 sütun genişliğinde, 1–4 satır yüksekliğinde olabilir ve grafikler boyuta göre ölçeklenir. Çubuklar daraldığında sayılar fareyle üzerine gelince çıkan ipucuna taşınır ve tarih etiketleri 45° çapraz yazılır. Etiketler yalnızca çubuklar çok daraldığında (uzun bir aralık, tarihe göre) aralıklı yazılır.
@@ -128,6 +129,7 @@ Klasörler:
 - Widget: katalogda görünmesi, ayar paneli, canlı önizleme ve Kaydet'ten sonra ayarların kalması.
 - **Raporu aç** bağlantısı (`/<proje>/_apps/hub/turanemin.field-lens.hub`) ve sorgu bağlantıları (`…hub?query=<id>`): sayfa `query` parametresini alabilmeli.
 - **Bana atananlar** (`@Me`) raporu çalıştıran kişiye çözülmeli.
+- Proje-arası: proje listesi (`_apis/projects`), birleştirilen türler ve state'ler, başka projedeki kayıtlara bağlantılar.
 
 ## Lisans
 

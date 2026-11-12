@@ -22,6 +22,7 @@ Work item'larınızdan **herhangi bir tarih alanına** göre aylık rapor. Bir w
   - ID'ye tıklayınca kayıt açılır
 - **CSV dışa aktarma**: o an görünen kayıtlar iner. Dosya UTF-8 olduğu için Excel Türkçe karakterleri bozmaz; ayırıcı arayüz diline göre `;` ya da `,` olur.
 - Seçimleriniz hatırlanır.
+- **Proje-arası sorgu**: bu proje, tüm projeler ya da seçili projeler; Team Project kolonuyla.
 - **Atanan** filtresi: herkes, bana atananlar ya da atanmamış.
 - **Kayıtlı sorgular**: ayarları isim vererek kaydedin, aralarında geçiş yapın, güncelleyin, yeniden adlandırın ya da silin. **Projeyle paylaş** işaretlenirse projedeki herkes görür; yalnızca oluşturan düzenleyip silebilir. **Bağlantıyı kopyala** ile sorgu paylaşılır: bağlantı raporu o sorguyla, çalışmış olarak açar.
 
@@ -42,6 +43,8 @@ Widget kataloğundan **Field Lens**'i ekleyip ayarlarından görünümü seçin:
 Bir proje açın → **Boards** → **Field Lens**. Widget: **Dashboards → Edit → Add a widget**.
 
 ## Sürüm notları
+
+**0.2.15**: projeler arası sorgu (tümü ya da seçili olanlar).
 
 **0.2.14**: atanan filtresi, sorgu bağlantıları ve kayıtlı sorguyu kullanan widget'lar.
 

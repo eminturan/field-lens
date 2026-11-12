@@ -16,6 +16,7 @@ Open a project → **Boards** → **Field Lens**.
 | **Date field** | Any Date/Time field, custom fields included (for example `Custom.TargetDate`). Searchable by display name or reference name. Nothing is hardcoded. |
 | **Range** | Last 15 / 30 / 90 days, this month, last month or a custom from–to. Both ends are inclusive. |
 | **States** | One or more. An item counts when its **current** state is one of them. |
+| **Projects** | **This project** (default), **All projects** you can see, or **Chosen projects** from a searchable list. Across projects, types and states are merged from the projects in scope (a state's color comes from the first project that has it), a **Team Project** column is added after ID, and the ID opens the item in its own project. Results respect your permissions. |
 | **Assigned to** | Anyone (default), **Assigned to me** (whoever runs the report, `@Me`) or **Unassigned**. A shared query with "Assigned to me" shows each person their own items. |
 | **Columns** | Any fields. Search by display name (large) or reference name (small). Drag a column chip to reorder it, or focus it with Tab and press Alt + ←/→. |
 
@@ -82,7 +83,7 @@ On a dashboard: **Edit → Add a widget → Field Lens**, then the edit icon for
 | **By date** | One bar for each day that has items, labelled with its date | Relative preset or custom |
 | **Upcoming** | Items whose date falls from today to the next 7 / 14 / 30 / 60 days, earliest first; up to 100 are listed, the ID opens the item | Always from today |
 
-- **Source**: the widget's own settings, or a saved query shared with the project. With a query, the type, date field, states, assigned-to filter and (for Summary, Weekly and By date) range come from it and follow its changes; Monthly trend keeps its month count and Upcoming its day count. If the query is deleted, the widget says so.
+- **Source**: the widget's own settings, or a saved query shared with the project. With a query, the projects, type, date field, states, assigned-to filter and (for Summary, Weekly and By date) range come from it and follow its changes; Monthly trend keeps its month count and Upcoming its day count. If the query is deleted, the widget says so.
 - With its own settings, the other settings are work item type, date field and states. No state is preselected: you pick them.
 - Relative ranges move with the calendar, so a "Last month" dashboard is always current. A custom range stays fixed.
 - The widget can be 2–6 columns wide and 1–4 rows tall. Charts scale to the widget. When bars get narrow, counts move into the hover tooltip and date labels are written at 45°. Only when bars are very narrow (a long range by date) are labels thinned out.
@@ -128,6 +129,7 @@ Layout:
 - The widget: catalog entry, settings panel, live preview, and settings persisting after Save.
 - The **Open report** link (`/<project>/_apps/hub/turanemin.field-lens.hub`) and query links (`…hub?query=<id>`): the page must receive the `query` parameter.
 - **Assigned to me** (`@Me`) resolves to the person running the report.
+- Across projects: the project list (`_apis/projects`), merged types and states, and item links to other projects.
 
 ## License
 

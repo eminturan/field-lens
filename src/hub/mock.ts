@@ -7,6 +7,7 @@ const FIELDS: Field[] = [
   { referenceName: "System.State", name: "State", type: "string" },
   { referenceName: "System.WorkItemType", name: "Work Item Type", type: "string" },
   { referenceName: "System.AssignedTo", name: "Assigned To", type: "identity" },
+  { referenceName: "System.TeamProject", name: "Team Project", type: "string" },
   { referenceName: "System.CreatedDate", name: "Created Date", type: "dateTime" },
   { referenceName: "System.Description", name: "Description", type: "html" },
   { referenceName: "Custom.TargetDate", name: "Target Date", type: "dateTime" },
@@ -19,6 +20,8 @@ const SYSTEMS = ["Core Banking", "Mobil", "İnternet Şube"];
 // Görünen adda kişi adı + birim; türetilmiş kolon kuralını denemek için.
 const REQUESTERS = ["Deniz Arslan ABC Ödeme Hizmetleri", "Selin Koç XY Yazılım Destek", "Burak Tekin ABC Ödeme Hizmetleri", "Ece Yalın XY Altyapı", "Ali Veli"];
 const DAY = 86400000;
+/** İlki hub'ın açıldığı proje sayılır. */
+const MOCK_PROJECTS = ["Örnek Proje", "Kanallar", "Kredi"];
 
 /** `npm run dev` için örnek veri: son 120 ve sonraki 30 güne yayılmış 240 kart ve 60 bug (sayfalama denenebilsin). */
 function build(): Row[] {
@@ -34,6 +37,8 @@ function build(): Row[] {
       "System.State": STATES[i % STATES.length],
       "System.WorkItemType": i < 240 ? "Kart" : "Bug",
       "System.AssignedTo": person && { displayName: person, uniqueName: person },
+      // Kayıtların yarısı bu projede, kalanı diğer iki projede: proje-arası sorgu denensin diye.
+      "System.TeamProject": i % 2 ? MOCK_PROJECTS[0] : MOCK_PROJECTS[1 + ((i >> 1) % 2)],
       "System.CreatedDate": new Date(planned.getTime() - 20 * DAY + 9.5 * 3600000).toISOString(),
       "System.Description": `<div>Hata Başlığı: Kayıt ${i}<br>Ekran Adı: Bireysel Kredi Kartı Başvurusu. Modül Adı: Bireysel Kart Pazarlama. Hata Detayı: TLP-30863 kapsamında açılmış bir kayıttır; desteklerinizi talep ederiz. Bilgisayar Adı: NB-BPBB12. Etki: Sadece ben.</div>`,
       "Custom.TargetDate": planned.toISOString(),
@@ -54,6 +59,10 @@ export function mockSource(): DataSource {
   const match = (q: Query) =>
     rows
       .filter((r) => r["System.WorkItemType"] === q.type && q.states.includes(String(r["System.State"])))
+      .filter((r) => {
+        const p = String(r["System.TeamProject"]);
+        return q.projects === "all" || (q.projects ?? [MOCK_PROJECTS[0]]).includes(p);
+      })
       .filter((r) => r[q.dateField] !== undefined && day(r[q.dateField]) >= q.from && day(r[q.dateField]) <= q.to)
       // Örnek veride "ben" = PEOPLE[0].
       .filter((r) => {
@@ -61,6 +70,7 @@ export function mockSource(): DataSource {
         return q.assignee === "me" ? who === PEOPLE[0] : q.assignee === "none" ? !who : true;
       });
   return {
+    projects: () => later([...MOCK_PROJECTS].sort((a, b) => a.localeCompare(b, "tr"))),
     types: () => later(["Bug", "Kart"]),
     states: () => later(STATES.map((name, i) => ({ name, color: ["#b2b2b2", "#007acc", "#ff9d00", "#339933"][i] }))),
     fields: () => later(FIELDS),

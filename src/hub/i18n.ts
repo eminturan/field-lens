@@ -1,4 +1,4 @@
-import { Preset, View, Assignee } from "./logic";
+import { Assignee, Preset, Projects, View } from "./logic";
 
 export type Lang = "tr" | "en";
 
@@ -159,7 +159,12 @@ export interface Strings {
   comfortable: string;
   compact: string;
   empty: string;
-  need: { type: string; dateField: string; states: string; range: string; columns: string };
+  need: { type: string; dateField: string; states: string; range: string; columns: string; projects: string };
+  projects: string;
+  projectModes: Record<"this" | "all" | "some", string>;
+  searchProject: string;
+  allProjectsHint: string;
+  scope: (projects: Projects) => string;
 }
 
 export const STRINGS: Record<Lang, Strings> = {
@@ -294,6 +299,11 @@ export const STRINGS: Record<Lang, Strings> = {
       `Önceki dönem: ${f} – ${to}. Aynı tür, state'ler ve tarih alanıyla sayıldı. Arama ya da kolon filtresi açıkken karşılaştırma gizlenir.`,
     weekTip: (f, to, n) => `${f}–${to}: ${n} kayıt`,
     density: "Satır yoğunluğu",
+    projects: "Projeler",
+    projectModes: { this: "Bu proje", all: "Tüm projeler", some: "Seçili projeler" },
+    searchProject: "Proje ara…",
+    allProjectsHint: "Görme yetkiniz olan tüm projeler. Geniş bir aralıkta 20.000 kayıt sınırına ulaşılabilir.",
+    scope: (p) => (p === "all" ? "tüm projeler" : p.length === 1 ? p[0] : `${p.length} proje`),
     comfortable: "Rahat",
     compact: "Sıkı",
     empty: "Bu filtrelerle kayıt bulunamadı.",
@@ -303,6 +313,7 @@ export const STRINGS: Record<Lang, Strings> = {
       states: "En az bir state seçin.",
       range: "Başlangıç tarihi bitişten sonra olamaz.",
       columns: "En az bir kolon seçin.",
+      projects: "En az bir proje seçin.",
     },
   },
   en: {
@@ -436,6 +447,11 @@ export const STRINGS: Record<Lang, Strings> = {
       `Previous period: ${f} – ${to}, counted with the same type, states and date field. Hidden while a search or column filter is on.`,
     weekTip: (f, to, n) => `${f}–${to}: ${n} items`,
     density: "Row density",
+    projects: "Projects",
+    projectModes: { this: "This project", all: "All projects", some: "Chosen projects" },
+    searchProject: "Search projects…",
+    allProjectsHint: "Every project you can see. A wide range may reach the 20,000-item limit.",
+    scope: (p) => (p === "all" ? "all projects" : p.length === 1 ? p[0] : `${p.length} projects`),
     comfortable: "Comfortable",
     compact: "Compact",
     empty: "No items match these filters.",
@@ -445,6 +461,7 @@ export const STRINGS: Record<Lang, Strings> = {
       states: "Choose at least one state.",
       range: "Start date cannot be after end date.",
       columns: "Choose at least one column.",
+      projects: "Choose at least one project.",
     },
   },
 };

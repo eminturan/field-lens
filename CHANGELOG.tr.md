@@ -2,6 +2,11 @@
 
 [English](CHANGELOG.md)
 
+## 0.2.15
+
+- Rapor sayfası: projeler arası sorgu için **Projeler** filtresi: bu proje (varsayılan), görebildiğiniz tüm projeler ya da aranabilir listeden seçili projeler. Türler ve state'ler kapsamdaki projelerden birleştirilir, Team Project kolonu eklenir ve ID'ler kaydı kendi projesinde açar. Kapsam kayıtlı sorgulara ve sorgu bağlantılarına girer.
+- Widget: kayıtlı sorguya bağlı widget sorgunun projelerini de alır.
+
 ## 0.2.14
 
 - Rapor sayfası: **Atanan** filtresi (herkes, `@Me` ile bana atananlar, atanmamış). Kayıtlı sorgulara girer; böylece tek bir paylaşılan sorgu herkese kendi kayıtlarını gösterir.

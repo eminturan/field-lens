@@ -80,6 +80,46 @@ describe("createRestSource", () => {
     expect(calls[0].url).toBe(`https://s/tfs/C/My%20Proj/_apis/wit/workitemtypes/${encodeURIComponent("Ürün Kartı")}/states?api-version=7.0`);
   });
 
+  it("projects lists the collection's projects by name", async () => {
+    const { source, calls } = fake(() => json({ value: [{ name: "Kredi" }, { name: "Altyapı" }] }));
+    expect(await source.projects()).toEqual(["Altyapı", "Kredi"]);
+    expect(calls[0].url).toBe("https://s/tfs/C/_apis/projects?$top=1000&api-version=7.0");
+  });
+
+  it("types across chosen projects are merged; a failing project is skipped", async () => {
+    const { source, calls } = fake((url) =>
+      url.includes("/A/") ? json({ value: [{ name: "Kart" }, { name: "Bug" }] }) : url.includes("/B/") ? json({ value: [{ name: "Kart" }, { name: "Epic" }] }) : json({}, 404),
+    );
+    expect(await source.types(["A", "B", "C"])).toEqual(["Bug", "Epic", "Kart"]);
+    expect(calls.map((c) => c.url)).toContain("https://s/tfs/C/A/_apis/wit/workitemtypes?api-version=7.0");
+  });
+
+  it("types for all projects asks for the project list first", async () => {
+    const { source } = fake((url) => (url.includes("_apis/projects") ? json({ value: [{ name: "A" }] }) : json({ value: [{ name: "Kart" }] })));
+    expect(await source.types("all")).toEqual(["Kart"]);
+  });
+
+  it("states across projects: union in first-seen order, first color wins, missing type skipped", async () => {
+    const { source } = fake((url) =>
+      url.includes("/A/")
+        ? json({ value: [{ name: "New", color: "b2b2b2" }, { name: "Done", color: "339933" }] })
+        : url.includes("/B/")
+          ? json({ value: [{ name: "New", color: "000000" }, { name: "Review", color: "ff9d00" }] })
+          : json({ message: "type not found" }, 404),
+    );
+    expect(await source.states("Kart", ["A", "B", "C"])).toEqual([
+      { name: "New", color: "#b2b2b2" },
+      { name: "Done", color: "#339933" },
+      { name: "Review", color: "#ff9d00" },
+    ]);
+  });
+
+  it("run across projects also fetches the project of each item", async () => {
+    const { source, calls } = fake((url, body) => (url.includes("/wiql") ? json({ workItems: ids(1) }) : json({ value: [{ id: 1000, fields: {} }] })));
+    await source.run({ ...q, projects: "all" });
+    expect(calls[1].body.fields).toContain("System.TeamProject");
+  });
+
   it("count runs only the WIQL for the given range", async () => {
     const { source, calls } = fake(() => json({ workItems: ids(7) }));
     expect(await source.count({ ...q, from: "2026-09-01", to: "2026-09-30" })).toBe(7);

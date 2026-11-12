@@ -28,6 +28,8 @@ describe("saved queries", () => {
     expect(settingsKey({})).toBe(settingsKey({ preset: "thisMonth" }));
     expect(settingsKey({ derived: { source: "", pattern: "", name: "" } })).toBe(settingsKey({}));
     expect(settingsKey({ assignee: "me" })).not.toBe(settingsKey({}));
+    expect(settingsKey({ projects: "all" })).not.toBe(settingsKey({}));
+    expect(settingsKey({ projects: ["A"] })).not.toBe(settingsKey({ projects: ["B"] }));
   });
 
   it("parseQueries keeps only well-formed documents and coerces their fields", () => {
@@ -37,15 +39,19 @@ describe("saved queries", () => {
       { id: 3, name: "bad id", settings: {} },
       { id: "4", name: "no settings" },
       { id: "5", name: "x".repeat(200), settings: { columns: "nope", type: 7, assignee: "everyone" } },
-      { id: "6", name: "Bana", settings: { assignee: "me" } },
+      { id: "6", name: "Bana", settings: { assignee: "me", projects: ["P1", 2] } },
+      { id: "7", name: "Hepsi", settings: { projects: "all" } },
+      { id: "8", name: "Kötü", settings: { projects: "yes" } },
       null,
     ];
     const out = parseQueries(docs, true);
-    expect(out.map((x) => x.id)).toEqual(["6", "1", "5"]);
-    expect(out[0].settings.assignee).toBe("me");
-    expect(out[1]).toEqual({ id: "1", name: "Ok", shared: true, ownerId: "u1", ownerName: "Ayşe", settings: { type: "Bug", states: ["New", "5"] }, __etag: 3 });
-    expect(out[2].name.length).toBe(80);
-    expect(out[2].settings).toEqual({});
+    expect(out.map((x) => x.id)).toEqual(["6", "7", "8", "1", "5"]);
+    expect(out[0].settings).toMatchObject({ assignee: "me", projects: ["P1", "2"] });
+    expect(out[1].settings.projects).toBe("all");
+    expect(out[2].settings.projects).toBeUndefined();
+    expect(out[3]).toEqual({ id: "1", name: "Ok", shared: true, ownerId: "u1", ownerName: "Ayşe", settings: { type: "Bug", states: ["New", "5"] }, __etag: 3 });
+    expect(out[4].name.length).toBe(80);
+    expect(out[4].settings).toEqual({});
   });
 
   it("canEdit: personal queries always, shared ones only by their owner", () => {
@@ -56,10 +62,14 @@ describe("saved queries", () => {
 });
 
 describe("applyQuery (widget linked to a saved query)", () => {
-  const base = { view: "summary" as const, type: "W", dateField: "W.Date", states: ["X"], preset: "last90" as const, from: "", to: "", months: 6 };
+  const base = { view: "summary" as const, type: "W", dateField: "W.Date", states: ["X"], preset: "last90" as const, from: "", to: "", months: 6, projects: undefined as "all" | string[] | undefined };
   const s = { type: "Change", dateField: "Custom.TargetDate", states: ["Kapalı"], assignee: "me" as const, preset: "lastMonth" as const };
   it("takes type, date field, states, assignee and range from the query for ranged views", () => {
     expect(applyQuery(base, s)).toEqual({ ...base, type: "Change", dateField: "Custom.TargetDate", states: ["Kapalı"], assignee: "me", preset: "lastMonth" });
+  });
+  it("takes the query's projects", () => {
+    expect(applyQuery({ ...base, view: "trend" }, { projects: ["A"] }).projects).toEqual(["A"]);
+    expect(applyQuery(base, {}).projects).toBeUndefined();
   });
   it("keeps the widget's own range for trend", () => {
     const r = applyQuery({ ...base, view: "trend" }, s);

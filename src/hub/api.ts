@@ -1,4 +1,4 @@
-import { buildWiql, chunk, Field, Query, Row } from "./logic";
+import { buildWiql, chunk, Field, Projects, Query, Row } from "./logic";
 
 // Server 2022 için 7.0.
 const API = "api-version=7.0";
@@ -19,8 +19,12 @@ export interface StateInfo {
 }
 
 export interface DataSource {
-  types(): Promise<string[]>;
-  states(type: string): Promise<StateInfo[]>;
+  /** Koleksiyondaki (kullanıcının görebildiği) projelerin adları. */
+  projects(): Promise<string[]>;
+  /** projects verilmezse hub'ın projesi; birden çok projede türler birleştirilir. */
+  types(projects?: Projects): Promise<string[]>;
+  /** Birden çok projede state'ler ilk görülme sırasıyla birleştirilir; renk ilk projeden gelir. */
+  states(type: string, projects?: Projects): Promise<StateInfo[]>;
   fields(): Promise<Field[]>;
   run(q: Query): Promise<RunResult>;
   /** Yalnızca WIQL: eşleşen kayıt sayısı (önceki dönem karşılaştırması için). */
@@ -80,22 +84,41 @@ export function createRestSource(
     return out;
   }
 
+  let allProjects: Promise<string[]> | undefined;
+  const listProjects = () =>
+    (allProjects ??= call<{ value?: { name: string }[] }>(`_apis/projects?$top=1000&${API}`).then((r) =>
+      (r.value ?? []).map((p) => p.name).sort((a, b) => a.localeCompare(b, "tr")),
+    ));
+  /** Kapsamdaki projeler; tek tek okunamayanlar (tür yok, yetki yok) atlanır. */
+  const names = async (p?: Projects) => (p === undefined ? [project] : p === "all" ? await listProjects() : p);
+  const each = async <T>(p: Projects | undefined, f: (proj: string) => Promise<T>) =>
+    (await Promise.all((await names(p)).map((n) => f(`${encodeURIComponent(n)}/`).then((v) => [v], () => [])))).flat();
+
   async function wiqlIds(q: Query): Promise<number[]> {
     const found = await call<{ workItems?: { id: number }[] }>(`${proj}_apis/wit/wiql?$top=${QUERY_LIMIT}&${API}`, { query: buildWiql(q) });
     return (found.workItems ?? []).map((w) => w.id);
   }
 
   return {
-    async types() {
-      const r = await call<{ value?: { name: string; isDisabled?: boolean }[] }>(`${proj}_apis/wit/workitemtypes?${API}`);
-      return (r.value ?? [])
-        .filter((t) => !t.isDisabled)
-        .map((t) => t.name)
-        .sort((a, b) => a.localeCompare(b, "tr"));
+    projects: listProjects,
+    async types(p) {
+      const one = async (pp: string) =>
+        ((await call<{ value?: { name: string; isDisabled?: boolean }[] }>(`${pp}_apis/wit/workitemtypes?${API}`)).value ?? [])
+          .filter((t) => !t.isDisabled)
+          .map((t) => t.name);
+      // Tek projede hata yutulmaz; birden çok projede okunamayan proje atlanır.
+      const all = p === undefined ? await one(proj) : (await each(p, one)).flat();
+      return [...new Set(all)].sort((a, b) => a.localeCompare(b, "tr"));
     },
-    async states(type) {
-      const r = await call<{ value?: { name: string; color?: string }[] }>(`${proj}_apis/wit/workitemtypes/${encodeURIComponent(type)}/states?${API}`);
-      return (r.value ?? []).map((s) => ({ name: s.name, color: /^[0-9a-f]{6}$/i.test(s.color ?? "") ? `#${s.color}` : "" }));
+    async states(type, p) {
+      const one = async (pp: string) =>
+        ((await call<{ value?: { name: string; color?: string }[] }>(`${pp}_apis/wit/workitemtypes/${encodeURIComponent(type)}/states?${API}`)).value ?? []).map(
+          (s) => ({ name: s.name, color: /^[0-9a-f]{6}$/i.test(s.color ?? "") ? `#${s.color}` : "" }),
+        );
+      const lists = p === undefined ? [await one(proj)] : await each(p, one);
+      const seen = new Map<string, StateInfo>();
+      for (const s of lists.flat()) if (!seen.has(s.name)) seen.set(s.name, s);
+      return [...seen.values()];
     },
     async fields() {
       const r = await call<{ value?: Field[] }>(`${proj}_apis/wit/fields?${API}`);
@@ -106,7 +129,8 @@ export function createRestSource(
     count: async (q) => (await wiqlIds(q)).length,
     async run(q) {
       const ids = await wiqlIds(q);
-      const fields = [...new Set(["System.Id", ...q.columns])];
+      // Proje-arası sorguda kaydın projesi bağlantı ve Proje kolonu için gerekir.
+      const fields = [...new Set(["System.Id", ...q.columns, ...(q.projects ? ["System.TeamProject"] : [])])];
       const byId = new Map<number, Row>();
       for (const part of await batches(chunk(ids, BATCH), fields)) for (const w of part) byId.set(w.id, { ...w.fields, "System.Id": w.id });
       return { rows: ids.flatMap((id): Row[] => { const r = byId.get(id); return r ? [r] : []; }), truncated: ids.length >= QUERY_LIMIT };

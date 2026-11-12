@@ -19,7 +19,11 @@ export interface Field {
 export type Assignee = "me" | "none";
 export const ASSIGNEES: Assignee[] = ["me", "none"];
 
+/** Sorgunun kapsamı: yok = hub'ın açıldığı proje, "all" = görülebilen tüm projeler, liste = seçili projeler (adlarıyla). */
+export type Projects = "all" | string[];
+
 export interface Query {
+  projects?: Projects;
   assignee?: Assignee;
   type: string;
   dateField: string;
@@ -40,6 +44,7 @@ export interface Rule {
 export const DERIVED = "FieldLens.Derived";
 
 export interface Settings {
+  projects?: Projects;
   assignee?: Assignee;
   derived?: Rule;
   type?: string;
@@ -66,10 +71,15 @@ export function buildWiql(q: Query): string {
   if (!FIELD_REF.test(q.dateField)) throw new Error(`Invalid field: ${q.dateField}`);
   if (!DATE.test(q.from) || !DATE.test(q.to)) throw new Error("Invalid date");
   if (q.states.length === 0) throw new Error("No states selected");
+  if (Array.isArray(q.projects) && q.projects.length === 0) throw new Error("No projects selected");
   const f = `[${q.dateField}]`;
   return [
     "SELECT [System.Id] FROM WorkItems",
-    "WHERE [System.TeamProject] = @project",
+    q.projects === undefined
+      ? "WHERE [System.TeamProject] = @project"
+      : q.projects === "all"
+        ? "WHERE [System.Id] > 0"
+        : `WHERE [System.TeamProject] IN (${q.projects.map(esc).join(", ")})`,
     `AND [System.WorkItemType] = ${esc(q.type)}`,
     `AND ${f} >= '${q.from}'`,
     `AND ${f} <= '${q.to}'`,
@@ -134,9 +144,13 @@ export function csvRows(rows: Row[], columns: Field[]): string[][] {
 }
 
 /** Kayıtlı seçimlerden artık projede olmayan tür/alanları atar. State'ler türle birlikte düşer; tür içi kontrol arayüzde yapılır. */
-export function sanitizeSettings(s: Settings | undefined, types: string[], fields: Field[]): Settings {
+export function sanitizeSettings(s: Settings | undefined, types: string[], fields: Field[], projectNames?: string[]): Settings {
   if (!s) return {};
   const out: Settings = { ...s };
+  if (Array.isArray(s.projects) && projectNames) {
+    const kept = s.projects.filter((p) => projectNames.includes(p));
+    out.projects = kept.length ? kept : undefined;
+  }
   const refs = new Set(fields.map((f) => f.referenceName));
   if ("type" in s && !types.includes(s.type ?? "")) {
     out.type = undefined;
@@ -403,6 +417,7 @@ export function settingsKey(s: Settings): string {
     s.columns?.length ? s.columns : DEFAULT_COLUMNS,
     d && (d.source || d.pattern) ? [d.source, d.pattern, d.name] : [],
     s.assignee ?? "",
+    s.projects ?? "",
   ]);
 }
 
@@ -421,6 +436,7 @@ export function parseQueries(docs: unknown[], shared: boolean): SavedQuery[] {
     const x = s as Record<string, unknown>;
     const rule = x.derived as Record<string, unknown> | undefined;
     const settings: Settings = {
+      projects: x.projects === "all" ? "all" : Array.isArray(x.projects) && x.projects.length ? x.projects.map(String) : undefined,
       assignee: ASSIGNEES.includes(x.assignee as Assignee) ? (x.assignee as Assignee) : undefined,
       type: str(x.type),
       dateField: str(x.dateField),
@@ -460,11 +476,12 @@ interface QueryTarget {
   from: string;
   to: string;
   assignee?: Assignee;
+  projects?: Projects;
 }
 
 /** Widget ayarına kayıtlı sorguyu uygular: tür, tarih alanı, state'ler, atanan; aralık yalnızca aralık seçen görünümlerde (trend ay, yaklaşanlar gün sayısıyla çalışır). */
 export function applyQuery<C extends QueryTarget>(c: C, s: Settings): C {
-  const out: C = { ...c, type: s.type ?? "", dateField: s.dateField ?? "", states: s.states ?? [], assignee: s.assignee };
+  const out: C = { ...c, type: s.type ?? "", dateField: s.dateField ?? "", states: s.states ?? [], assignee: s.assignee, projects: s.projects };
   if (c.view !== "summary" && c.view !== "weekly" && c.view !== "daily") return out;
   const preset = s.preset ?? DEFAULT_PRESET;
   return preset === "custom" ? { ...out, preset, from: s.from ?? "", to: s.to ?? "" } : { ...out, preset };

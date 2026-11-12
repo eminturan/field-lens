@@ -19,7 +19,7 @@ import {
 
 import { createRestSource, DataSource } from "../hub/api";
 import { firstOf, pickLang, Strings, STRINGS } from "../hub/i18n";
-import { Assignee, compileRule, monthsRange, parseQueries, Preset, presetRange, SavedQuery, upcomingRange, View, VIEWS } from "../hub/logic";
+import { Assignee, Projects, compileRule, monthsRange, parseQueries, Preset, presetRange, SavedQuery, upcomingRange, View, VIEWS } from "../hub/logic";
 import { localDocs } from "../hub/queryBar";
 import { mockSource } from "../hub/mock";
 
@@ -35,6 +35,8 @@ export interface WidgetConfig {
   queryId: string;
   /** Yalnızca kayıtlı sorgudan gelir. */
   assignee?: Assignee;
+  /** Yalnızca kayıtlı sorgudan gelir; yoksa dashboard'un projesi. */
+  projects?: Projects;
   type: string;
   dateField: string;
   states: string[];
@@ -91,7 +93,7 @@ export interface Env {
   t: Strings;
   /** Hub ve work item bağlantıları; dashboard dışında "#". */
   hubUrl: string;
-  itemUrl: (id: number) => string;
+  itemUrl: (id: number, project?: string) => string;
   /** Projeyle paylaşılmış kayıtlı sorgular (okunamazsa boş). */
   sharedQueries(): Promise<SavedQuery[]>;
 }
@@ -124,12 +126,14 @@ export function connect(): Promise<Env> {
     if (!project || !projectInfo) throw new Error("Project not found");
     const dataService = await SDK.getService<IExtensionDataService>(CommonServiceIds.ExtensionDataService);
     const manager = dataService.getExtensionDataManager(SDK.getExtensionContext().id, await SDK.getAccessToken());
-    const base = (baseUrl.endsWith("/") ? baseUrl : baseUrl + "/") + encodeURIComponent(project);
+    const collection = baseUrl.endsWith("/") ? baseUrl : baseUrl + "/";
+    const base = collection + encodeURIComponent(project);
     return {
       source: createRestSource(baseUrl, () => SDK.getAccessToken(), project),
       t: STRINGS[pickLang(culture)],
       hubUrl: `${base}/_apps/hub/${EXTENSION}.hub`,
-      itemUrl: (id) => `${base}/_workitems/edit/${id}`,
+      // base proje adresi; başka projedeki kayıt için koleksiyon adresi + o projenin adı kullanılır.
+      itemUrl: (id, p) => (p ? `${collection}${encodeURIComponent(p)}` : base) + `/_workitems/edit/${id}`,
       // Rapor sayfasıyla aynı koleksiyon: proje başına ortak liste. Okunamazsa boş sayılır.
       sharedQueries: () =>
         manager

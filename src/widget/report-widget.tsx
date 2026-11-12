@@ -73,11 +73,11 @@ function Report({ settings }: { settings?: WidgetSettings }) {
     if (!env || !ok) return;
     let live = true;
     setError(undefined);
-    Promise.all([env.source.fields(), env.source.states(cfg.type)]).then(
+    Promise.all([env.source.fields(), env.source.states(cfg.type, cfg.projects)]).then(
       ([fs, st]) => live && setMeta({ fields: new Map(fs.map((f) => [f.referenceName, f])), colors: Object.fromEntries(st.map((s) => [s.name, s.color])) }),
       (e) => live && setError(String(e?.message ?? e)),
     );
-    const q: Query = { assignee: cfg.assignee, type: cfg.type, dateField: cfg.dateField, states: cfg.states, from: req.from, to: req.to, columns: req.columns };
+    const q: Query = { projects: cfg.projects, assignee: cfg.assignee, type: cfg.type, dateField: cfg.dateField, states: cfg.states, from: req.from, to: req.to, columns: req.columns };
     Promise.all([
       env.source.run(q),
       cfg.view === "summary" ? env.source.count({ ...q, ...previousRange(q.from, q.to) }).catch(() => undefined) : undefined,
@@ -108,6 +108,7 @@ function Report({ settings }: { settings?: WidgetSettings }) {
     field(cfg.dateField).name,
     `${span} (${day(req.from)} – ${day(req.to)})`,
     ...(cfg.assignee ? [t.assignees[cfg.assignee]] : []),
+    ...(cfg.projects ? [t.scope(cfg.projects)] : []),
   ].join(" · ");
   // Bağlı sorguda "Raporu aç" raporu o sorguyla açıp çalıştırır.
   const link = { href: linked ? `${env.hubUrl}?query=${encodeURIComponent(linked.id)}` : env.hubUrl, label: t.w.openReport };
@@ -267,7 +268,7 @@ function Upcoming({ rows, dateField, colors, env }: { rows: Row[]; dateField: Fi
               <tr key={id}>
                 <td className="flw-when">{formatCell(r[dateField.referenceName], dateField.type)}</td>
                 <td>
-                  <a className="fl-link" href={env.itemUrl(id)} target="_blank" rel="noopener noreferrer">
+                  <a className="fl-link" href={env.itemUrl(id, r["System.TeamProject"] ? String(r["System.TeamProject"]) : undefined)} target="_blank" rel="noopener noreferrer">
                     {id}
                   </a>
                 </td>

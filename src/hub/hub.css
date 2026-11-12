@@ -660,3 +660,20 @@ section > .fl-button {
 .fl-assignee {
   align-self: flex-start;
 }
+
+/* Seçili projeler: aranabilir onay listesi */
+.fl-projects {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-width: 420px;
+}
+.fl-project-list {
+  display: flex;
+  flex-direction: column;
+  max-height: 180px;
+  overflow-y: auto;
+  padding: 4px 8px;
+  border: 1px solid var(--component-grid-cell-bottom-border-color, rgba(0, 0, 0, 0.15));
+  border-radius: 2px;
+}
