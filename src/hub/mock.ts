@@ -54,7 +54,12 @@ export function mockSource(): DataSource {
   const match = (q: Query) =>
     rows
       .filter((r) => r["System.WorkItemType"] === q.type && q.states.includes(String(r["System.State"])))
-      .filter((r) => r[q.dateField] !== undefined && day(r[q.dateField]) >= q.from && day(r[q.dateField]) <= q.to);
+      .filter((r) => r[q.dateField] !== undefined && day(r[q.dateField]) >= q.from && day(r[q.dateField]) <= q.to)
+      // Örnek veride "ben" = PEOPLE[0].
+      .filter((r) => {
+        const who = (r["System.AssignedTo"] as { displayName?: string } | undefined)?.displayName;
+        return q.assignee === "me" ? who === PEOPLE[0] : q.assignee === "none" ? !who : true;
+      });
   return {
     types: () => later(["Bug", "Kart"]),
     states: () => later(STATES.map((name, i) => ({ name, color: ["#b2b2b2", "#007acc", "#ff9d00", "#339933"][i] }))),

@@ -15,7 +15,12 @@ export interface Field {
 }
 
 /** from/to "YYYY-MM-DD", ikisi de dahil. */
+/** Atanan filtresi: yok (herkes), sorguyu çalıştıran kişi ya da atanmamış. */
+export type Assignee = "me" | "none";
+export const ASSIGNEES: Assignee[] = ["me", "none"];
+
 export interface Query {
+  assignee?: Assignee;
   type: string;
   dateField: string;
   from: string;
@@ -35,6 +40,7 @@ export interface Rule {
 export const DERIVED = "FieldLens.Derived";
 
 export interface Settings {
+  assignee?: Assignee;
   derived?: Rule;
   type?: string;
   dateField?: string;
@@ -68,6 +74,7 @@ export function buildWiql(q: Query): string {
     `AND ${f} >= '${q.from}'`,
     `AND ${f} <= '${q.to}'`,
     `AND [System.State] IN (${q.states.map(esc).join(", ")})`,
+    ...(q.assignee === "me" ? ["AND [System.AssignedTo] = @Me"] : q.assignee === "none" ? ["AND [System.AssignedTo] = ''"] : []),
     `ORDER BY ${f} ASC`,
   ].join(" ");
 }
@@ -395,6 +402,7 @@ export function settingsKey(s: Settings): string {
     s.states ?? [],
     s.columns?.length ? s.columns : DEFAULT_COLUMNS,
     d && (d.source || d.pattern) ? [d.source, d.pattern, d.name] : [],
+    s.assignee ?? "",
   ]);
 }
 
@@ -413,6 +421,7 @@ export function parseQueries(docs: unknown[], shared: boolean): SavedQuery[] {
     const x = s as Record<string, unknown>;
     const rule = x.derived as Record<string, unknown> | undefined;
     const settings: Settings = {
+      assignee: ASSIGNEES.includes(x.assignee as Assignee) ? (x.assignee as Assignee) : undefined,
       type: str(x.type),
       dateField: str(x.dateField),
       preset: PRESETS.includes(x.preset as Preset) ? (x.preset as Preset) : undefined,
@@ -440,3 +449,23 @@ export function parseQueries(docs: unknown[], shared: boolean): SavedQuery[] {
 
 /** Kişisel sorgular her zaman, ortak olanlar yalnızca oluşturanınca düzenlenir (arayüz kısıtı; servis sahiplik denetlemez). */
 export const canEdit = (q: SavedQuery, userId: string) => !q.shared || q.ownerId === userId;
+
+/** Widget'ın kayıtlı sorgudan aldığı alanlar. */
+interface QueryTarget {
+  view: View;
+  type: string;
+  dateField: string;
+  states: string[];
+  preset: Preset;
+  from: string;
+  to: string;
+  assignee?: Assignee;
+}
+
+/** Widget ayarına kayıtlı sorguyu uygular: tür, tarih alanı, state'ler, atanan; aralık yalnızca aralık seçen görünümlerde (trend ay, yaklaşanlar gün sayısıyla çalışır). */
+export function applyQuery<C extends QueryTarget>(c: C, s: Settings): C {
+  const out: C = { ...c, type: s.type ?? "", dateField: s.dateField ?? "", states: s.states ?? [], assignee: s.assignee };
+  if (c.view !== "summary" && c.view !== "weekly" && c.view !== "daily") return out;
+  const preset = s.preset ?? DEFAULT_PRESET;
+  return preset === "custom" ? { ...out, preset, from: s.from ?? "", to: s.to ?? "" } : { ...out, preset };
+}

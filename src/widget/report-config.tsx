@@ -1,7 +1,7 @@
 import * as React from "react";
 
 import { FieldPicker } from "../hub/fieldPicker";
-import { Field, formatCell, monthsRange, Preset, PRESETS, presetRange, VIEWS } from "../hub/logic";
+import { applyQuery, Field, formatCell, monthsRange, Preset, PRESETS, presetRange, SavedQuery, VIEWS } from "../hub/logic";
 import { RulePreview } from "../hub/rulePreview";
 import { customValid, DAYS, DEFAULTS, Env, inHost, MONTHS, plan, startConfig, usesCustom, WidgetConfig } from "./shared";
 
@@ -20,6 +20,14 @@ function Form({ value, onChange, env }: { value: WidgetConfig; onChange: (v: Wid
   const [stateList, setStateList] = React.useState<string[]>();
   const [error, setError] = React.useState<string>();
   const set = (patch: Partial<WidgetConfig>) => onChange(withDates({ ...value, ...patch }));
+  const [shared, setShared] = React.useState<SavedQuery[]>();
+  React.useEffect(() => {
+    env.sharedQueries().then(setShared);
+  }, [env]);
+  const linked = value.queryId ? shared?.find((q) => q.id === value.queryId) : undefined;
+  /** Sorguya bağlıyken alanlar sorgudan gelir; formdaki kendi değerler geri dönülürse diye saklanır. */
+  const r = linked ? applyQuery(value, linked.settings) : value;
+  const ranged = r.view === "summary" || r.view === "weekly" || r.view === "daily";
 
   React.useEffect(() => {
     Promise.all([source.types(), source.fields()]).then(([ts, fs]) => {
@@ -49,15 +57,15 @@ function Form({ value, onChange, env }: { value: WidgetConfig; onChange: (v: Wid
 
   // Kural önizlemesi için kırılım alanının gerçek değerleri: widget'ın filtreleriyle tek sorgu.
   const [samples, setSamples] = React.useState<{ key: string; values: string[] }>();
-  const req = plan(value, new Date());
-  const sampleKey = JSON.stringify([value.type, value.dateField, value.states, value.breakdown, req.from, req.to]);
-  const wantSamples = value.view === "summary" && !!value.breakdown && !!value.type && !!value.dateField && value.states.length > 0;
+  const req = plan(r, new Date());
+  const sampleKey = JSON.stringify([r.type, r.dateField, r.states, r.assignee, value.breakdown, req.from, req.to]);
+  const wantSamples = value.view === "summary" && !!value.breakdown && !!r.type && !!r.dateField && r.states.length > 0;
   React.useEffect(() => {
     if (!wantSamples || samples?.key === sampleKey) return;
     let live = true;
     const timer = window.setTimeout(() => {
       source
-        .run({ type: value.type, dateField: value.dateField, states: value.states, from: req.from, to: req.to, columns: [value.breakdown] })
+        .run({ assignee: r.assignee, type: r.type, dateField: r.dateField, states: r.states, from: req.from, to: req.to, columns: [value.breakdown] })
         .then(
           (r) => live && setSamples({ key: sampleKey, values: r.rows.map((row) => formatCell(row[value.breakdown], byRef.get(value.breakdown)?.type)) }),
           () => undefined,
@@ -85,6 +93,34 @@ function Form({ value, onChange, env }: { value: WidgetConfig; onChange: (v: Wid
         </select>
       </label>
       <label className="flc-field">
+        <span>{t.w.cfgSource}</span>
+        <select value={value.queryId} onChange={(e) => set({ queryId: e.target.value })}>
+          <option value="">{t.w.ownSettings}</option>
+          {value.queryId && !linked && shared && <option value={value.queryId}>{t.w.queryMissing}</option>}
+          {(shared ?? []).map((q) => (
+            <option key={q.id} value={q.id}>
+              {q.ownerName ? `${q.name} — ${q.ownerName}` : q.name}
+            </option>
+          ))}
+        </select>
+        <span className="flc-hint">{shared && shared.length === 0 ? t.w.noShared : t.w.sourceHint}</span>
+      </label>
+      {linked && (
+        <div className="flc-field">
+          <span>{t.w.fromQuery}</span>
+          <span className="flc-hint">
+            {[
+              r.type,
+              byRef.get(r.dateField)?.name ?? r.dateField,
+              r.states.join(", "),
+              ...(ranged ? [r.preset === "custom" ? `${r.from} – ${r.to}` : t.presets[r.preset]] : []),
+              ...(r.assignee ? [t.assignees[r.assignee]] : []),
+            ].join(" · ")}
+          </span>
+        </div>
+      )}
+      {!value.queryId && (<>
+      <label className="flc-field">
         <span>{t.type}</span>
         <select value={value.type} onChange={(e) => set({ type: e.target.value, states: [] })}>
           <option value="">{t.choose}</option>
@@ -107,7 +143,8 @@ function Form({ value, onChange, env }: { value: WidgetConfig; onChange: (v: Wid
           onPick={(ref) => set({ dateField: ref })}
         />
       </div>
-      {(value.view === "summary" || value.view === "weekly" || value.view === "daily") && (
+      </>)}
+      {!value.queryId && (value.view === "summary" || value.view === "weekly" || value.view === "daily") && (
         <label className="flc-field">
           <span>{t.w.cfgRange}</span>
           <select value={value.preset} onChange={(e) => set({ preset: e.target.value as Preset })}>
@@ -132,7 +169,7 @@ function Form({ value, onChange, env }: { value: WidgetConfig; onChange: (v: Wid
           </select>
         </label>
       )}
-      {usesCustom(value) && (
+      {usesCustom(value) && !(value.queryId && ranged) && (
         <div className="flc-row">
           <label className="flc-field">
             <span>{t.from}</span>
@@ -144,7 +181,7 @@ function Form({ value, onChange, env }: { value: WidgetConfig; onChange: (v: Wid
           </label>
         </div>
       )}
-      {usesCustom(value) && !customValid(value) && <span className="flc-hint flw-error">{t.need.range}</span>}
+      {usesCustom(value) && !(value.queryId && ranged) && !customValid(value) && <span className="flc-hint flw-error">{t.need.range}</span>}
       {value.view === "upcoming" && (
         <label className="flc-field">
           <span>{t.w.cfgDays}</span>
@@ -193,7 +230,7 @@ function Form({ value, onChange, env }: { value: WidgetConfig; onChange: (v: Wid
           <RulePreview pattern={value.breakdownRule} values={samples?.key === sampleKey ? samples.values : undefined} t={t} pending={t.loading} />
         </div>
       )}
-      <fieldset className="flc-states">
+      {!value.queryId && <fieldset className="flc-states">
         <legend>{t.states}</legend>
         {!value.type ? (
           <span className="flc-hint">{t.need.type}</span>
@@ -207,7 +244,7 @@ function Form({ value, onChange, env }: { value: WidgetConfig; onChange: (v: Wid
             </label>
           ))
         )}
-      </fieldset>
+      </fieldset>}
     </div>
   );
 }

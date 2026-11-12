@@ -16,6 +16,7 @@ Bir proje açın → **Boards** → **Field Lens**.
 | **Tarih alanı** | Özel alanlar dahil herhangi bir Date/Time alanı (örneğin `Custom.TargetDate`). Görünen ad ya da referans adıyla aranır; hiçbir alan sabit yazılmaz. |
 | **Aralık** | Son 15 / 30 / 90 gün, bu ay, geçen ay ya da özel başlangıç–bitiş. İki uç da dahildir. |
 | **State** | Bir ya da birkaç. Kaydın **şu anki** state'i bunlardan biriyse sayılır. |
+| **Atanan** | Herkes (varsayılan), **Bana atananlar** (raporu çalıştıran kişi, `@Me`) ya da **Atanmamış**. "Bana atananlar" ayarlı paylaşılan bir sorgu herkese kendi kayıtlarını gösterir. |
 | **Kolonlar** | İstenen alanlar. Görünen ad (büyük) ya da referans adıyla (küçük) aranır. Etiketi sürükleyerek ya da Tab ile seçip Alt + ←/→ ile sıralanır. |
 
 Seçilen tarih alanı kolonlara kendiliğinden eklenir. Seçimler kullanıcı başına saklanır (Extension Data Service, kullanıcı kapsamı) ve sonraki açılışta geri gelir. Artık var olmayan tür ya da alanlar atlanır. **Ayarları sıfırla** (Çalıştır satırının sağında, onay için iki kez tıklanır) her şeyi tek seferde temizler: tür, tarih alanı, aralık, state'ler, kolonlar, kural ve satır görünümü varsayılana döner, hatırlanan son seçimler silinir; kayıtlı sorgulara dokunulmaz.
@@ -30,6 +31,7 @@ Filtre panelinin üstündeki **Kayıtlı sorgu** çubuğu:
 - **Projeyle paylaş** (yalnızca kaydederken): işaretlenmezse sorgu kullanıcı kapsamında saklanır ve yalnızca size görünür. İşaretlenirse proje başına ayrı bir ortak koleksiyona yazılır ve projedeki herkes görür. Listede "Sorgularım" ve "Proje sorguları" ayrı gruplanır; başkasının sorgusunun yanında oluşturanın adı yazar.
 - Paylaşılan bir sorguyu yalnızca oluşturan güncelleyip yeniden adlandırabilir ve silebilir; diğerleri **Farklı kaydet** ile kendi kopyasını alır. Bu bir **arayüz kısıtıdır**: Extension Data Service sahiplik denetlemez. Ortak listeden okunan her sorgu doğrulanır (beklenmedik alanlar atılır, kurallar ve alanlar normal denetimlerden geçer).
 - İki kişi aynı sorguyu aynı anda kaydederse ikincisi uyarı alır ve liste yenilenir (belge sürümü, `__etag`).
+- **Bağlantıyı kopyala** seçili sorgunun bağlantısını panoya koyar (tarayıcı engellerse bağlantı elle kopyalanmak üzere gösterilir). Bağlantıyı açan kişi için sorgu yüklenir ve rapor çalışır. Kişisel sorgunun bağlantısı yalnızca sahibi için çalışır; silinmiş ya da paylaşılmamış bir sorgunun bağlantısı bunu söyler.
 - **Ayarları sıfırla** kayıtlı sorgulara dokunmaz.
 
 ### Kuralla türetilen kolon
@@ -80,10 +82,11 @@ Dashboard'da **Edit → Add a widget → Field Lens**, ardından ayarlar için d
 | **Tarihe göre** | Kayıt olan her gün için tarihiyle etiketlenmiş bir çubuk | Göreli aralık ya da özel |
 | **Yaklaşanlar** | Tarihi bugünden önümüzdeki 7 / 14 / 30 / 60 güne düşen kayıtlar, en yakın önce; en fazla 100 kayıt listelenir, ID kaydı açar | Her zaman bugünden itibaren |
 
-- Diğer ayarlar work item türü, tarih alanı ve state'lerdir. State'ler önceden seçili gelmez, siz seçersiniz.
+- **Kaynak**: widget'ın kendi ayarları ya da projeyle paylaşılmış bir kayıtlı sorgu. Sorgu seçilirse tür, tarih alanı, state'ler, atanan ve (Özet, Haftalık, Tarihe göre için) aralık sorgudan gelir ve sorgu değiştikçe güncellenir; Aylık trend ay sayısını, Yaklaşanlar gün sayısını korur. Sorgu silinirse widget bunu yazar.
+- Kendi ayarlarıyla diğer ayarlar work item türü, tarih alanı ve state'lerdir. State'ler önceden seçili gelmez, siz seçersiniz.
 - Göreli aralıklar takvimle birlikte ilerler; "Geçen ay" ayarlı bir dashboard hep güncel kalır. Özel aralık sabittir.
 - Widget 2–6 sütun genişliğinde, 1–4 satır yüksekliğinde olabilir ve grafikler boyuta göre ölçeklenir. Çubuklar daraldığında sayılar fareyle üzerine gelince çıkan ipucuna taşınır ve tarih etiketleri 45° çapraz yazılır. Etiketler yalnızca çubuklar çok daraldığında (uzun bir aralık, tarihe göre) aralıklı yazılır.
-- **Raporu aç** bağlantısı Field Lens sayfasını açar. Widget'taki filtreleri sayfaya taşımaz.
+- **Raporu aç** bağlantısı Field Lens sayfasını açar. Kayıtlı sorguya bağlı widget'ta o sorguyu açıp çalıştırır; kendi ayarlı widget'ta filtreler sayfaya taşınmaz.
 
 ## Sınırlar ve hesaplama
 
@@ -123,7 +126,8 @@ Klasörler:
 - Gerçek tarih alanıyla ay sonuna denk gelen bir aralıkta bitiş gününün dahil olması.
 - Saat dilimi: WIQL tarihleri sunucuda karşılaştırır, grafikler ise tarayıcının gününe göre gruplar. Gece yarısına yakın kayıtlar komşu güne düşebilir.
 - Widget: katalogda görünmesi, ayar paneli, canlı önizleme ve Kaydet'ten sonra ayarların kalması.
-- **Raporu aç** bağlantısı (`/<proje>/_apps/hub/turanemin.field-lens.hub`).
+- **Raporu aç** bağlantısı (`/<proje>/_apps/hub/turanemin.field-lens.hub`) ve sorgu bağlantıları (`…hub?query=<id>`): sayfa `query` parametresini alabilmeli.
+- **Bana atananlar** (`@Me`) raporu çalıştıran kişiye çözülmeli.
 
 ## Lisans
 

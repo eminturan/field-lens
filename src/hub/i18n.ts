@@ -1,4 +1,4 @@
-import { Preset, View } from "./logic";
+import { Preset, View, Assignee } from "./logic";
 
 export type Lang = "tr" | "en";
 
@@ -31,6 +31,12 @@ export interface WidgetStrings {
   cfgRule: string;
   ruleHint: string;
   breakdownHint: string;
+  cfgSource: string;
+  ownSettings: string;
+  sourceHint: string;
+  noShared: string;
+  queryMissing: string;
+  fromQuery: string;
   searchField: string;
   clear: string;
   other: string;
@@ -68,6 +74,12 @@ export interface QueryStrings {
   conflict: string;
   failed: (detail: string) => string;
   ownerOnly: (owner: string) => string;
+  copyLink: string;
+  linkTip: string;
+  linkCopied: string;
+  linkManual: string;
+  linkPersonal: string;
+  notFound: string;
 }
 
 export interface RuleStrings {
@@ -103,6 +115,8 @@ export interface Strings {
   from: string;
   to: string;
   states: string;
+  assignee: string;
+  assignees: Record<"all" | Assignee, string>;
   columns: string;
   addColumn: string;
   noMatch: string;
@@ -172,6 +186,12 @@ export const STRINGS: Record<Lang, Strings> = {
       errors: { empty: "Bir ad yazın.", long: "Ad en fazla 80 karakter olabilir.", duplicate: "Bu adda bir sorgu var." },
       conflict: "Bu sorgu bu arada başka biri tarafından değiştirildi; liste yenilendi. Değişikliğinizi yeniden kaydedin.",
       failed: (d) => `Sorgu kaydedilemedi: ${d}`,
+      copyLink: "Bağlantıyı kopyala",
+      linkTip: "Açan kişi raporu bu sorguyla, çalışmış olarak görür.",
+      linkCopied: "Bağlantı kopyalandı.",
+      linkManual: "Bağlantı kopyalanamadı; aşağıdan seçip kopyalayın.",
+      linkPersonal: "Bu kişisel bir sorgu: bağlantı yalnızca sizin için çalışır. Ekiple paylaşmak için Farklı kaydet ile projeyle paylaşın.",
+      notFound: "Bağlantıdaki sorgu bulunamadı: silinmiş ya da size paylaşılmamış olabilir.",
       ownerOnly: (o) => `${o} oluşturdu; yalnızca o düzenleyip silebilir. Kendi kopyanız için Farklı kaydet'i kullanın.`,
     },
     rule: {
@@ -200,6 +220,12 @@ export const STRINGS: Record<Lang, Strings> = {
       cfgBreakdown: "Kırılım alanı (isteğe bağlı)",
       cfgRule: "Değere uygulanacak kural (isteğe bağlı, regex)",
       ruleHint: "Grafik, alanın görünen değerinde kurala uyan ilk kısma göre bölünür. Örnek kural, ABC ya da XY kelimesinden başlayıp sonuna kadar olan kısmı alır.",
+      cfgSource: "Kaynak",
+      ownSettings: "Bu widget'ın kendi ayarları",
+      sourceHint: "Projeyle paylaşılmış bir kayıtlı sorgu seçilirse tür, tarih alanı, state'ler, atanan ve (Özet, Haftalık, Tarihe göre için) aralık o sorgudan gelir. Sorgu güncellenince widget da güncellenir.",
+      noShared: "Projede paylaşılmış sorgu yok. Rapor sayfasında Projeyle paylaş ile kaydedin.",
+      queryMissing: "Bağlı kayıtlı sorgu bulunamadı; silinmiş olabilir. Widget'ı yeniden ayarlayın.",
+      fromQuery: "Sorgudan gelen",
       breakdownHint: "Boşsa halka grafik state'lere göre bölünür. Bir alan seçilirse alanın her değeri için, seçili state'lere bölünmüş bir yatay çubuk çizilir.",
       searchField: "Alan ara…",
       clear: "Temizle",
@@ -226,6 +252,8 @@ export const STRINGS: Record<Lang, Strings> = {
     from: "Başlangıç",
     to: "Bitiş",
     states: "State",
+    assignee: "Atanan",
+    assignees: { all: "Herkes", me: "Bana atananlar", none: "Atanmamış" },
     columns: "Kolonlar",
     addColumn: "Kolon ara ve ekle…",
     noMatch: "Eşleşen alan yok",
@@ -300,6 +328,12 @@ export const STRINGS: Record<Lang, Strings> = {
       errors: { empty: "Enter a name.", long: "Use at most 80 characters.", duplicate: "A query with this name already exists." },
       conflict: "Someone else changed this query in the meantime, so the list was reloaded. Save your change again.",
       failed: (d) => `Couldn't save the query: ${d}`,
+      copyLink: "Copy link",
+      linkTip: "Whoever opens it sees the report with this query, already run.",
+      linkCopied: "Link copied.",
+      linkManual: "Couldn't copy the link; select and copy it below.",
+      linkPersonal: "This is a personal query, so the link only works for you. To share it with the team, use Save as and share it with the project.",
+      notFound: "The query in the link wasn't found. It may have been deleted or not shared with you.",
       ownerOnly: (o) => `Created by ${o}; only they can edit or delete it. Use Save as for your own copy.`,
     },
     rule: {
@@ -328,6 +362,12 @@ export const STRINGS: Record<Lang, Strings> = {
       cfgBreakdown: "Breakdown field (optional)",
       cfgRule: "Rule applied to the value (optional, regex)",
       ruleHint: "The chart is split by the first part of the field's displayed value that matches the rule. The example rule keeps everything from the word ABC or XY to the end.",
+      cfgSource: "Source",
+      ownSettings: "This widget's own settings",
+      sourceHint: "Pick a saved query shared with the project and the type, date field, states, assignee and (for Summary, Weekly and By date) range come from it. When the query changes, the widget follows.",
+      noShared: "No queries are shared with this project yet. Save one on the report page with Share with the project.",
+      queryMissing: "The linked saved query wasn't found; it may have been deleted. Configure the widget again.",
+      fromQuery: "From the query",
       breakdownHint: "Empty: a donut split by state. With a field: one horizontal bar per value of the field, split by the chosen states.",
       searchField: "Search field…",
       clear: "Clear",
@@ -354,6 +394,8 @@ export const STRINGS: Record<Lang, Strings> = {
     from: "From",
     to: "To",
     states: "States",
+    assignee: "Assigned to",
+    assignees: { all: "Anyone", me: "Assigned to me", none: "Unassigned" },
     columns: "Columns",
     addColumn: "Search and add column…",
     noMatch: "No matching field",

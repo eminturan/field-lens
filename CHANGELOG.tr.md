@@ -2,6 +2,12 @@
 
 [English](CHANGELOG.md)
 
+## 0.2.14
+
+- Rapor sayfası: **Atanan** filtresi (herkes, `@Me` ile bana atananlar, atanmamış). Kayıtlı sorgulara girer; böylece tek bir paylaşılan sorgu herkese kendi kayıtlarını gösterir.
+- Kayıtlı sorgular: **Bağlantıyı kopyala**. Bağlantı rapor sayfasını sorgu yüklenmiş ve çalışmış olarak açar. Silinmiş ya da paylaşılmamış bir sorgunun bağlantısı mesaj gösterir.
+- Widget: **Kaynak** ayarı. Projeyle paylaşılmış bir kayıtlı sorgu seçilirse widget türü, tarih alanı, state'leri, atanan filtresini ve (Özet, Haftalık, Tarihe göre için) aralığı sorgudan alır, sorgudaki sonraki değişiklikleri de izler. **Raporu aç** o sorguyu açar.
+
 ## 0.2.13
 
 - Rapor sayfası: **kayıtlı sorgular**. Formdaki ayarları isim vererek kaydedin, kayıtlı sorgular arasında geçiş yapın, güncelleyin, yeniden adlandırın ya da silin. **Projeyle paylaş** işaretlenmezse sorgu kişiseldir; paylaşılanları projedeki herkes görür, yalnızca oluşturan düzenleyip silebilir (arayüz kısıtı). Paylaşılan sorgular okunurken doğrulanır, eşzamanlı kaydetmede uyarı çıkar.

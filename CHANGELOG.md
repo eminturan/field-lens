@@ -2,6 +2,12 @@
 
 [Türkçe](CHANGELOG.tr.md)
 
+## 0.2.14
+
+- Report page: an **Assigned to** filter (anyone, assigned to me via `@Me`, unassigned). It is part of saved queries, so one shared query shows each person their own items.
+- Saved queries: **Copy link**. The link opens the report page with the query loaded and run. A link to a deleted or unshared query shows a message.
+- Widget: a **Source** setting. Pick a saved query shared with the project and the widget takes its type, date field, states, assigned-to filter and (for Summary, Weekly and By date) range, following later changes to the query. **Open report** then opens that query.
+
 ## 0.2.13
 
 - Report page: **saved queries**. Save the form's settings under a name, switch between saved queries, update, rename or delete them. A query is personal unless **Share with the project** is ticked; shared queries are visible to everyone in the project, and only their creator can edit or delete them (a UI restriction). Shared queries are validated when read, and a concurrent save shows a warning.

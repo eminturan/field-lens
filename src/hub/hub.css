@@ -656,3 +656,7 @@ section > .fl-button {
   color: var(--status-error-foreground, #a4262c);
   font-size: 12px;
 }
+
+.fl-assignee {
+  align-self: flex-start;
+}

@@ -22,6 +22,41 @@ export interface QueryStore {
   remove(q: SavedQuery): Promise<void>;
 }
 
+/** Örnek veri modunda sorgular tarayıcıda; sahiplik denensin diye ortak listede başkasının bir sorgusu hazır gelir. */
+export function localDocs(): Docs {
+  const key = (shared: boolean) => `field-lens-queries-${shared ? "shared" : "user"}`;
+  const read = (shared: boolean): Record<string, unknown>[] => {
+    try {
+      const raw = localStorage.getItem(key(shared));
+      if (raw) return JSON.parse(raw);
+    } catch {
+      return [];
+    }
+    return shared
+      ? [{ id: "seed", name: "Ekip – açık buglar", ownerId: "someone", ownerName: "Ayşe Yılmaz", settings: { type: "Bug", preset: "last30", states: ["New", "Active"] }, __etag: 1 }]
+      : [];
+  };
+  const write = (shared: boolean, docs: unknown[]) => {
+    try {
+      localStorage.setItem(key(shared), JSON.stringify(docs));
+    } catch {
+      // saklanamıyor
+    }
+  };
+  return {
+    get: async (shared) => read(shared),
+    async set(shared, doc) {
+      const docs = read(shared);
+      const old = docs.find((d) => d.id === doc.id);
+      if (old && doc.__etag !== undefined && old.__etag !== doc.__etag) throw new Error("409 etag conflict");
+      const next = { ...doc, __etag: ((old?.__etag as number) ?? 0) + 1 };
+      write(shared, [...docs.filter((d) => d.id !== doc.id), next]);
+      return next;
+    },
+    del: async (shared, id) => write(shared, read(shared).filter((d) => d.id !== id)),
+  };
+}
+
 export function queryStore(docs: Docs, user: User): QueryStore {
   // shortcut: okunamayan liste boş sayılır (henüz hiç belge yokken servis 404 dönebiliyor); ağ hatası da boş liste gibi görünür.
   const read = (shared: boolean) => docs.get(shared).then((d) => parseQueries(d, shared), () => []);
@@ -44,21 +79,57 @@ interface Props {
   /** Formdaki o anki ayarlar. */
   current: Settings;
   selectedId?: string;
-  onSelect(q: SavedQuery | undefined): void;
+  /** run: bağlantıyla açıldı, sorgu yüklenince rapor çalıştırılsın. */
+  onSelect(q: SavedQuery | undefined, run?: boolean): void;
+  /** Sayfa bir sorgu bağlantısıyla açıldıysa o sorgunun id'si. */
+  initialId?: string;
+  linkFor(id: string): string;
+}
+
+/** Panoya yazar; iframe'de Clipboard API engelliyse eski yöntemi dener. Başarısızsa false. */
+async function copyText(text: string): Promise<boolean> {
+  try {
+    await navigator.clipboard.writeText(text);
+    return true;
+  } catch {
+    const box = document.createElement("textarea");
+    box.value = text;
+    document.body.appendChild(box);
+    box.select();
+    try {
+      return document.execCommand("copy");
+    } catch {
+      return false;
+    } finally {
+      box.remove();
+    }
+  }
 }
 
 type Mode = { kind: "new" | "rename"; name: string; share: boolean; error?: string } | { kind: "remove" } | undefined;
 
-export function QueryBar({ store, t, current, selectedId, onSelect }: Props) {
+export function QueryBar({ store, t, current, selectedId, onSelect, initialId, linkFor }: Props) {
   const [list, setList] = React.useState<SavedQuery[]>([]);
   const [mode, setMode] = React.useState<Mode>();
   const [busy, setBusy] = React.useState(false);
-  const [note, setNote] = React.useState<{ text: string; error?: boolean }>();
+  const [note, setNote] = React.useState<{ text: string; error?: boolean; link?: string }>();
 
-  const reload = React.useCallback(() => store.list().then(setList), [store]);
+  const reload = React.useCallback(() => store.list().then((l) => (setList(l), l)), [store]);
   React.useEffect(() => {
-    reload();
+    reload().then((l) => {
+      if (!initialId) return;
+      const q = l.find((x) => x.id === initialId);
+      if (q) onSelect(q, true);
+      else setNote({ text: t.notFound, error: true });
+    });
   }, [reload]);
+
+  const copyLink = async () => {
+    if (!selected) return;
+    const link = linkFor(selected.id);
+    const hint = selected.shared ? "" : " " + t.linkPersonal;
+    setNote((await copyText(link)) ? { text: t.linkCopied + hint } : { text: t.linkManual + hint, link });
+  };
 
   const open = (m: Mode) => {
     setNote(undefined);
@@ -166,6 +237,11 @@ export function QueryBar({ store, t, current, selectedId, onSelect }: Props) {
             {t.save}
           </button>
         )}
+        {selected && (
+          <button className="fl-button" disabled={busy} title={t.linkTip} onClick={copyLink}>
+            {t.copyLink}
+          </button>
+        )}
         <button className="fl-button" disabled={busy} onClick={() => open({ kind: "new", name: "", share: false })}>
           {t.saveAs}
         </button>
@@ -228,6 +304,7 @@ export function QueryBar({ store, t, current, selectedId, onSelect }: Props) {
       )}
 
       {note && (note.error || !dirty) && <span className={note.error ? "fl-qerror" : "fl-muted"}>{note.text}</span>}
+      {note?.link && <input className="fl-input fl-qname" readOnly value={note.link} onFocus={(e) => e.target.select()} autoFocus />}
     </section>
   );
 }

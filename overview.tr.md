@@ -22,7 +22,8 @@ Work item'larınızdan **herhangi bir tarih alanına** göre aylık rapor. Bir w
   - ID'ye tıklayınca kayıt açılır
 - **CSV dışa aktarma**: o an görünen kayıtlar iner. Dosya UTF-8 olduğu için Excel Türkçe karakterleri bozmaz; ayırıcı arayüz diline göre `;` ya da `,` olur.
 - Seçimleriniz hatırlanır.
-- **Kayıtlı sorgular**: ayarları isim vererek kaydedin, aralarında geçiş yapın, güncelleyin, yeniden adlandırın ya da silin. **Projeyle paylaş** işaretlenirse projedeki herkes görür; yalnızca oluşturan düzenleyip silebilir.
+- **Atanan** filtresi: herkes, bana atananlar ya da atanmamış.
+- **Kayıtlı sorgular**: ayarları isim vererek kaydedin, aralarında geçiş yapın, güncelleyin, yeniden adlandırın ya da silin. **Projeyle paylaş** işaretlenirse projedeki herkes görür; yalnızca oluşturan düzenleyip silebilir. **Bağlantıyı kopyala** ile sorgu paylaşılır: bağlantı raporu o sorguyla, çalışmış olarak açar.
 
 ## Dashboard widget'ı
 
@@ -34,13 +35,15 @@ Widget kataloğundan **Field Lens**'i ekleyip ayarlarından görünümü seçin:
 4. **Tarihe göre**: kayıt olan her gün için tarihiyle etiketlenmiş bir çubuk.
 5. **Yaklaşanlar**: tarihi önümüzdeki 7 / 14 / 30 / 60 güne düşen kayıtlar, en yakın önce, bağlantılı.
 
-"Geçen ay" gibi göreli aralıklar kullanırsanız dashboard kendiliğinden güncel kalır; isterseniz sabit bir özel aralık da seçebilirsiniz. Widget'ı farklı görünümlerle birkaç kez ekleyerek bir rapor sayfası kurabilirsiniz. **Raporu aç** bağlantısı tam rapora götürür.
+"Geçen ay" gibi göreli aralıklar kullanırsanız dashboard kendiliğinden güncel kalır; isterseniz sabit bir özel aralık da seçebilirsiniz. Widget'ı farklı görünümlerle birkaç kez ekleyerek bir rapor sayfası kurabilirsiniz. **Raporu aç** bağlantısı tam rapora götürür. Widget, projeyle paylaşılmış bir kayıtlı sorguyu da kullanabilir; böylece filtreler tek yerde tanımlanır.
 
 ## Nerede
 
 Bir proje açın → **Boards** → **Field Lens**. Widget: **Dashboards → Edit → Add a widget**.
 
 ## Sürüm notları
+
+**0.2.14**: atanan filtresi, sorgu bağlantıları ve kayıtlı sorguyu kullanan widget'lar.
 
 **0.2.13**: kişisel ya da projeyle paylaşılan kayıtlı sorgular.
 

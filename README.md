@@ -16,6 +16,7 @@ Open a project → **Boards** → **Field Lens**.
 | **Date field** | Any Date/Time field, custom fields included (for example `Custom.TargetDate`). Searchable by display name or reference name. Nothing is hardcoded. |
 | **Range** | Last 15 / 30 / 90 days, this month, last month or a custom from–to. Both ends are inclusive. |
 | **States** | One or more. An item counts when its **current** state is one of them. |
+| **Assigned to** | Anyone (default), **Assigned to me** (whoever runs the report, `@Me`) or **Unassigned**. A shared query with "Assigned to me" shows each person their own items. |
 | **Columns** | Any fields. Search by display name (large) or reference name (small). Drag a column chip to reorder it, or focus it with Tab and press Alt + ←/→. |
 
 The chosen date field is added to the columns automatically. Selections are saved per user (Extension Data Service, user scope) and restored next time; types or fields that no longer exist are dropped. **Reset settings** (at the right of the Run row, click twice to confirm) clears everything at once: type, date field, range, states, columns, rule and row density go back to their defaults and the remembered selections are deleted; saved queries are kept.
@@ -30,6 +31,7 @@ The **Saved query** bar above the filter panel:
 - **Share with the project** (only when saving): unticked, the query is stored in user scope and only you see it. Ticked, it goes to a shared collection per project and everyone in the project sees it. The list groups "My queries" and "Project queries", and someone else's query shows its creator's name.
 - Only the creator can update, rename or delete a shared query; others use **Save as** for their own copy. This is a **UI restriction**: Extension Data Service doesn't check ownership. Every query read from the shared list is validated (unexpected fields are dropped, rules and fields go through the usual checks).
 - If two people save the same query at the same time, the second gets a warning and the list reloads (document version, `__etag`).
+- **Copy link** puts a link to the selected query on the clipboard (if the browser blocks that, the link is shown to copy by hand). Opening it loads the query and runs the report. A personal query's link only works for its owner; a link to a deleted or unshared query says so.
 - **Reset settings** doesn't touch saved queries.
 
 ### Column derived by a rule
@@ -80,10 +82,11 @@ On a dashboard: **Edit → Add a widget → Field Lens**, then the edit icon for
 | **By date** | One bar for each day that has items, labelled with its date | Relative preset or custom |
 | **Upcoming** | Items whose date falls from today to the next 7 / 14 / 30 / 60 days, earliest first; up to 100 are listed, the ID opens the item | Always from today |
 
-- The other settings are work item type, date field and states. No state is preselected: you pick them.
+- **Source**: the widget's own settings, or a saved query shared with the project. With a query, the type, date field, states, assigned-to filter and (for Summary, Weekly and By date) range come from it and follow its changes; Monthly trend keeps its month count and Upcoming its day count. If the query is deleted, the widget says so.
+- With its own settings, the other settings are work item type, date field and states. No state is preselected: you pick them.
 - Relative ranges move with the calendar, so a "Last month" dashboard is always current. A custom range stays fixed.
 - The widget can be 2–6 columns wide and 1–4 rows tall. Charts scale to the widget. When bars get narrow, counts move into the hover tooltip and date labels are written at 45°. Only when bars are very narrow (a long range by date) are labels thinned out.
-- **Open report** opens the Field Lens page. It does not carry the widget's filters over.
+- **Open report** opens the Field Lens page. For a widget linked to a saved query it opens that query and runs it; otherwise the widget's filters are not carried over.
 
 ## Limits and calculation details
 
@@ -123,7 +126,8 @@ Layout:
 - The inclusive end day on a month-end range with the real date field.
 - Time zone: WIQL compares dates on the server, while charts group by the browser's day. Items near midnight may land on a neighbouring day.
 - The widget: catalog entry, settings panel, live preview, and settings persisting after Save.
-- The **Open report** link (`/<project>/_apps/hub/turanemin.field-lens.hub`).
+- The **Open report** link (`/<project>/_apps/hub/turanemin.field-lens.hub`) and query links (`…hub?query=<id>`): the page must receive the `query` parameter.
+- **Assigned to me** (`@Me`) resolves to the person running the report.
 
 ## License
 

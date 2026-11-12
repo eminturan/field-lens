@@ -22,7 +22,8 @@ Monthly reports from your work items, built on **any date field**. Pick a work i
   - the ID opens the work item
 - **CSV export** of the current view: UTF-8 so Excel keeps Turkish characters, with `;` or `,` as separator depending on the interface language.
 - Your selections are remembered.
-- **Saved queries**: save your settings under a name, switch between them, update, rename or delete them. Tick **Share with the project** and everyone in the project sees it; only its creator can edit or delete it.
+- **Assigned to** filter: anyone, assigned to me, or unassigned.
+- **Saved queries**: save your settings under a name, switch between them, update, rename or delete them. Tick **Share with the project** and everyone in the project sees it; only its creator can edit or delete it. **Copy link** shares a query: the link opens the report with it, already run.
 
 ## Dashboard widget
 
@@ -34,13 +35,15 @@ Add **Field Lens** from the widget catalog and choose a view in its settings:
 4. **By date**: one bar for every day that has items, labelled with its date.
 5. **Upcoming**: items whose date falls in the next 7 / 14 / 30 / 60 days, earliest first, with links.
 
-Use relative ranges such as "last month" so the dashboard stays current on its own, or set a fixed custom range. Add the widget several times with different views to build a report page. **Open report** takes you to the full report.
+Use relative ranges such as "last month" so the dashboard stays current on its own, or set a fixed custom range. Add the widget several times with different views to build a report page. **Open report** takes you to the full report. A widget can also use a saved query shared with the project, so its filters are defined in one place.
 
 ## Where to find it
 
 Open a project → **Boards** → **Field Lens**. The widget is under **Dashboards → Edit → Add a widget**.
 
 ## Release notes
+
+**0.2.14**: an assigned-to filter, query links, and widgets that use a saved query.
 
 **0.2.13**: saved queries, personal or shared with the project.
 

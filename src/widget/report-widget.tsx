@@ -13,7 +13,9 @@ import {
   DERIVED,
   deriveRows,
   previousRange,
+  applyQuery,
   Query,
+  SavedQuery,
   Row,
   View,
   weekBuckets,
@@ -40,7 +42,7 @@ function chartHeight(settings?: WidgetSettings) {
 function Report({ settings }: { settings?: WidgetSettings }) {
   const env = useEnv();
   // Dashboard dışında görünüm ?view= ile seçilir, ayarlar örnek veriye göredir.
-  const cfg: WidgetConfig = inHost
+  const raw: WidgetConfig = inHost
     ? parseSettings(settings)
     : {
         ...DEFAULTS,
@@ -51,7 +53,15 @@ function Report({ settings }: { settings?: WidgetSettings }) {
         preset: (new URLSearchParams(window.location.search).get("preset") as WidgetConfig["preset"]) || "last90",
         breakdown: new URLSearchParams(window.location.search).get("breakdown") ?? "",
         breakdownRule: new URLSearchParams(window.location.search).get("rule") ?? "",
+        queryId: new URLSearchParams(window.location.search).get("query") ?? "",
       };
+  // Kayıtlı sorguya bağlı widget: sorgu her yüklemede okunur, böylece sorgudaki değişiklik widget'a yansır.
+  const [shared, setShared] = React.useState<SavedQuery[]>();
+  React.useEffect(() => {
+    if (env && raw.queryId) env.sharedQueries().then(setShared);
+  }, [env, raw.queryId]);
+  const linked = raw.queryId ? shared?.find((q) => q.id === raw.queryId) : undefined;
+  const cfg: WidgetConfig = linked ? applyQuery(raw, linked.settings) : raw.queryId ? { ...raw, type: "" } : raw;
   const ok = configured(cfg);
   const req = plan(cfg, new Date());
   const key = JSON.stringify([cfg, req]);
@@ -67,7 +77,7 @@ function Report({ settings }: { settings?: WidgetSettings }) {
       ([fs, st]) => live && setMeta({ fields: new Map(fs.map((f) => [f.referenceName, f])), colors: Object.fromEntries(st.map((s) => [s.name, s.color])) }),
       (e) => live && setError(String(e?.message ?? e)),
     );
-    const q: Query = { type: cfg.type, dateField: cfg.dateField, states: cfg.states, from: req.from, to: req.to, columns: req.columns };
+    const q: Query = { assignee: cfg.assignee, type: cfg.type, dateField: cfg.dateField, states: cfg.states, from: req.from, to: req.to, columns: req.columns };
     Promise.all([
       env.source.run(q),
       cfg.view === "summary" ? env.source.count({ ...q, ...previousRange(q.from, q.to) }).catch(() => undefined) : undefined,
@@ -83,6 +93,8 @@ function Report({ settings }: { settings?: WidgetSettings }) {
   const title = settings?.name || "Field Lens";
   if (!env) return <Frame title={title} />;
   const { t } = env;
+  if (raw.queryId && !shared) return <Frame title={title} message={t.loading} />;
+  if (raw.queryId && !linked) return <Frame title={title} message={t.w.queryMissing} error />;
   if (!ok) return <Frame title={title} message={t.w.notConfigured} />;
   const field = (ref: string) => meta?.fields.get(ref) ?? { referenceName: ref, name: ref, type: "string" };
   const custom = usesCustom(cfg);
@@ -90,8 +102,15 @@ function Report({ settings }: { settings?: WidgetSettings }) {
   // Özel aralık yıl değiştirebilir; o yüzden yılıyla yazılır.
   const day = custom ? fullDay : shortDay;
   const viewName = cfg.view === "summary" && cfg.breakdown ? `${t.w.views.summary}: ${field(cfg.breakdown).name}` : t.w.views[cfg.view];
-  const sub = [viewName, cfg.type, field(cfg.dateField).name, `${span} (${day(req.from)} – ${day(req.to)})`].join(" · ");
-  const link = { href: env.hubUrl, label: t.w.openReport };
+  const sub = [
+    viewName,
+    linked ? linked.name : cfg.type,
+    field(cfg.dateField).name,
+    `${span} (${day(req.from)} – ${day(req.to)})`,
+    ...(cfg.assignee ? [t.assignees[cfg.assignee]] : []),
+  ].join(" · ");
+  // Bağlı sorguda "Raporu aç" raporu o sorguyla açıp çalıştırır.
+  const link = { href: linked ? `${env.hubUrl}?query=${encodeURIComponent(linked.id)}` : env.hubUrl, label: t.w.openReport };
   if (error) return <Frame title={title} sub={sub} link={link} message={t.loadError(error)} error />;
   if (!meta || data?.key !== key) return <Frame title={title} sub={sub} link={link} message={t.loading} />;
   const rows = data.result.rows;

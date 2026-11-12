@@ -7,6 +7,7 @@ import * as SDK from "azure-devops-extension-sdk";
 import {
   CommonServiceIds,
   IExtensionDataService,
+  IHostNavigationService,
   ILocationService,
   IProjectPageService,
 } from "azure-devops-extension-api/Common/CommonServices";
@@ -18,7 +19,7 @@ import { createRestSource, DataSource, RunResult } from "./api";
 import { fullDay } from "./chart";
 import { FieldPicker } from "./fieldPicker";
 import { RulePreview } from "./rulePreview";
-import { Docs, QueryBar, QueryStore, queryStore } from "./queryBar";
+import { Docs, localDocs, QueryBar, QueryStore, queryStore } from "./queryBar";
 import { firstOf, pickLang, Strings, STRINGS } from "./i18n";
 import {
   countStates,
@@ -39,6 +40,7 @@ import {
   DERIVED,
   deriveRows,
   Rule,
+  Assignee,
   sanitizeSettings,
   SavedQuery,
   sortRows,
@@ -59,6 +61,9 @@ interface Props {
   source: DataSource;
   store: Store;
   queries: QueryStore;
+  /** Sayfa ?query=<id> ile açıldıysa. */
+  initialQueryId?: string;
+  linkFor(id: string): string;
   mock: boolean;
   t: Strings;
   itemUrl: (id: number) => string;
@@ -120,7 +125,7 @@ const readDense = () => {
 };
 
 
-function App({ source, store, queries, mock, t, itemUrl }: Props) {
+function App({ source, store, queries, initialQueryId, linkFor, mock, t, itemUrl }: Props) {
   const [reload, setReload] = React.useState(0);
   const [loadError, setLoadError] = React.useState<string>();
   const [types, setTypes] = React.useState<string[]>();
@@ -137,6 +142,7 @@ function App({ source, store, queries, mock, t, itemUrl }: Props) {
   const [from, setFrom] = React.useState("");
   const [to, setTo] = React.useState("");
   const [states, setStates] = React.useState<string[]>([]);
+  const [assignee, setAssignee] = React.useState<Assignee>();
   const [columns, setColumns] = React.useState<string[]>(DEFAULT_COLUMNS);
 
   const [running, setRunning] = React.useState(false);
@@ -184,6 +190,7 @@ function App({ source, store, queries, mock, t, itemUrl }: Props) {
     setFrom(range.from);
     setTo(range.to);
     setStates(s.states ?? []);
+    setAssignee(s.assignee);
     setColumns(s.columns?.length ? s.columns : DEFAULT_COLUMNS);
     setRule(s.derived ?? { source: "", pattern: "", name: "" });
   };
@@ -201,11 +208,14 @@ function App({ source, store, queries, mock, t, itemUrl }: Props) {
     setCollapsed(false);
   };
   const [queryId, setQueryId] = React.useState<string>();
-  const pickQuery = (q: SavedQuery | undefined) => {
+  /** Bağlantıyla açılan sorgu, form hazır olunca (state listesi yüklenince) bir kez çalıştırılır. */
+  const [autoRun, setAutoRun] = React.useState(false);
+  const pickQuery = (q: SavedQuery | undefined, run?: boolean) => {
     setQueryId(q?.id);
     if (!q || !types) return;
     applySettings(sanitizeSettings(q.settings, types, fields), types);
     clearResults();
+    setAutoRun(!!run);
   };
 
   // İlk yükleme: türler, alanlar ve kayıtlı seçimler.
@@ -216,8 +226,9 @@ function App({ source, store, queries, mock, t, itemUrl }: Props) {
     Promise.all([source.types(), source.fields(), store.load().catch(() => undefined)])
       .then(([ts, fs, saved]) => {
         if (!live) return;
-        setTypes(ts);
+        // Önce alanlar: sorgu çubuğu türler gelince açılır ve bağlantıdaki sorguyu alan listesiyle doğrular.
         setFields(fs);
+        setTypes(ts);
         applySettings(sanitizeSettings(saved, ts, fs), ts);
       })
       .catch((e) => live && setLoadError(message(e)));
@@ -302,11 +313,17 @@ function App({ source, store, queries, mock, t, itemUrl }: Props) {
     chooseDense(false);
   };
 
-  const current: Settings = { type, dateField, preset, from, to, states, columns, derived: rule.source || rule.pattern ? rule : undefined };
+  const current: Settings = { assignee, type, dateField, preset, from, to, states, columns, derived: rule.source || rule.pattern ? rule : undefined };
+
+  React.useEffect(() => {
+    if (!autoRun || missing === t.loading) return;
+    setAutoRun(false);
+    if (!missing) run();
+  }, [autoRun, missing]);
 
   const run = () => {
     if (missing) return;
-    const query: Query = { type, dateField, from, to, states, columns };
+    const query: Query = { assignee, type, dateField, from, to, states, columns };
     const activeRule = ruleReady && columns.includes(DERIVED) ? rule : undefined;
     // Türetilmiş kolon sunucudan istenmez; yerine kaynak alanı istenir.
     const fetched = [...new Set([...columns.filter((c) => c !== DERIVED), ...(activeRule ? [activeRule.source] : [])])];
@@ -413,7 +430,7 @@ function App({ source, store, queries, mock, t, itemUrl }: Props) {
           </MessageCard>
         )}
         {!types && !loadError && <div className="fl-empty">{t.loading}</div>}
-        {types && <QueryBar store={queries} t={t.q} current={current} selectedId={queryId} onSelect={pickQuery} />}
+        {types && <QueryBar store={queries} t={t.q} current={current} selectedId={queryId} onSelect={pickQuery} initialId={initialQueryId} linkFor={linkFor} />}
         {types && result && collapsed && !running && (
           <section className="fl-report">
             <div className="fl-report-text">
@@ -423,6 +440,7 @@ function App({ source, store, queries, mock, t, itemUrl }: Props) {
                   byRef.get(result.query.dateField)?.name ?? result.query.dateField,
                   `${result.query.from} – ${result.query.to}`,
                   t.statesN(result.query.states.length),
+                  ...(result.query.assignee ? [t.assignees[result.query.assignee]] : []),
                 ].join(" · ")}
               </span>
             </div>
@@ -504,6 +522,17 @@ function App({ source, store, queries, mock, t, itemUrl }: Props) {
                 {!type && <span className="fl-muted">{t.need.type}</span>}
               </div>
             </fieldset>
+
+            <div className="fl-field">
+              <span className="fl-muted">{t.assignee}</span>
+              <span className="fl-segment fl-assignee" role="group" aria-label={t.assignee}>
+                {([undefined, "me", "none"] as const).map((a) => (
+                  <button key={a ?? "all"} aria-pressed={assignee === a} onClick={() => setAssignee(a)}>
+                    {t.assignees[a ?? "all"]}
+                  </button>
+                ))}
+              </span>
+            </div>
 
             <div className="fl-field">
               <span className="fl-muted">{t.columns}</span>
@@ -793,41 +822,6 @@ function render(props: Omit<Props, "t">, culture: string | undefined) {
   ReactDOM.render(<App {...props} t={STRINGS[lang]} />, document.getElementById("root"));
 }
 
-/** Örnek veri modunda sorgular tarayıcıda; sahiplik denensin diye ortak listede başkasının bir sorgusu hazır gelir. */
-function localDocs(): Docs {
-  const key = (shared: boolean) => `field-lens-queries-${shared ? "shared" : "user"}`;
-  const read = (shared: boolean): Record<string, unknown>[] => {
-    try {
-      const raw = localStorage.getItem(key(shared));
-      if (raw) return JSON.parse(raw);
-    } catch {
-      return [];
-    }
-    return shared
-      ? [{ id: "seed", name: "Ekip – açık buglar", ownerId: "someone", ownerName: "Ayşe Yılmaz", settings: { type: "Bug", preset: "last30", states: ["New", "Active"] }, __etag: 1 }]
-      : [];
-  };
-  const write = (shared: boolean, docs: unknown[]) => {
-    try {
-      localStorage.setItem(key(shared), JSON.stringify(docs));
-    } catch {
-      // saklanamıyor
-    }
-  };
-  return {
-    get: async (shared) => read(shared),
-    async set(shared, doc) {
-      const docs = read(shared);
-      const old = docs.find((d) => d.id === doc.id);
-      if (old && doc.__etag !== undefined && old.__etag !== doc.__etag) throw new Error("409 etag conflict");
-      const next = { ...doc, __etag: ((old?.__etag as number) ?? 0) + 1 };
-      write(shared, [...docs.filter((d) => d.id !== doc.id), next]);
-      return next;
-    },
-    del: async (shared, id) => write(shared, read(shared).filter((d) => d.id !== id)),
-  };
-}
-
 /** Tarayıcıda yerel saklama; erişim engelliyse sessizce atlanır. */
 const localStore: Store = {
   async load() {
@@ -850,7 +844,15 @@ async function start() {
   // Azure DevOps dışında (npm run dev) açıldıysa örnek veriyle çalış; dil ?lang=tr|en ile seçilebilir.
   if (window.self === window.top) {
     render(
-      { source: mockSource(), store: localStore, queries: queryStore(localDocs(), { id: "me", name: "Siz" }), mock: true, itemUrl: () => "#" },
+      {
+        source: mockSource(),
+        store: localStore,
+        queries: queryStore(localDocs(), { id: "me", name: "Siz" }),
+        initialQueryId: new URLSearchParams(window.location.search).get("query") ?? undefined,
+        linkFor: (id) => `${window.location.origin}${window.location.pathname}?query=${encodeURIComponent(id)}`,
+        mock: true,
+        itemUrl: () => "#",
+      },
       new URLSearchParams(window.location.search).get("lang") ?? navigator.language,
     );
     return;
@@ -886,11 +888,14 @@ async function start() {
       del: async (shared, id) => (await manager).deleteDocument(coll(shared), id, scope(shared)),
     };
     const me = SDK.getUser();
+    const params = await (await SDK.getService<IHostNavigationService>(CommonServiceIds.HostNavigationService)).getQueryParams().catch(() => ({}) as Record<string, string>);
     render(
       {
         source: createRestSource(baseUrl, () => SDK.getAccessToken(), project),
         store,
         queries: queryStore(docs, { id: me.id, name: me.displayName || me.name }),
+        initialQueryId: params.query || undefined,
+        linkFor: (id) => `${base}${encodeURIComponent(project)}/_apps/hub/turanemin.field-lens.hub?query=${encodeURIComponent(id)}`,
         mock: false,
         itemUrl: (id) => `${base}${encodeURIComponent(project)}/_workitems/edit/${id}`,
       },

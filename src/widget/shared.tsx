@@ -3,7 +3,12 @@ import "./widget.css";
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 import * as SDK from "azure-devops-extension-sdk";
-import { CommonServiceIds, ILocationService, IProjectPageService } from "azure-devops-extension-api/Common/CommonServices";
+import {
+  CommonServiceIds,
+  IExtensionDataService,
+  ILocationService,
+  IProjectPageService,
+} from "azure-devops-extension-api/Common/CommonServices";
 import {
   ConfigurationEvent,
   IWidgetConfigurationContext,
@@ -14,7 +19,8 @@ import {
 
 import { createRestSource, DataSource } from "../hub/api";
 import { firstOf, pickLang, Strings, STRINGS } from "../hub/i18n";
-import { compileRule, monthsRange, Preset, presetRange, upcomingRange, View, VIEWS } from "../hub/logic";
+import { Assignee, compileRule, monthsRange, parseQueries, Preset, presetRange, SavedQuery, upcomingRange, View, VIEWS } from "../hub/logic";
+import { localDocs } from "../hub/queryBar";
 import { mockSource } from "../hub/mock";
 
 /** vss-extension.json içindeki publisher ve extension id'si; widget tam id ile de kaydedilir. */
@@ -25,6 +31,10 @@ export const inHost = window.self !== window.top;
 
 export interface WidgetConfig {
   view: View;
+  /** Doluysa tür, tarih alanı, state'ler, atanan (ve aralık seçen görünümlerde aralık) bu paylaşılan kayıtlı sorgudan gelir. */
+  queryId: string;
+  /** Yalnızca kayıtlı sorgudan gelir. */
+  assignee?: Assignee;
   type: string;
   dateField: string;
   states: string[];
@@ -41,7 +51,7 @@ export interface WidgetConfig {
   days: number;
 }
 
-export const DEFAULTS: WidgetConfig = { view: "summary", type: "", dateField: "", states: [], preset: "lastMonth", months: 6, from: "", to: "", breakdown: "", breakdownRule: "", days: 14 };
+export const DEFAULTS: WidgetConfig = { queryId: "", view: "summary", type: "", dateField: "", states: [], preset: "lastMonth", months: 6, from: "", to: "", breakdown: "", breakdownRule: "", days: 14 };
 export const MONTHS = [3, 6, 12];
 export const DAYS = [7, 14, 30, 60];
 
@@ -82,6 +92,8 @@ export interface Env {
   /** Hub ve work item bağlantıları; dashboard dışında "#". */
   hubUrl: string;
   itemUrl: (id: number) => string;
+  /** Projeyle paylaşılmış kayıtlı sorgular (okunamazsa boş). */
+  sharedQueries(): Promise<SavedQuery[]>;
 }
 
 let env: Promise<Env> | undefined;
@@ -91,7 +103,13 @@ export function connect(): Promise<Env> {
   return (env ??= (async () => {
     if (!inHost) {
       const lang = new URLSearchParams(window.location.search).get("lang") ?? navigator.language;
-      return { source: mockSource(), t: STRINGS[pickLang(lang)], hubUrl: "#", itemUrl: () => "#" };
+      return {
+        source: mockSource(),
+        t: STRINGS[pickLang(lang)],
+        hubUrl: "/hub/hub.html",
+        itemUrl: () => "#",
+        sharedQueries: async () => parseQueries(await localDocs().get(true), true),
+      };
     }
     await SDK.ready();
     const baseUrl = await (await SDK.getService<ILocationService>(CommonServiceIds.LocationService)).getServiceLocation();
@@ -101,14 +119,22 @@ export function connect(): Promise<Env> {
       () => window.parent.document.documentElement.lang,
       () => navigator.language,
     ]);
-    const project = (await (await SDK.getService<IProjectPageService>(CommonServiceIds.ProjectPageService)).getProject())?.name;
-    if (!project) throw new Error("Project not found");
+    const projectInfo = await (await SDK.getService<IProjectPageService>(CommonServiceIds.ProjectPageService)).getProject();
+    const project = projectInfo?.name;
+    if (!project || !projectInfo) throw new Error("Project not found");
+    const dataService = await SDK.getService<IExtensionDataService>(CommonServiceIds.ExtensionDataService);
+    const manager = dataService.getExtensionDataManager(SDK.getExtensionContext().id, await SDK.getAccessToken());
     const base = (baseUrl.endsWith("/") ? baseUrl : baseUrl + "/") + encodeURIComponent(project);
     return {
       source: createRestSource(baseUrl, () => SDK.getAccessToken(), project),
       t: STRINGS[pickLang(culture)],
       hubUrl: `${base}/_apps/hub/${EXTENSION}.hub`,
       itemUrl: (id) => `${base}/_workitems/edit/${id}`,
+      // Rapor sayfasıyla aynı koleksiyon: proje başına ortak liste. Okunamazsa boş sayılır.
+      sharedQueries: () =>
+        manager
+          .then((m) => m.getDocuments(`queries-${projectInfo.id}`, { scopeType: "Default" }))
+          .then((d) => parseQueries(d, true), () => []),
     };
   })());
 }
@@ -124,7 +150,7 @@ export function useEnv(): Env | undefined {
 export function parseSettings(settings: WidgetSettings | undefined): WidgetConfig {
   try {
     const c = { ...DEFAULTS, ...JSON.parse(settings?.customSettings?.data || "{}") };
-    return { ...c, states: Array.isArray(c.states) ? c.states.map(String) : [] };
+    return { ...c, queryId: typeof c.queryId === "string" ? c.queryId : "", states: Array.isArray(c.states) ? c.states.map(String) : [] };
   } catch {
     return DEFAULTS;
   }

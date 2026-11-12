@@ -25,6 +25,9 @@ describe("buildWiql", () => {
   it("accepts Turkish letters in field ref", () =>
     expect(buildWiql({ ...q, dateField: "Custom.GeçişTarihi" })).toContain("[Custom.GeçişTarihi] >= '2026-10-01'"));
   it("rejects empty states",() => expect(() => buildWiql({ ...q, states: [] })).toThrow());
+  it("adds no assignee condition by default", () => expect(buildWiql(q)).not.toContain("AssignedTo"));
+  it("filters to the current user", () => expect(buildWiql({ ...q, assignee: "me" })).toContain("AND [System.AssignedTo] = @Me"));
+  it("filters to unassigned items", () => expect(buildWiql({ ...q, assignee: "none" })).toContain("AND [System.AssignedTo] = ''"));
   it("rejects malformed dates", () => expect(() => buildWiql({ ...q, from: "2026-10-01' OR '" })).toThrow());
 });
 
