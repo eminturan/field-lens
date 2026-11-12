@@ -28,19 +28,32 @@ export interface WidgetConfig {
   type: string;
   dateField: string;
   states: string[];
-  /** Özet, haftalık ve dağılım için göreli aralık; özel aralık yok ki dashboard kendiliğinden güncel kalsın. */
-  preset: Exclude<Preset, "custom">;
+  /** Özet, haftalık ve dağılım için aralık. Göreli olanlar dashboard'u kendiliğinden güncel tutar; "custom" from–to kullanır. */
+  preset: Preset;
+  /** Aylık trend için ay sayısı; 0 = özel aralık (from–to). */
   months: number;
+  from: string;
+  to: string;
   groupField: string;
   days: number;
 }
 
-export const DEFAULTS: WidgetConfig = { view: "summary", type: "", dateField: "", states: [], preset: "lastMonth", months: 6, groupField: "", days: 14 };
+export const DEFAULTS: WidgetConfig = { view: "summary", type: "", dateField: "", states: [], preset: "lastMonth", months: 6, from: "", to: "", groupField: "", days: 14 };
 export const MONTHS = [3, 6, 12];
 export const DAYS = [7, 14, 30, 60];
 
+const DATE = /^\d{4}-\d{2}-\d{2}$/;
+/** Görünüm özel aralık kullanıyor mu (yaklaşanlar her zaman bugünden ileriye bakar). */
+export const usesCustom = (c: WidgetConfig) => (c.view === "trend" ? c.months === 0 : c.view !== "upcoming" && c.preset === "custom");
+export const customValid = (c: WidgetConfig) => DATE.test(c.from) && DATE.test(c.to) && c.from <= c.to;
+
 export const configured = (c: WidgetConfig) =>
-  VIEWS.includes(c.view) && !!c.type && !!c.dateField && c.states.length > 0 && (c.view !== "distribution" || !!c.groupField);
+  VIEWS.includes(c.view) &&
+  !!c.type &&
+  !!c.dateField &&
+  c.states.length > 0 &&
+  (c.view !== "distribution" || !!c.groupField) &&
+  (!usesCustom(c) || customValid(c));
 
 export interface Env {
   source: DataSource;

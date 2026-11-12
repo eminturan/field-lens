@@ -22,6 +22,6 @@ Add **Field Lens** from the widget catalog and pick a view in its settings:
 4. **Distribution**: counts by any field (system, assignee, …).
 5. **Upcoming**: items whose date falls in the next 7–60 days, with links.
 
-Ranges are relative (last month, last 90 days, …), so the dashboard stays current on its own.
+Ranges can be relative (last month, last 90 days, …), so the dashboard stays current on its own, or a fixed custom range.
 
 Built for Azure DevOps Server 2022.

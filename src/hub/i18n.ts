@@ -26,6 +26,7 @@ export interface WidgetStrings {
   cfgRange: string;
   cfgMonths: string;
   months: (n: number) => string;
+  customRange: string;
   cfgGroup: string;
   searchField: string;
   cfgDays: string;
@@ -107,6 +108,7 @@ export const STRINGS: Record<Lang, Strings> = {
       cfgRange: "Aralık",
       cfgMonths: "Ay sayısı",
       months: (n) => `Son ${n} ay`,
+      customRange: "Özel aralık",
       cfgGroup: "Gruplanacak alan",
       searchField: "Alan ara…",
       cfgDays: "Süre",
@@ -189,6 +191,7 @@ export const STRINGS: Record<Lang, Strings> = {
       cfgRange: "Range",
       cfgMonths: "Months",
       months: (n) => `Last ${n} months`,
+      customRange: "Custom range",
       cfgGroup: "Group by field",
       searchField: "Search field…",
       cfgDays: "Period",

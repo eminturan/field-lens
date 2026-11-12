@@ -2,7 +2,7 @@ import * as React from "react";
 import { WidgetSettings } from "azure-devops-extension-api/Dashboard";
 
 import { RunResult } from "../hub/api";
-import { Bar, shortDay, StackChart } from "../hub/chart";
+import { Bar, fullDay, shortDay, StackChart } from "../hub/chart";
 import {
   countBy,
   Field,
@@ -10,6 +10,7 @@ import {
   monthBuckets,
   monthsRange,
   presetRange,
+  Preset,
   previousRange,
   Query,
   Row,
@@ -17,7 +18,7 @@ import {
   View,
   weekBuckets,
 } from "../hub/logic";
-import { configured, DEFAULTS, Env, Frame, inHost, parseSettings, startWidget, useEnv, WidgetConfig } from "./shared";
+import { configured, usesCustom, DEFAULTS, Env, Frame, inHost, parseSettings, startWidget, useEnv, WidgetConfig } from "./shared";
 
 /** Dağılımda gösterilen en fazla değer; kalanlar "Diğer"de toplanır. */
 const TOP = 8;
@@ -31,8 +32,13 @@ interface Meta {
 
 /** Görünümün veri isteği: hangi aralık ve hangi kolonlar. */
 function plan(cfg: WidgetConfig, now: Date): { from: string; to: string; columns: string[] } {
-  const range =
-    cfg.view === "trend" ? monthsRange(cfg.months, now) : cfg.view === "upcoming" ? upcomingRange(cfg.days, now) : presetRange(cfg.preset, now);
+  const range = usesCustom(cfg)
+    ? { from: cfg.from, to: cfg.to }
+    : cfg.view === "trend"
+      ? monthsRange(cfg.months, now)
+      : cfg.view === "upcoming"
+        ? upcomingRange(cfg.days, now)
+        : presetRange(cfg.preset as Exclude<Preset, "custom">, now);
   const columns =
     cfg.view === "distribution"
       ? [cfg.groupField, "System.State"]
@@ -98,10 +104,12 @@ function Report({ settings }: { settings?: WidgetSettings }) {
   const { t } = env;
   if (!ok) return <Frame title={title} message={t.w.notConfigured} />;
   const field = (ref: string) => meta?.fields.get(ref) ?? { referenceName: ref, name: ref, type: "string" };
-  const span =
-    cfg.view === "trend" ? t.w.months(cfg.months) : cfg.view === "upcoming" ? t.w.nextDays(cfg.days) : t.presets[cfg.preset];
+  const custom = usesCustom(cfg);
+  const span = custom ? t.presets.custom : cfg.view === "trend" ? t.w.months(cfg.months) : cfg.view === "upcoming" ? t.w.nextDays(cfg.days) : t.presets[cfg.preset];
+  // Özel aralık yıl değiştirebilir; o yüzden yılıyla yazılır.
+  const day = custom ? fullDay : shortDay;
   const viewName = cfg.view === "distribution" ? `${t.w.views.distribution}: ${field(cfg.groupField).name}` : t.w.views[cfg.view];
-  const sub = [viewName, cfg.type, field(cfg.dateField).name, `${span} (${shortDay(req.from)} – ${shortDay(req.to)})`].join(" · ");
+  const sub = [viewName, cfg.type, field(cfg.dateField).name, `${span} (${day(req.from)} – ${day(req.to)})`].join(" · ");
   const link = { href: env.hubUrl, label: t.w.openReport };
   if (error) return <Frame title={title} sub={sub} link={link} message={t.loadError(error)} error />;
   if (!meta || data?.key !== key) return <Frame title={title} sub={sub} link={link} message={t.loading} />;

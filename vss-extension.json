@@ -2,7 +2,7 @@
   "manifestVersion": 1,
   "id": "field-lens",
   "publisher": "turanemin",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "name": "Field Lens",
   "description": "Lists work items of one type whose chosen date field falls in a date range, with selectable states and columns, exportable as CSV.",
   "public": true,

@@ -15,7 +15,7 @@ import { MessageCard, MessageCardSeverity } from "azure-devops-ui/MessageCard";
 import { Page } from "azure-devops-ui/Page";
 
 import { createRestSource, DataSource, RunResult } from "./api";
-import { shortDay, StackChart } from "./chart";
+import { fullDay, shortDay, StackChart } from "./chart";
 import { FieldPicker } from "./fieldPicker";
 import { firstOf, pickLang, Strings, STRINGS } from "./i18n";
 import {
@@ -112,8 +112,6 @@ const readDense = () => {
   }
 };
 
-/** "2026-10-07" → "07.10.2026" */
-const fullDay = (d: string) => `${shortDay(d)}.${d.slice(0, 4)}`;
 
 function App({ source, store, mock, t, itemUrl }: Props) {
   const [reload, setReload] = React.useState(0);

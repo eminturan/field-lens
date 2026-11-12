@@ -4,6 +4,8 @@ import * as React from "react";
 
 /** "2026-10-07" → "07.10" */
 export const shortDay = (d: string) => `${d.slice(8, 10)}.${d.slice(5, 7)}`;
+/** "2026-10-07" → "07.10.2026" */
+export const fullDay = (d: string) => `${shortDay(d)}.${d.slice(0, 4)}`;
 
 export interface Bar {
   start: string;
