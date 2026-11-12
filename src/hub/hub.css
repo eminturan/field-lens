@@ -1,0 +1,296 @@
+/* Renkler Azure DevOps tema değişkenlerinden gelir; değişken yoksa açık tema değerleri kullanılır. */
+body {
+  margin: 0;
+  background: var(--background-color, #fff);
+  color: var(--text-primary-color, rgba(0, 0, 0, 0.9));
+}
+
+/* azure-devops-ui body'yi flex yapar; #root genişliği verilmezse sayfa içeriği kadar daralır. */
+#root {
+  flex: 1 1 auto;
+  width: 100%;
+  min-width: 0;
+}
+
+.fl-page {
+  width: 100%;
+  min-width: 0;
+  min-height: 100vh;
+}
+
+.fl-content {
+  padding: 8px 32px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.fl-muted {
+  color: var(--text-secondary-color, rgba(0, 0, 0, 0.55));
+  font-size: 12px;
+}
+
+.fl-empty {
+  padding: 32px 0;
+  text-align: center;
+  color: var(--text-secondary-color, rgba(0, 0, 0, 0.55));
+}
+
+.fl-h {
+  margin: 0 0 4px;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.fl-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.fl-toolbar .fl-h {
+  margin: 0 auto 6px 0;
+}
+
+.fl-field {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.fl-input,
+.fl-button {
+  height: 32px;
+  box-sizing: border-box;
+  padding: 0 10px;
+  border: 1px solid var(--component-grid-cell-bottom-border-color, rgba(0, 0, 0, 0.25));
+  border-radius: 2px;
+  background: var(--callout-background-color, #fff);
+  color: inherit;
+  font: inherit;
+  font-size: 14px;
+}
+
+.fl-search {
+  width: 240px;
+}
+
+.fl-button {
+  cursor: pointer;
+  align-self: flex-end;
+}
+
+.fl-button:hover:not(:disabled) {
+  background: var(--component-grid-row-hover-color, rgba(0, 0, 0, 0.04));
+}
+
+.fl-button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+section > .fl-button {
+  margin-top: 8px;
+}
+
+.fl-input:focus-visible,
+.fl-button:focus-visible,
+.fl-sort:focus-visible {
+  outline: 2px solid var(--communication-foreground, #0078d4);
+  outline-offset: 1px;
+}
+
+/* Tablolar */
+.fl-scroll {
+  overflow-x: auto;
+}
+
+.fl-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.fl-table-narrow {
+  width: auto;
+  min-width: min(100%, 560px);
+}
+
+.fl-table th,
+.fl-table td {
+  padding: 7px 10px;
+  text-align: left;
+  border-bottom: 1px solid var(--component-grid-cell-bottom-border-color, rgba(0, 0, 0, 0.1));
+  white-space: nowrap;
+}
+
+.fl-table th {
+  font-weight: 600;
+  font-size: 12px;
+  color: var(--text-secondary-color, rgba(0, 0, 0, 0.55));
+}
+
+.fl-table tbody tr:hover {
+  background: var(--component-grid-row-hover-color, rgba(0, 0, 0, 0.04));
+}
+
+.fl-table .fl-num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.fl-table .fl-title {
+  white-space: normal;
+  min-width: 220px;
+  max-width: 520px;
+}
+
+.fl-strong {
+  font-weight: 600;
+}
+
+.fl-sort {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.fl-link {
+  color: var(--communication-foreground, #0078d4);
+  text-decoration: none;
+}
+
+.fl-link:hover {
+  text-decoration: underline;
+}
+
+.fl-check {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.fl-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  align-items: center;
+  min-height: 32px;
+}
+
+.fl-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 26px;
+  padding: 0 4px 0 10px;
+  border: 1px solid var(--component-grid-cell-bottom-border-color, rgba(0, 0, 0, 0.25));
+  border-radius: 13px;
+  font-size: 13px;
+}
+
+.fl-chip button {
+  border: 0;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+  font-size: 15px;
+  line-height: 1;
+  padding: 2px 6px;
+  border-radius: 10px;
+}
+
+.fl-chip button:hover {
+  background: var(--component-grid-row-hover-color, rgba(0, 0, 0, 0.08));
+}
+
+.fl-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.fl-table td.fl-cell {
+  white-space: normal;
+  overflow-wrap: anywhere;
+  min-width: 140px;
+  max-width: 320px;
+  vertical-align: top;
+}
+
+/* Satırlar en fazla 3 satır yüksekliğinde; uzun içerik hücre içinde kaydırılır. */
+.fl-clip {
+  max-height: calc(3 * 1.45em);
+  line-height: 1.45;
+  overflow-y: auto;
+}
+
+.fl-table td.fl-nowrap {
+  vertical-align: top;
+}
+
+/* Kolon seçici */
+.fl-picker {
+  position: relative;
+}
+
+.fl-picker-list {
+  position: absolute;
+  z-index: 10;
+  top: calc(100% + 2px);
+  left: 0;
+  width: max(100%, 360px);
+  max-width: calc(100vw - 32px);
+  max-height: 320px;
+  overflow-y: auto;
+  margin: 0;
+  padding: 4px 0;
+  list-style: none;
+  background: var(--callout-background-color, #fff);
+  border: 1px solid var(--component-grid-cell-bottom-border-color, rgba(0, 0, 0, 0.2));
+  border-radius: 4px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
+}
+
+.fl-picker-item {
+  display: flex;
+  flex-direction: column;
+  padding: 6px 12px;
+  cursor: pointer;
+}
+
+.fl-picker-active {
+  background: var(--component-grid-row-hover-color, rgba(0, 0, 0, 0.06));
+}
+
+.fl-picker-name {
+  font-size: 14px;
+}
+
+.fl-picker-ref,
+.fl-picker-empty {
+  font-size: 12px;
+  color: var(--text-secondary-color, rgba(0, 0, 0, 0.55));
+}
+
+.fl-picker-empty {
+  padding: 6px 12px;
+}
+
+@media (max-width: 600px) {
+  .fl-content {
+    padding: 8px 16px 24px;
+  }
+}
+
+.fl-pager {
+  justify-content: center;
+  padding-top: 12px;
+}
