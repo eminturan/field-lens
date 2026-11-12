@@ -195,6 +195,28 @@ section > .fl-button {
   font-size: 13px;
 }
 
+.fl-chip[draggable="true"] {
+  cursor: grab;
+}
+
+.fl-chip:focus-visible {
+  outline: 2px solid var(--communication-foreground, #0078d4);
+  outline-offset: 1px;
+}
+
+.fl-dragging {
+  opacity: 0.4;
+}
+
+/* Bırakılacak yer: hedef etiketin solunda ya da sağında ince çizgi */
+.fl-drop-before {
+  box-shadow: -4px 0 0 -1px var(--communication-foreground, #0078d4);
+}
+
+.fl-drop-after {
+  box-shadow: 4px 0 0 -1px var(--communication-foreground, #0078d4);
+}
+
 .fl-chip button {
   border: 0;
   background: none;

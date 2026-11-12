@@ -22,6 +22,7 @@ import {
   DEFAULT_COLUMNS,
   Field,
   formatCell,
+  moveItem,
   pageSlice,
   Preset,
   PRESETS,
@@ -85,6 +86,14 @@ function App({ source, store, mock, t, itemUrl }: Props) {
   const [runError, setRunError] = React.useState<string>();
   const [result, setResult] = React.useState<{ query: Query; data: RunResult }>();
   const [page, setPage] = React.useState(0);
+  const [drag, setDrag] = React.useState<{ from: number; over: number }>();
+  /** Klavyeyle taşınan etiket; yeniden çizimden sonra odak onda kalsın. */
+  const focusChip = React.useRef<string>();
+  React.useEffect(() => {
+    if (!focusChip.current) return;
+    document.querySelector<HTMLElement>(`.fl-chip[data-ref="${CSS.escape(focusChip.current)}"]`)?.focus();
+    focusChip.current = undefined;
+  }, [columns]);
 
   // İlk yükleme: türler, alanlar ve kayıtlı seçimler.
   React.useEffect(() => {
@@ -284,8 +293,42 @@ function App({ source, store, mock, t, itemUrl }: Props) {
             <div className="fl-field">
               <span className="fl-muted">{t.columns}</span>
               <div className="fl-group">
-                {columnFields.map((f) => (
-                  <span key={f.referenceName} className="fl-chip" title={f.referenceName}>
+                {columnFields.map((f, i) => (
+                  <span
+                    key={f.referenceName}
+                    data-ref={f.referenceName}
+                    className={
+                      "fl-chip" +
+                      (drag && drag.over === i && drag.from !== i ? (drag.from > i ? " fl-drop-before" : " fl-drop-after") : "") +
+                      (drag?.from === i ? " fl-dragging" : "")
+                    }
+                    title={`${f.referenceName} — ${t.moveHint}`}
+                    tabIndex={0}
+                    aria-keyshortcuts="Alt+ArrowLeft Alt+ArrowRight"
+                    draggable
+                    onDragStart={(e) => {
+                      e.dataTransfer.effectAllowed = "move";
+                      e.dataTransfer.setData("text/plain", f.referenceName); // Firefox veri olmadan sürüklemez
+                      setDrag({ from: i, over: i });
+                    }}
+                    onDragOver={(e) => {
+                      if (!drag) return;
+                      e.preventDefault();
+                      if (drag.over !== i) setDrag({ ...drag, over: i });
+                    }}
+                    onDrop={(e) => {
+                      e.preventDefault();
+                      if (drag) setColumns(moveItem(columns, drag.from, i));
+                      setDrag(undefined);
+                    }}
+                    onDragEnd={() => setDrag(undefined)}
+                    onKeyDown={(e) => {
+                      if (!e.altKey || (e.key !== "ArrowLeft" && e.key !== "ArrowRight")) return;
+                      e.preventDefault();
+                      setColumns(moveItem(columns, i, i + (e.key === "ArrowLeft" ? -1 : 1)));
+                      focusChip.current = f.referenceName;
+                    }}
+                  >
                     {f.name}
                     <button aria-label={t.remove(f.name)} onClick={() => setColumns(columns.filter((c) => c !== f.referenceName))}>
                       ×

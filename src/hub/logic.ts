@@ -132,6 +132,15 @@ export function searchFields(fields: Field[], text: string): Field[] {
   return [...hits.filter((f) => low(f.name).startsWith(q)), ...hits.filter((f) => !low(f.name).startsWith(q))];
 }
 
+/** from'daki öğeyi to sırasına taşır (yeni dizi); to listeye sığdırılır, geçersiz from'da liste aynen döner. */
+export function moveItem<T>(list: T[], from: number, to: number): T[] {
+  if (from < 0 || from >= list.length) return list;
+  const out = [...list];
+  const [item] = out.splice(from, 1);
+  out.splice(Math.min(Math.max(0, to), out.length), 0, item);
+  return out;
+}
+
 /** 0 tabanlı sayfa; sayfa aralık dışındaysa son sayfaya çekilir. first/last 1 tabanlı satır numaraları. */
 export function pageSlice<T>(rows: T[], page: number, size: number) {
   const pages = Math.max(1, Math.ceil(rows.length / size));

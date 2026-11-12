@@ -37,6 +37,7 @@ export interface Strings {
   noMatch: string;
   searchDateField: string;
   remove: (name: string) => string;
+  moveHint: string;
   choose: string;
   run: string;
   running: string;
@@ -72,6 +73,7 @@ export const STRINGS: Record<Lang, Strings> = {
     noMatch: "Eşleşen alan yok",
     searchDateField: "Tarih alanı ara…",
     remove: (n) => `${n} kolonunu kaldır`,
+    moveHint: "Sürükleyerek ya da Alt + ←/→ ile sırasını değiştirin",
     choose: "Seçin…",
     run: "Çalıştır",
     running: "Çalışıyor…",
@@ -111,6 +113,7 @@ export const STRINGS: Record<Lang, Strings> = {
     noMatch: "No matching field",
     searchDateField: "Search date field…",
     remove: (n) => `Remove column ${n}`,
+    moveHint: "Drag or use Alt + ←/→ to reorder",
     choose: "Choose…",
     run: "Run",
     running: "Running…",

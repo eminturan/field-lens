@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildWiql, chunk, csvRows, Field, formatCell, pageSlice, presetRange, Query, sanitizeSettings, searchFields, toCsv } from "../src/hub/logic";
+import { buildWiql, chunk, csvRows, Field, formatCell, moveItem, pageSlice, presetRange, Query, sanitizeSettings, searchFields, toCsv } from "../src/hub/logic";
 
 const q: Query = {
   type: "Kart",
@@ -104,6 +104,21 @@ describe("searchFields", () => {
   it("Turkish casing", () => expect(searchFields(fs, "istek").map((f) => f.name)).toEqual(["İstek Tipi"]));
   it("name-start matches first", () => expect(searchFields(fs, "ti").map((f) => f.name)).toEqual(["Title", "İstek Tipi"]));
   it("empty query returns all", () => expect(searchFields(fs, " ")).toHaveLength(4));
+});
+
+describe("moveItem", () => {
+  it("moves forward", () => expect(moveItem(["a", "b", "c", "d"], 0, 2)).toEqual(["b", "c", "a", "d"]));
+  it("moves backward", () => expect(moveItem(["a", "b", "c", "d"], 3, 1)).toEqual(["a", "d", "b", "c"]));
+  it("clamps target and ignores bad source", () => {
+    expect(moveItem(["a", "b"], 0, 5)).toEqual(["b", "a"]);
+    expect(moveItem(["a", "b"], 0, -1)).toEqual(["a", "b"]);
+    expect(moveItem(["a", "b"], 7, 0)).toEqual(["a", "b"]);
+  });
+  it("does not mutate input", () => {
+    const list = ["a", "b"];
+    moveItem(list, 0, 1);
+    expect(list).toEqual(["a", "b"]);
+  });
 });
 
 it("chunk",() => expect(chunk([1, 2, 3, 4, 5], 2)).toEqual([[1, 2], [3, 4], [5]]));
