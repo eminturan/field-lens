@@ -21,7 +21,7 @@ function Form({ value, onChange, env }: { value: WidgetConfig; onChange: (v: Wid
     }, (e) => setError(String(e?.message ?? e)));
   }, [source]);
 
-  // Tür değişince state listesi yenilenir; bu türde olmayan seçimler düşer, hiç seçim yoksa hepsi seçilir.
+  // Tür değişince state listesi yenilenir; bu türde olmayan seçimler düşer. Varsayılan seçim yok, kullanıcı seçer.
   React.useEffect(() => {
     if (!value.type) return setStateList([]);
     let live = true;
@@ -31,7 +31,7 @@ function Form({ value, onChange, env }: { value: WidgetConfig; onChange: (v: Wid
       const names = info.map((s) => s.name);
       setStateList(names);
       const kept = value.states.filter((s) => names.includes(s));
-      if (kept.length !== value.states.length || kept.length === 0) set({ states: kept.length ? kept : names });
+      if (kept.length !== value.states.length) set({ states: kept });
     }, (e) => live && setError(String(e?.message ?? e)));
     return () => {
       live = false;
