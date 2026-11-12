@@ -41,6 +41,8 @@ Open a project → **Boards** → **Field Lens**. The widget is under **Dashboar
 
 ## Release notes
 
+**0.2.10**: the sample data and documentation examples use made-up names.
+
 **0.2.9**: chart dates are written at an angle when they don't fit, so no date is skipped.
 
 **0.2.8**: a Summary with a breakdown field is drawn as state-stacked horizontal bars.

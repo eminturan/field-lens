@@ -2,6 +2,10 @@
 
 [Türkçe](CHANGELOG.tr.md)
 
+## 0.2.10
+
+- The sample data and the examples in the documentation now use made-up names, units and fields.
+
 ## 0.2.9
 
 - Widget charts (By date, Weekly, Monthly trend): when date labels don't fit side by side, they are written at 45° so every bar keeps its date. Before, every other label was skipped. The first label is no longer cut off at the left edge.

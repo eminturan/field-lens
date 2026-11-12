@@ -41,6 +41,8 @@ Bir proje açın → **Boards** → **Field Lens**. Widget: **Dashboards → Edi
 
 ## Sürüm notları
 
+**0.2.10**: örnek veri ve belge örnekleri uydurma adlar kullanıyor.
+
 **0.2.9**: grafik tarihleri sığmadığında çapraz yazılıyor, hiçbir tarih atlanmıyor.
 
 **0.2.8**: kırılım alanlı Özet, state'lere bölünmüş yatay çubuklar olarak çiziliyor.

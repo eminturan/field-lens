@@ -2,6 +2,10 @@
 
 [English](CHANGELOG.md)
 
+## 0.2.10
+
+- Örnek veri ve belgelerdeki örnekler artık uydurma kişi, birim ve alan adları kullanıyor.
+
 ## 0.2.9
 
 - Widget grafikleri (Tarihe göre, Haftalık, Aylık trend): tarih etiketleri yan yana sığmadığında 45° çapraz yazılıyor, böylece her çubuğun tarihi görünüyor. Önceden etiketler birer atlanıyordu. İlk etiket artık sol kenardan kesilmiyor.
