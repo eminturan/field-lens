@@ -159,6 +159,38 @@ export function countStates(rows: Row[], states: string[]): { state: string; cou
   return [...counts].map(([state, count]) => ({ state, count }));
 }
 
+const lowTr = (s: string) => s.toLocaleLowerCase("tr");
+
+/** Tabloda görünen metinde arar (Türkçe büyük/küçük harf duyarsız). global her kolonda, byCol yalnızca kendi kolonunda; hepsi sağlanmalı. */
+export function filterRows(rows: Row[], columns: Field[], global: string, byCol: Record<string, string>): Row[] {
+  const g = lowTr(global.trim());
+  const per = columns.map((c) => [c, lowTr((byCol[c.referenceName] ?? "").trim())] as const).filter(([, q]) => q);
+  if (!g && per.length === 0) return rows;
+  const text = (r: Row, c: Field) => lowTr(formatCell(r[c.referenceName], c.type));
+  return rows.filter((r) => (!g || columns.some((c) => text(r, c).includes(g))) && per.every(([c, q]) => text(r, c).includes(q)));
+}
+
+/** Yeni dizi döner. Sayılar sayısal, tarihler zamana göre, diğerleri görünen metne göre doğal sırada; boşlar her yönde sonda. */
+export function sortRows(rows: Row[], col: Field, dir: "asc" | "desc"): Row[] {
+  const numeric = col.type === "integer" || col.type === "double";
+  const key = (r: Row): number | string | undefined => {
+    const v = r[col.referenceName];
+    if (v === null || v === undefined || v === "") return undefined;
+    if (numeric) return Number(v);
+    if (col.type === "dateTime") return Date.parse(String(v));
+    return formatCell(v, col.type);
+  };
+  const sign = dir === "asc" ? 1 : -1;
+  return rows
+    .map((r) => [r, key(r)] as const)
+    .sort(([, a], [, b]) => {
+      if (a === undefined || b === undefined) return a === b ? 0 : a === undefined ? 1 : -1;
+      const c = typeof a === "number" && typeof b === "number" ? a - b : String(a).localeCompare(String(b), "tr", { numeric: true, sensitivity: "base" });
+      return c * sign;
+    })
+    .map(([r]) => r);
+}
+
 export function chunk<T>(list: T[], size: number): T[][] {
   const out: T[][] = [];
   for (let i = 0; i < list.length; i += size) out.push(list.slice(i, i + size));

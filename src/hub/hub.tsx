@@ -20,6 +20,7 @@ import { firstOf, pickLang, Strings, STRINGS } from "./i18n";
 import {
   countStates,
   csvRows,
+  filterRows,
   DEFAULT_COLUMNS,
   Field,
   formatCell,
@@ -30,6 +31,7 @@ import {
   presetRange,
   Query,
   sanitizeSettings,
+  sortRows,
   Settings,
   toCsv,
 } from "./logic";
@@ -91,6 +93,10 @@ function App({ source, store, mock, t, itemUrl }: Props) {
   const [page, setPage] = React.useState(0);
   /** Özet kartına tıklanınca tablo ve CSV yalnızca bu state'i gösterir. */
   const [stateFilter, setStateFilter] = React.useState<string>();
+  /** Sonuçlar içinde arama: tüm kolonlarda ve kolon bazında; sıralama tablo başlığından. */
+  const [search, setSearch] = React.useState("");
+  const [colFilters, setColFilters] = React.useState<Record<string, string>>({});
+  const [sort, setSort] = React.useState<{ ref: string; dir: "asc" | "desc" }>();
   const [drag, setDrag] = React.useState<{ from: number; over: number }>();
   /** Klavyeyle taşınan etiket; yeniden çizimden sonra odak onda kalsın. */
   const focusChip = React.useRef<string>();
@@ -194,6 +200,9 @@ function App({ source, store, mock, t, itemUrl }: Props) {
         setResult({ query, data });
         setPage(0);
         setStateFilter(undefined);
+        setSearch("");
+        setColFilters({});
+        setSort(undefined);
       })
       .catch((e) => {
         setResult(undefined);
@@ -212,14 +221,39 @@ function App({ source, store, mock, t, itemUrl }: Props) {
   };
 
   const allRows = result?.data.rows ?? [];
-  const visible = stateFilter ? allRows.filter((r) => r["System.State"] === stateFilter) : allRows;
-  const summary = result ? countStates(allRows, result.query.states) : [];
+  const shownCols = React.useMemo(
+    () => (result ? result.query.columns.map((c) => byRef.get(c) ?? { referenceName: c, name: c, type: "string" }) : []),
+    [result, byRef],
+  );
+  // Metin filtreleri state kartlarındaki sayılara da yansır; state filtresi ve sıralama yalnızca tabloya/CSV'ye.
+  const matched = React.useMemo(() => filterRows(allRows, shownCols, search, colFilters), [allRows, shownCols, search, colFilters]);
+  const visible = React.useMemo(() => {
+    const rows = stateFilter ? matched.filter((r) => r["System.State"] === stateFilter) : matched;
+    const col = sort && shownCols.find((c) => c.referenceName === sort.ref);
+    return col ? sortRows(rows, col, sort.dir) : rows;
+  }, [matched, stateFilter, sort, shownCols]);
+  const summary = result ? countStates(matched, result.query.states) : [];
+  const filtering = !!search.trim() || Object.values(colFilters).some((v) => v.trim()) || !!stateFilter;
   const filterBy = (s: string | undefined) => {
     setStateFilter(s);
     setPage(0);
   };
+  const setColFilter = (ref: string, v: string) => {
+    setColFilters((prev) => ({ ...prev, [ref]: v }));
+    setPage(0);
+  };
+  const clearFilters = () => {
+    setSearch("");
+    setColFilters({});
+    setStateFilter(undefined);
+    setPage(0);
+  };
+  const toggleSort = (ref: string) => {
+    // artan → azalan → kapalı (WIQL sırası: tarih alanına göre artan)
+    setSort((s) => (s?.ref !== ref ? { ref, dir: "asc" } : s.dir === "asc" ? { ref, dir: "desc" } : undefined));
+    setPage(0);
+  };
   const shown = pageSlice(visible, page, PAGE_SIZE);
-  const shownCols = result ? result.query.columns.map((c) => byRef.get(c) ?? { referenceName: c, name: c, type: "string" }) : [];
 
   return (
     <Page className="fl-page">
@@ -380,7 +414,7 @@ function App({ source, store, mock, t, itemUrl }: Props) {
         {result && allRows.length > 0 && (
           <div className="fl-summary" role="group" aria-label={t.summary}>
             <button className="fl-card" aria-pressed={!stateFilter} onClick={() => filterBy(undefined)}>
-              <span className="fl-card-num">{allRows.length}</span>
+              <span className="fl-card-num">{matched.length}</span>
               <span className="fl-card-label">{t.total}</span>
             </button>
             {summary.map(({ state, count }) => (
@@ -399,10 +433,35 @@ function App({ source, store, mock, t, itemUrl }: Props) {
                   {state}
                 </span>
                 <span className="fl-card-bar">
-                  <span style={{ width: `${(count / allRows.length) * 100}%` }} />
+                  <span style={{ width: `${matched.length ? (count / matched.length) * 100 : 0}%` }} />
                 </span>
               </button>
             ))}
+          </div>
+        )}
+        {result && allRows.length > 0 && (
+          <div className="fl-actions">
+            <input
+              className="fl-input fl-search"
+              type="search"
+              aria-label={t.search}
+              placeholder={t.search}
+              value={search}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setPage(0);
+              }}
+            />
+            {filtering && (
+              <>
+                <span className="fl-muted" aria-live="polite">
+                  {t.shownOf(visible.length, allRows.length)}
+                </span>
+                <button className="fl-button" onClick={clearFilters}>
+                  {t.clearFilters}
+                </button>
+              </>
+            )}
           </div>
         )}
         {result && allRows.length > 0 && (
@@ -410,14 +469,37 @@ function App({ source, store, mock, t, itemUrl }: Props) {
             <table className="fl-table">
               <thead>
                 <tr>
-                  {shownCols.map((c) => (
-                    <th key={c.referenceName} title={c.referenceName}>
-                      {c.name}
-                    </th>
-                  ))}
+                  {shownCols.map((c) => {
+                    const dir = sort?.ref === c.referenceName ? sort.dir : undefined;
+                    return (
+                      <th key={c.referenceName} aria-sort={dir === "asc" ? "ascending" : dir === "desc" ? "descending" : undefined}>
+                        <button className="fl-sort" title={`${c.referenceName} — ${t.sortHint}`} onClick={() => toggleSort(c.referenceName)}>
+                          {c.name}
+                          <span className="fl-sort-arrow" aria-hidden="true">
+                            {dir === "asc" ? "▲" : dir === "desc" ? "▼" : "↕"}
+                          </span>
+                        </button>
+                        <input
+                          className="fl-col-filter"
+                          type="search"
+                          aria-label={t.filterCol(c.name)}
+                          placeholder={t.filterPlaceholder}
+                          value={colFilters[c.referenceName] ?? ""}
+                          onChange={(e) => setColFilter(c.referenceName, e.target.value)}
+                        />
+                      </th>
+                    );
+                  })}
                 </tr>
               </thead>
               <tbody>
+                {visible.length === 0 && (
+                  <tr>
+                    <td colSpan={shownCols.length} className="fl-empty">
+                      {t.noFiltered}
+                    </td>
+                  </tr>
+                )}
                 {shown.items.map((r) => (
                   <tr key={String(r["System.Id"])}>
                     {shownCols.map((c) => (

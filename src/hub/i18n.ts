@@ -54,6 +54,13 @@ export interface Strings {
   summary: string;
   total: string;
   filterHint: (state: string) => string;
+  search: string;
+  filterCol: (name: string) => string;
+  filterPlaceholder: string;
+  clearFilters: string;
+  shownOf: (shown: number, total: number) => string;
+  noFiltered: string;
+  sortHint: string;
   empty: string;
   need: { type: string; dateField: string; states: string; range: string; columns: string };
 }
@@ -93,6 +100,13 @@ export const STRINGS: Record<Lang, Strings> = {
     summary: "State özeti",
     total: "Toplam",
     filterHint: (s) => `Yalnızca ${s} kayıtlarını göster (tablo ve CSV)`,
+    search: "Sonuçlarda ara…",
+    filterCol: (n) => `${n} kolonunda filtrele`,
+    filterPlaceholder: "Filtrele",
+    clearFilters: "Filtreleri temizle",
+    shownOf: (s, n) => `${s} / ${n} kayıt gösteriliyor`,
+    noFiltered: "Filtrelere uyan kayıt yok.",
+    sortHint: "Sıralamak için tıklayın",
     empty: "Bu filtrelerle kayıt bulunamadı.",
     need: {
       type: "Work item türü seçin.",
@@ -136,6 +150,13 @@ export const STRINGS: Record<Lang, Strings> = {
     summary: "State summary",
     total: "Total",
     filterHint: (s) => `Show only ${s} items (table and CSV)`,
+    search: "Search results…",
+    filterCol: (n) => `Filter ${n}`,
+    filterPlaceholder: "Filter",
+    clearFilters: "Clear filters",
+    shownOf: (s, n) => `Showing ${s} of ${n}`,
+    noFiltered: "No items match the filters.",
+    sortHint: "Click to sort",
     empty: "No items match these filters.",
     need: {
       type: "Choose a work item type.",

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildWiql, chunk, countStates, csvRows, Field, formatCell, moveItem, pageSlice, presetRange, Query, sanitizeSettings, searchFields, toCsv } from "../src/hub/logic";
+import { buildWiql, chunk, countStates, csvRows, filterRows, sortRows, Field, formatCell, moveItem, pageSlice, presetRange, Query, sanitizeSettings, searchFields, toCsv } from "../src/hub/logic";
 
 const q: Query = {
   type: "Kart",
@@ -132,5 +132,50 @@ describe("countStates", () => {
       { state: "Closed", count: 2 },
       { state: "Odd", count: 1 },
     ]);
+  });
+});
+
+describe("filterRows", () => {
+  const cols: Field[] = [
+    { referenceName: "System.Title", name: "Title", type: "string" },
+    { referenceName: "System.AssignedTo", name: "Assigned To", type: "identity" },
+  ];
+  const rows = [
+    { "System.Title": "İNTERNET şube", "System.AssignedTo": { displayName: "Ayşe Yılmaz" } },
+    { "System.Title": "Mobil", "System.AssignedTo": { displayName: "Can Işık" } },
+    { "System.Title": "Mobil ödeme", "System.AssignedTo": undefined },
+  ];
+
+  it("global search looks in every column as displayed, Turkish case-insensitive", () => {
+    expect(filterRows(rows, cols, "internet", {})).toEqual([rows[0]]);
+    expect(filterRows(rows, cols, "ışık", {})).toEqual([rows[1]]);
+  });
+
+  it("column filters must all match, and combine with the global search", () => {
+    expect(filterRows(rows, cols, "", { "System.Title": "mobil" })).toEqual([rows[1], rows[2]]);
+    expect(filterRows(rows, cols, "mobil", { "System.AssignedTo": "can" })).toEqual([rows[1]]);
+    expect(filterRows(rows, cols, " ", { "System.Title": "" })).toEqual(rows);
+  });
+});
+
+describe("sortRows", () => {
+  const rows = [
+    { "System.Id": 10, "System.Title": "b2", "D": "2026-09-05T00:00:00Z" },
+    { "System.Id": 9, "System.Title": "B10", "D": undefined },
+    { "System.Id": 100, "System.Title": "a", "D": "2026-09-01T00:00:00Z" },
+  ];
+  const ids = (r: Record<string, unknown>[]) => r.map((x) => x["System.Id"]);
+
+  it("numbers numerically, text naturally, both directions", () => {
+    expect(ids(sortRows(rows, { referenceName: "System.Id", name: "ID", type: "integer" }, "asc"))).toEqual([9, 10, 100]);
+    expect(ids(sortRows(rows, { referenceName: "System.Title", name: "Title", type: "string" }, "asc"))).toEqual([100, 10, 9]);
+    expect(ids(sortRows(rows, { referenceName: "System.Title", name: "Title", type: "string" }, "desc"))).toEqual([9, 10, 100]);
+  });
+
+  it("dates by time with empty values last in both directions, without mutating", () => {
+    const d: Field = { referenceName: "D", name: "D", type: "dateTime" };
+    expect(ids(sortRows(rows, d, "asc"))).toEqual([100, 10, 9]);
+    expect(ids(sortRows(rows, d, "desc"))).toEqual([10, 100, 9]);
+    expect(ids(rows)).toEqual([10, 9, 100]);
   });
 });

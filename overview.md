@@ -7,6 +7,7 @@ Monthly reports from your work items, by any date field.
 - Narrow by one or more **states**.
 - Choose the **columns** you want — search by display name or reference name, reorder by drag and drop (or Alt + ←/→).
 - A **state summary** above the table shows counts in the board's state colors; click a card to show only that state (table and CSV).
+- **Search** the results across all columns or **filter each column**, and **sort** by clicking a column header.
 - Results are shown **100 per page** with a sticky header; CSV contains all rows of the current view.
 - **Export to CSV** (opens directly in Excel, Turkish characters intact).
 - Your selections are remembered.
