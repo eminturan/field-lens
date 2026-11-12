@@ -77,7 +77,7 @@ function Report({ settings }: { settings?: WidgetSettings }) {
       ([fs, st]) => live && setMeta({ fields: new Map(fs.map((f) => [f.referenceName, f])), colors: Object.fromEntries(st.map((s) => [s.name, s.color])) }),
       (e) => live && setError(String(e?.message ?? e)),
     );
-    const q: Query = { projects: cfg.projects, assignee: cfg.assignee, type: cfg.type, dateField: cfg.dateField, states: cfg.states, from: req.from, to: req.to, columns: req.columns };
+    const q: Query = { conditions: cfg.conditions, projects: cfg.projects, assignee: cfg.assignee, type: cfg.type, dateField: cfg.dateField, states: cfg.states, from: req.from, to: req.to, columns: req.columns };
     Promise.all([
       env.source.run(q),
       cfg.view === "summary" ? env.source.count({ ...q, ...previousRange(q.from, q.to) }).catch(() => undefined) : undefined,
@@ -109,6 +109,7 @@ function Report({ settings }: { settings?: WidgetSettings }) {
     `${span} (${day(req.from)} – ${day(req.to)})`,
     ...(cfg.assignee ? [t.assignees[cfg.assignee]] : []),
     ...(cfg.projects ? [t.scope(cfg.projects)] : []),
+    ...(cfg.conditions ? [t.cond.count(cfg.conditions.length)] : []),
   ].join(" · ");
   // Bağlı sorguda "Raporu aç" raporu o sorguyla açıp çalıştırır.
   const link = { href: linked ? `${env.hubUrl}?query=${encodeURIComponent(linked.id)}` : env.hubUrl, label: t.w.openReport };

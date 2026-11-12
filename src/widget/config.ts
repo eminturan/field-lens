@@ -1,4 +1,4 @@
-import { Assignee, compileRule, monthsRange, Preset, presetRange, Projects, upcomingRange, View, VIEWS } from "../hub/logic";
+import { Assignee, Condition, compileRule, monthsRange, Preset, presetRange, Projects, upcomingRange, View, VIEWS } from "../hub/logic";
 
 /** Widget ayarları ve doğrulaması; SDK'ya bağlı olmadığı için birim testlerde kullanılabilir. */
 export interface WidgetConfig {
@@ -9,6 +9,8 @@ export interface WidgetConfig {
   assignee?: Assignee;
   /** Yalnızca kayıtlı sorgudan gelir; yoksa dashboard'un projesi. */
   projects?: Projects;
+  /** Yalnızca kayıtlı sorgudan gelir. */
+  conditions?: Condition[];
   type: string;
   dateField: string;
   states: string[];

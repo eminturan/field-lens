@@ -22,7 +22,17 @@ export const ASSIGNEES: Assignee[] = ["me", "none"];
 /** Sorgunun kapsamı: yok = hub'ın açıldığı proje, "all" = görülebilen tüm projeler, liste = seçili projeler (adlarıyla). */
 export type Projects = "all" | string[];
 
+/** Ek alan koşulu; type alanın türüdür (değerin nasıl yazılacağını belirler). */
+export type Op = "=" | "<>" | "<" | ">" | "<=" | ">=" | "contains" | "notContains" | "under" | "notUnder";
+export interface Condition {
+  field: string;
+  type: string;
+  op: Op;
+  value: string;
+}
+
 export interface Query {
+  conditions?: Condition[];
   projects?: Projects;
   assignee?: Assignee;
   type: string;
@@ -44,6 +54,7 @@ export interface Rule {
 export const DERIVED = "FieldLens.Derived";
 
 export interface Settings {
+  conditions?: Condition[];
   projects?: Projects;
   assignee?: Assignee;
   derived?: Rule;
@@ -84,10 +95,55 @@ export function buildWiql(q: Query): string {
     `AND ${f} >= '${q.from}'`,
     `AND ${f} <= '${q.to}'`,
     `AND [System.State] IN (${q.states.map(esc).join(", ")})`,
+    ...(q.conditions ?? []).map(conditionClause),
     ...(q.assignee === "me" ? ["AND [System.AssignedTo] = @Me"] : q.assignee === "none" ? ["AND [System.AssignedTo] = ''"] : []),
     `ORDER BY ${f} ASC`,
   ].join(" ");
 }
+
+const NUMERIC = ["integer", "double"];
+const LONG_TEXT = ["plainText", "html", "history"];
+const COMPARE: Op[] = ["=", "<>", "<", ">", "<=", ">="];
+
+/** Alan türüne göre kullanılabilen koşullar (WIQL'in desteklediği kadar). */
+export function opsFor(type: string): Op[] {
+  if (NUMERIC.includes(type) || type === "dateTime") return COMPARE;
+  if (type === "boolean") return ["=", "<>"];
+  if (LONG_TEXT.includes(type)) return ["contains", "notContains"];
+  if (type === "treePath") return ["=", "<>", "under", "notUnder"];
+  return ["=", "<>", "contains", "notContains"];
+}
+
+/** Koşulun sorunu: alan adı, koşul türü ya da değer. Değerler WIQL'e yazılmadan önce burada doğrulanır. */
+export function checkCondition(c: Condition): "field" | "op" | "value" | undefined {
+  if (!FIELD_REF.test(c.field)) return "field";
+  if (!opsFor(c.type).includes(c.op)) return "op";
+  const v = c.value.trim();
+  if (NUMERIC.includes(c.type)) return /^-?\d+(\.\d+)?$/.test(v) ? undefined : "value";
+  if (c.type === "dateTime") return DATE.test(v) ? undefined : "value";
+  if (c.type === "boolean") return v === "true" || v === "false" ? undefined : "value";
+  if (c.value.length > 200 || (!v && c.op !== "=" && c.op !== "<>")) return "value";
+  return undefined;
+}
+
+const WIQL_OP: Record<Op, string> = { "=": "=", "<>": "<>", "<": "<", ">": ">", "<=": "<=", ">=": ">=", contains: "CONTAINS", notContains: "NOT CONTAINS", under: "UNDER", notUnder: "UNDER" };
+
+function conditionClause(c: Condition): string {
+  if (checkCondition(c)) throw new Error(`Invalid condition: ${c.field}`);
+  const v = c.value.trim();
+  const literal = NUMERIC.includes(c.type) ? v : c.type === "boolean" ? (v === "true" ? "True" : "False") : esc(c.type === "dateTime" ? v : c.value);
+  return `AND ${c.op === "notUnder" ? "NOT " : ""}[${c.field}] ${WIQL_OP[c.op]} ${literal}`;
+}
+
+/** Panoya düz metin: sekmeyle ayrılmış, hücre içindeki sekme ve satır sonları boşluk olur. */
+export const toTsv = (rows: string[][]) => rows.map((r) => r.map((v) => v.replace(/[\t\r\n]+/g, " ")).join("\t")).join("\r\n");
+
+const html = (v: string) => v.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+/** Panoya HTML tablo (Teams, e-posta ve Excel biçimiyle yapıştırır); ilk satır başlık, her hücre kaçışlanır. */
+export const toHtmlTable = ([head, ...body]: string[][]) =>
+  `<table><thead><tr>${head.map((v) => `<th>${html(v)}</th>`).join("")}</tr></thead><tbody>${body
+    .map((r) => `<tr>${r.map((v) => `<td>${html(v)}</td>`).join("")}</tr>`)
+    .join("")}</tbody></table>`;
 
 const p2 = (n: number) => String(n).padStart(2, "0");
 export const toDateInput = (d: Date) => `${d.getFullYear()}-${p2(d.getMonth() + 1)}-${p2(d.getDate())}`;
@@ -131,9 +187,12 @@ export function formatCell(value: unknown, fieldType: string | undefined): strin
 }
 
 /** Excel formül enjeksiyonuna karşı =,+,-,@ ile başlayan hücrelerin başına ' eklenir. */
+/** Excel'in formül olarak çalıştıracağı başlangıçların önüne ' koyar (CSV ve panoya kopyalama). */
+export const protectCell = (v: string) => (/^[=+\-@\t\r]/.test(v) ? `'${v}` : v);
+
 export function toCsv(rows: string[][], separator: string): string {
   const cell = (v: string) => {
-    const text = /^[=+\-@\t\r]/.test(v) ? `'${v}` : v;
+    const text = protectCell(v);
     return /["\r\n]/.test(text) || text.includes(separator) ? `"${text.replace(/"/g, '""')}"` : text;
   };
   return rows.map((r) => r.map(cell).join(separator)).join("\r\n");
@@ -159,6 +218,7 @@ export function sanitizeSettings(s: Settings | undefined, types: string[], field
   if ("dateField" in s && !fields.some((f) => f.referenceName === s.dateField && f.type === "dateTime")) out.dateField = undefined;
   const derivedOk = !!s.derived && refs.has(s.derived.source);
   if ("derived" in s && !derivedOk) out.derived = undefined;
+  if (s.conditions) out.conditions = s.conditions.filter((c) => refs.has(c.field));
   if (s.columns) out.columns = s.columns.filter((c) => refs.has(c) || (c === DERIVED && derivedOk));
   return out;
 }
@@ -424,6 +484,7 @@ export function settingsKey(s: Settings): string {
     d && (d.source || d.pattern) ? [d.source, d.pattern, d.name] : [],
     s.assignee ?? "",
     s.projects ?? "",
+    s.conditions ?? [],
   ]);
 }
 
@@ -441,7 +502,14 @@ export function parseQueries(docs: unknown[], shared: boolean): SavedQuery[] {
     if (!str(d.id) || !name || !s || typeof s !== "object") continue;
     const x = s as Record<string, unknown>;
     const rule = x.derived as Record<string, unknown> | undefined;
+    const conditions = (Array.isArray(x.conditions) ? x.conditions : []).flatMap((raw): Condition[] => {
+      const k = raw as Record<string, unknown>;
+      if (!k || typeof k !== "object" || ![k.field, k.type, k.op, k.value].every((v) => typeof v === "string")) return [];
+      const c = { field: k.field, type: k.type, op: k.op, value: k.value } as Condition;
+      return checkCondition(c) ? [] : [c];
+    });
     const settings: Settings = {
+      conditions: conditions.length ? conditions : undefined,
       projects: x.projects === "all" ? "all" : Array.isArray(x.projects) && x.projects.length ? x.projects.map(String) : undefined,
       assignee: ASSIGNEES.includes(x.assignee as Assignee) ? (x.assignee as Assignee) : undefined,
       type: str(x.type),
@@ -483,11 +551,12 @@ interface QueryTarget {
   to: string;
   assignee?: Assignee;
   projects?: Projects;
+  conditions?: Condition[];
 }
 
 /** Widget ayarına kayıtlı sorguyu uygular: tür, tarih alanı, state'ler, atanan; aralık yalnızca aralık seçen görünümlerde (trend ay, yaklaşanlar gün sayısıyla çalışır). */
 export function applyQuery<C extends QueryTarget>(c: C, s: Settings): C {
-  const out: C = { ...c, type: s.type ?? "", dateField: s.dateField ?? "", states: s.states ?? [], assignee: s.assignee, projects: s.projects };
+  const out: C = { ...c, type: s.type ?? "", dateField: s.dateField ?? "", states: s.states ?? [], assignee: s.assignee, projects: s.projects, conditions: s.conditions };
   if (c.view !== "summary" && c.view !== "weekly" && c.view !== "daily") return out;
   const preset = s.preset ?? DEFAULT_PRESET;
   return preset === "custom" ? { ...out, preset, from: s.from ?? "", to: s.to ?? "" } : { ...out, preset };

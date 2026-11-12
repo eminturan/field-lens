@@ -17,6 +17,7 @@ Open a project → **Boards** → **Field Lens**.
 | **Range** | Last 15 / 30 / 90 days, this month, last month or a custom from–to. Both ends are inclusive. |
 | **States** | One or more. An item counts when its **current** state is one of them. |
 | **Projects** | **This project** (default), **All projects** you can see, or **Chosen projects** from a searchable list. Across projects, types and states are merged from the projects in scope (a state's color comes from the first project that has it), a **Team Project** column is added after ID, and the ID opens the item in its own project. Results respect your permissions. |
+| **Extra conditions** | Any number of field conditions, all joined with AND. Operators depend on the field type: text `=`, `≠`, contains, doesn't contain; numbers and dates `=`, `≠`, `<`, `>`, `≤`, `≥`; long text contains / doesn't contain; paths `=`, `≠`, under, not under; yes/no fields `=`, `≠`. An empty value with `=` finds empty fields. Values are checked by type before they reach the query (numbers, `YYYY-MM-DD` dates, yes/no) and text is escaped. |
 | **Assigned to** | Anyone (default), **Assigned to me** (whoever runs the report, `@Me`) or **Unassigned**. A shared query with "Assigned to me" shows each person their own items. |
 | **Columns** | Any fields. Search by display name (large) or reference name (small). Drag a column chip to reorder it, or focus it with Tab and press Alt + ←/→. |
 
@@ -62,6 +63,11 @@ Under **Column derived by a rule**, pick a source field, write a rule (a JavaScr
   - the ID opens the work item
 - Text filters also update the state cards.
 
+### Grouping and copying
+
+- **Group by** a column: one row per value with its count and a bar split by state, biggest first, based on the rows currently shown. Clicking a value filters the table to it. Grouping is not saved.
+- **Copy table** copies every shown row (not only the current page) with its columns. It pastes as a table into Teams, email or Excel, and as tab-separated text elsewhere. Cells starting with `=`, `+`, `-` or `@` get a leading `'`, as in the CSV. If the browser blocks the clipboard, a message suggests the CSV.
+
 ### CSV export
 
 **Export CSV** downloads every row of the current view (state card, search and column filters applied), not just the page on screen. When a filter is on, the button shows the row count.
@@ -83,7 +89,7 @@ On a dashboard: **Edit → Add a widget → Field Lens**, then the edit icon for
 | **By date** | One bar for each day that has items, labelled with its date | Relative preset or custom |
 | **Upcoming** | Items whose date falls from today to the next 7 / 14 / 30 / 60 days, earliest first; up to 100 are listed, the ID opens the item | Always from today |
 
-- **Source**: the widget's own settings, or a saved query shared with the project. With a query, the projects, type, date field, states, assigned-to filter and (for Summary, Weekly and By date) range come from it and follow its changes; Monthly trend keeps its month count and Upcoming its day count. If the query is deleted, the widget says so.
+- **Source**: the widget's own settings, or a saved query shared with the project. With a query, the projects, extra conditions, type, date field, states, assigned-to filter and (for Summary, Weekly and By date) range come from it and follow its changes; Monthly trend keeps its month count and Upcoming its day count. If the query is deleted, the widget says so.
 - With its own settings, the other settings are work item type, date field and states. No state is preselected: you pick them.
 - Relative ranges move with the calendar, so a "Last month" dashboard is always current. A custom range stays fixed.
 - The widget can be 2–6 columns wide and 1–4 rows tall. Charts scale to the widget. When bars get narrow, counts move into the hover tooltip and date labels are written at 45°. Only when bars are very narrow (a long range by date) are labels thinned out.

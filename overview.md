@@ -24,6 +24,8 @@ Monthly reports from your work items, built on **any date field**. Pick a work i
 - Your selections are remembered.
 - **Across projects**: this project, all projects, or chosen projects, with a Team Project column.
 - **Assigned to** filter: anyone, assigned to me, or unassigned.
+- **Extra conditions** on any field: for example Tags contains "urgent", System = Mobile, Priority ≤ 2.
+- **Group by** any column, and **Copy table** to paste it into Teams, email or Excel.
 - **Saved queries**: save your settings under a name, switch between them, update, rename or delete them. Tick **Share with the project** and everyone in the project sees it; only its creator can edit or delete it. **Copy link** shares a query: the link opens the report with it, already run.
 
 ## Dashboard widget
@@ -43,6 +45,8 @@ Use relative ranges such as "last month" so the dashboard stays current on its o
 Open a project → **Boards** → **Field Lens**. The widget is under **Dashboards → Edit → Add a widget**.
 
 ## Release notes
+
+**0.2.18**: extra field conditions, group by, and copy table.
 
 **0.2.17**: widgets linked to a saved query can be saved.
 

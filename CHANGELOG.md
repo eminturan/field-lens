@@ -2,6 +2,12 @@
 
 [Türkçe](CHANGELOG.tr.md)
 
+## 0.2.18
+
+- Report page: **Extra conditions** on any field, joined with AND, with operators that fit the field type (contains, under, ≤ and so on). Values are validated by type and escaped before they reach the query. Conditions are part of saved queries, links and linked widgets.
+- Report page: **Group by** a column shows a count per value with a bar split by state; clicking a value filters the table.
+- Report page: **Copy table** copies every shown row as a table for Teams, email or Excel (and as tab-separated text), with the CSV's formula protection.
+
 ## 0.2.17
 
 - Fix: a widget whose **Source** is a saved query couldn't be saved ("You have errors in your configuration settings"). Saving checked the widget's own type, date field and states, which are empty when they come from the query. Now only what the widget still sets itself is checked: the Monthly trend's custom month range and the breakdown rule.

@@ -17,6 +17,7 @@ Bir proje açın → **Boards** → **Field Lens**.
 | **Aralık** | Son 15 / 30 / 90 gün, bu ay, geçen ay ya da özel başlangıç–bitiş. İki uç da dahildir. |
 | **State** | Bir ya da birkaç. Kaydın **şu anki** state'i bunlardan biriyse sayılır. |
 | **Projeler** | **Bu proje** (varsayılan), görebildiğiniz **Tüm projeler** ya da aranabilir listeden **Seçili projeler**. Proje-arası kapsamda türler ve state'ler kapsamdaki projelerden birleştirilir (state rengi o state'i içeren ilk projeden gelir), ID'nin arkasına **Team Project** kolonu eklenir ve ID kaydı kendi projesinde açar. Sonuçlar yetkilerinize göre gelir. |
+| **Ek koşullar** | İstenen sayıda alan koşulu, hepsi VE ile bağlanır. Koşullar alan türüne göre: metin `=`, `≠`, içerir, içermez; sayı ve tarih `=`, `≠`, `<`, `>`, `≤`, `≥`; uzun metin içerir / içermez; yol alanları `=`, `≠`, altında, altında değil; evet/hayır alanları `=`, `≠`. `=` ile boş değer, alanı boş olanları bulur. Değerler sorguya yazılmadan önce türüne göre denetlenir (sayı, `YYYY-AA-GG` tarih, evet/hayır) ve metinler kaçışlanır. |
 | **Atanan** | Herkes (varsayılan), **Bana atananlar** (raporu çalıştıran kişi, `@Me`) ya da **Atanmamış**. "Bana atananlar" ayarlı paylaşılan bir sorgu herkese kendi kayıtlarını gösterir. |
 | **Kolonlar** | İstenen alanlar. Görünen ad (büyük) ya da referans adıyla (küçük) aranır. Etiketi sürükleyerek ya da Tab ile seçip Alt + ←/→ ile sıralanır. |
 
@@ -62,6 +63,11 @@ Filtre panelinin üstündeki **Kayıtlı sorgu** çubuğu:
   - ID'ye tıklayınca kayıt açılır
 - Metin filtreleri state kartlarını da günceller.
 
+### Gruplama ve kopyalama
+
+- **Grupla** ile bir kolon seçilir: her değer için sayısı ve state'lere bölünmüş bir çubuk, en büyük önce; o an görünen satırlara göre. Bir değere tıklayınca tablo o değere göre filtrelenir. Gruplama kayda girmez.
+- **Tabloyu kopyala** görünen satırların tamamını (yalnızca o sayfayı değil) kolonlarıyla kopyalar. Teams, e-posta ya da Excel'e tablo olarak, diğer yerlere sekmeli metin olarak yapışır. `=`, `+`, `-` ya da `@` ile başlayan hücrelerin başına CSV'deki gibi `'` eklenir. Tarayıcı panoyu engellerse CSV'yi öneren bir mesaj çıkar.
+
 ### CSV dışa aktarma
 
 **CSV indir**, o an görünen kayıtların tamamını indirir (state kartı, arama ve kolon filtreleri uygulanmış halde); yalnızca ekrandaki sayfayı değil. Filtre açıkken düğmede satır sayısı yazar.
@@ -83,7 +89,7 @@ Dashboard'da **Edit → Add a widget → Field Lens**, ardından ayarlar için d
 | **Tarihe göre** | Kayıt olan her gün için tarihiyle etiketlenmiş bir çubuk | Göreli aralık ya da özel |
 | **Yaklaşanlar** | Tarihi bugünden önümüzdeki 7 / 14 / 30 / 60 güne düşen kayıtlar, en yakın önce; en fazla 100 kayıt listelenir, ID kaydı açar | Her zaman bugünden itibaren |
 
-- **Kaynak**: widget'ın kendi ayarları ya da projeyle paylaşılmış bir kayıtlı sorgu. Sorgu seçilirse projeler, tür, tarih alanı, state'ler, atanan ve (Özet, Haftalık, Tarihe göre için) aralık sorgudan gelir ve sorgu değiştikçe güncellenir; Aylık trend ay sayısını, Yaklaşanlar gün sayısını korur. Sorgu silinirse widget bunu yazar.
+- **Kaynak**: widget'ın kendi ayarları ya da projeyle paylaşılmış bir kayıtlı sorgu. Sorgu seçilirse projeler, ek koşullar, tür, tarih alanı, state'ler, atanan ve (Özet, Haftalık, Tarihe göre için) aralık sorgudan gelir ve sorgu değiştikçe güncellenir; Aylık trend ay sayısını, Yaklaşanlar gün sayısını korur. Sorgu silinirse widget bunu yazar.
 - Kendi ayarlarıyla diğer ayarlar work item türü, tarih alanı ve state'lerdir. State'ler önceden seçili gelmez, siz seçersiniz.
 - Göreli aralıklar takvimle birlikte ilerler; "Geçen ay" ayarlı bir dashboard hep güncel kalır. Özel aralık sabittir.
 - Widget 2–6 sütun genişliğinde, 1–4 satır yüksekliğinde olabilir ve grafikler boyuta göre ölçeklenir. Çubuklar daraldığında sayılar fareyle üzerine gelince çıkan ipucuna taşınır ve tarih etiketleri 45° çapraz yazılır. Etiketler yalnızca çubuklar çok daraldığında (uzun bir aralık, tarihe göre) aralıklı yazılır.

@@ -87,7 +87,7 @@ interface Props {
 }
 
 /** Panoya yazar; iframe'de Clipboard API engelliyse eski yöntemi dener. Başarısızsa false. */
-async function copyText(text: string): Promise<boolean> {
+export async function copyText(text: string): Promise<boolean> {
   try {
     await navigator.clipboard.writeText(text);
     return true;

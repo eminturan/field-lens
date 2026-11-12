@@ -1,5 +1,5 @@
 import { DataSource } from "./api";
-import { Field, Query, Row } from "./logic";
+import { Field, Query, Row, formatCell } from "./logic";
 
 const FIELDS: Field[] = [
   { referenceName: "System.Id", name: "ID", type: "integer" },
@@ -65,6 +65,24 @@ export function mockSource(): DataSource {
       })
       .filter((r) => r[q.dateField] !== undefined && day(r[q.dateField]) >= q.from && day(r[q.dateField]) <= q.to)
       // Örnek veride "ben" = PEOPLE[0].
+      // Ek koşullar örnek veride yaklaşık uygulanır: görünen değer üzerinde, sayılar ve tarihler karşılaştırılarak.
+      .filter((r) =>
+        (q.conditions ?? []).every((c) => {
+          const v = formatCell(r[c.field], c.type);
+          const a = c.type === "integer" || c.type === "double" ? Number(v) : c.type === "dateTime" ? day(r[c.field]) : v.toLocaleLowerCase("tr");
+          const b = c.type === "integer" || c.type === "double" ? Number(c.value) : c.type === "dateTime" ? c.value : c.value.toLocaleLowerCase("tr");
+          switch (c.op) {
+            case "=": return a === b;
+            case "<>": return a !== b;
+            case "<": return a < b;
+            case ">": return a > b;
+            case "<=": return a <= b;
+            case ">=": return a >= b;
+            case "contains": case "under": return String(a).includes(String(b));
+            default: return !String(a).includes(String(b));
+          }
+        }),
+      )
       .filter((r) => {
         const who = (r["System.AssignedTo"] as { displayName?: string } | undefined)?.displayName;
         return q.assignee === "me" ? who === PEOPLE[0] : q.assignee === "none" ? !who : true;

@@ -2,6 +2,12 @@
 
 [English](CHANGELOG.md)
 
+## 0.2.18
+
+- Rapor sayfası: herhangi bir alana **Ek koşullar**; VE ile bağlanır, alan türüne uygun koşullarla (içerir, altında, ≤ vb.). Değerler sorguya girmeden önce türüne göre denetlenir ve kaçışlanır. Koşullar kayıtlı sorgulara, bağlantılara ve bağlı widget'lara girer.
+- Rapor sayfası: **Grupla** ile seçilen kolonun her değeri için sayı ve state'lere bölünmüş çubuk; bir değere tıklayınca tablo filtrelenir.
+- Rapor sayfası: **Tabloyu kopyala** görünen satırların tamamını Teams, e-posta ya da Excel için tablo olarak (ve sekmeli metin olarak) kopyalar; CSV'deki formül koruması uygulanır.
+
 ## 0.2.17
 
 - Düzeltme: **Kaynak** olarak kayıtlı sorgu seçilen widget kaydedilemiyordu ("You have errors in your configuration settings"). Kaydet, widget'ın kendi tür, tarih alanı ve state alanlarını kontrol ediyordu; bunlar sorgudan geldiğinde boş kalır. Artık yalnızca widget'ın hâlâ kendisinin belirlediği alanlar kontrol ediliyor: Aylık trendin özel ay aralığı ve kırılım kuralı.

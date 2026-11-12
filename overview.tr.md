@@ -24,6 +24,8 @@ Work item'larınızdan **herhangi bir tarih alanına** göre aylık rapor. Bir w
 - Seçimleriniz hatırlanır.
 - **Proje-arası sorgu**: bu proje, tüm projeler ya da seçili projeler; Team Project kolonuyla.
 - **Atanan** filtresi: herkes, bana atananlar ya da atanmamış.
+- Herhangi bir alana **ek koşullar**: örneğin Tags içerir "acil", Sistem = Mobil, Öncelik ≤ 2.
+- Herhangi bir kolona göre **Grupla** ve Teams, e-posta ya da Excel'e yapıştırmak için **Tabloyu kopyala**.
 - **Kayıtlı sorgular**: ayarları isim vererek kaydedin, aralarında geçiş yapın, güncelleyin, yeniden adlandırın ya da silin. **Projeyle paylaş** işaretlenirse projedeki herkes görür; yalnızca oluşturan düzenleyip silebilir. **Bağlantıyı kopyala** ile sorgu paylaşılır: bağlantı raporu o sorguyla, çalışmış olarak açar.
 
 ## Dashboard widget'ı
@@ -43,6 +45,8 @@ Widget kataloğundan **Field Lens**'i ekleyip ayarlarından görünümü seçin:
 Bir proje açın → **Boards** → **Field Lens**. Widget: **Dashboards → Edit → Add a widget**.
 
 ## Sürüm notları
+
+**0.2.18**: ek alan koşulları, gruplama ve tabloyu kopyalama.
 
 **0.2.17**: kayıtlı sorguya bağlı widget'lar kaydedilebiliyor.
 

@@ -19,7 +19,9 @@ import { createRestSource, DataSource, RunResult } from "./api";
 import { fullDay } from "./chart";
 import { FieldPicker } from "./fieldPicker";
 import { RulePreview } from "./rulePreview";
-import { Docs, localDocs, QueryBar, QueryStore, queryStore } from "./queryBar";
+import { copyText, Docs, localDocs, QueryBar, QueryStore, queryStore } from "./queryBar";
+import { ConditionsEditor } from "./conditions";
+import { GroupSummary } from "./groupSummary";
 import { firstOf, pickLang, Strings, STRINGS } from "./i18n";
 import {
   countStates,
@@ -41,6 +43,11 @@ import {
   DERIVED,
   deriveRows,
   Rule,
+  checkCondition,
+  Condition,
+  protectCell,
+  toHtmlTable,
+  toTsv,
   Assignee,
   Projects,
   sanitizeSettings,
@@ -146,6 +153,10 @@ function App({ source, store, queries, initialQueryId, linkFor, mock, t, itemUrl
   const [to, setTo] = React.useState("");
   const [states, setStates] = React.useState<string[]>([]);
   const [assignee, setAssignee] = React.useState<Assignee>();
+  const [conditions, setConditions] = React.useState<Condition[]>([]);
+  /** Sonuçların gruplandığı kolon (yalnızca görünüm; kayda girmez). */
+  const [groupBy, setGroupBy] = React.useState("");
+  const [copyNote, setCopyNote] = React.useState<string>();
   const [projects, setProjects] = React.useState<Projects>();
   const projectsKey = JSON.stringify(projects ?? null);
   /** Koleksiyondaki projeler (okunamazsa boş: seçili projeler o zaman doğrulanmaz). */
@@ -202,6 +213,7 @@ function App({ source, store, queries, initialQueryId, linkFor, mock, t, itemUrl
     setStates(s.states ?? []);
     setAssignee(s.assignee);
     setProjects(s.projects);
+    setConditions(s.conditions ?? []);
     setColumns(s.columns?.length ? s.columns : DEFAULT_COLUMNS);
     setRule(s.derived ?? { source: "", pattern: "", name: "" });
   };
@@ -342,6 +354,8 @@ function App({ source, store, queries, initialQueryId, linkFor, mock, t, itemUrl
 
   const missing = Array.isArray(projects) && projects.length === 0
     ? t.need.projects
+    : conditions.some((c) => !c.field || checkCondition(c))
+      ? t.need.conditions
     : !type
     ? t.need.type
     : statesType !== type
@@ -368,7 +382,7 @@ function App({ source, store, queries, initialQueryId, linkFor, mock, t, itemUrl
     chooseDense(false);
   };
 
-  const current: Settings = { projects, assignee, type, dateField, preset, from, to, states, columns, derived: rule.source || rule.pattern ? rule : undefined };
+  const current: Settings = { conditions: conditions.length ? conditions : undefined, projects, assignee, type, dateField, preset, from, to, states, columns, derived: rule.source || rule.pattern ? rule : undefined };
 
   React.useEffect(() => {
     if (!autoRun || missing === t.loading) return;
@@ -378,7 +392,7 @@ function App({ source, store, queries, initialQueryId, linkFor, mock, t, itemUrl
 
   const run = () => {
     if (missing) return;
-    const query: Query = { projects, assignee, type, dateField, from, to, states, columns };
+    const query: Query = { conditions: conditions.length ? conditions : undefined, projects, assignee, type, dateField, from, to, states, columns };
     const activeRule = ruleReady && columns.includes(DERIVED) ? rule : undefined;
     // Türetilmiş kolon sunucudan istenmez; yerine kaynak alanı istenir.
     const fetched = [...new Set([...columns.filter((c) => c !== DERIVED), ...(activeRule ? [activeRule.source] : [])])];
@@ -465,6 +479,24 @@ function App({ source, store, queries, initialQueryId, linkFor, mock, t, itemUrl
   };
   const shown = pageSlice(visible, page, PAGE_SIZE);
   const textFiltered = matched.length !== allRows.length;
+  /** Görünen kayıtlar panoya: HTML tablo (Teams, e-posta, Excel) ve sekmeli düz metin; formül koruması CSV'deki gibi. */
+  const copyTable = async () => {
+    if (!result) return;
+    const rows = csvRows(visible, shownCols).map((r) => r.map(protectCell));
+    let ok = false;
+    try {
+      await navigator.clipboard.write([
+        new ClipboardItem({
+          "text/html": new Blob([toHtmlTable(rows)], { type: "text/html" }),
+          "text/plain": new Blob([toTsv(rows)], { type: "text/plain" }),
+        }),
+      ]);
+      ok = true;
+    } catch {
+      ok = await copyText(toTsv(rows));
+    }
+    setCopyNote(ok ? t.copied(visible.length) : t.copyFailed);
+  };
   const csvButton = (
     <button className="fl-button" disabled={!result || visible.length === 0} onClick={exportCsv}>
       {filtering ? `${t.exportCsv} (${visible.length})` : t.exportCsv}
@@ -497,6 +529,7 @@ function App({ source, store, queries, initialQueryId, linkFor, mock, t, itemUrl
                   t.statesN(result.query.states.length),
                   ...(result.query.assignee ? [t.assignees[result.query.assignee]] : []),
                   ...(result.query.projects ? [t.scope(result.query.projects)] : []),
+                  ...(result.query.conditions ? [t.cond.count(result.query.conditions.length)] : []),
                 ].join(" · ")}
               </span>
             </div>
@@ -624,6 +657,8 @@ function App({ source, store, queries, initialQueryId, linkFor, mock, t, itemUrl
                 ))}
               </span>
             </div>
+
+            <ConditionsEditor value={conditions} onChange={setConditions} fields={fields} t={t.cond} searchField={t.w.searchField} noMatch={t.noMatch} />
 
             <div className="fl-field">
               <span className="fl-muted">{t.columns}</span>
@@ -816,6 +851,27 @@ function App({ source, store, queries, initialQueryId, linkFor, mock, t, itemUrl
                 {t.compact}
               </button>
             </span>
+            <button className="fl-button" title={t.copyTableTip} disabled={visible.length === 0} onClick={copyTable}>
+              {t.copyTable}
+            </button>
+            <label className="fl-qpick">
+              <span className="fl-muted">{t.group.label}</span>
+              <select className="fl-input" value={shownCols.some((c) => c.referenceName === groupBy) ? groupBy : ""} onChange={(e) => setGroupBy(e.target.value)}>
+                <option value="">{t.group.none}</option>
+                {shownCols
+                  .filter((c) => c.referenceName !== "System.Id")
+                  .map((c) => (
+                    <option key={c.referenceName} value={c.referenceName}>
+                      {c.name}
+                    </option>
+                  ))}
+              </select>
+            </label>
+            {copyNote && (
+              <span className="fl-muted" aria-live="polite">
+                {copyNote}
+              </span>
+            )}
             {filtering && (
               <>
                 <span className="fl-muted" aria-live="polite">
@@ -827,6 +883,17 @@ function App({ source, store, queries, initialQueryId, linkFor, mock, t, itemUrl
               </>
             )}
           </div>
+        )}
+        {!running && result && allRows.length > 0 && byRef.get(groupBy) && shownCols.some((c) => c.referenceName === groupBy) && (
+          <GroupSummary
+            rows={visible}
+            col={byRef.get(groupBy)!}
+            states={result.query.states}
+            colors={stateColors}
+            tip={t.group.tip}
+            blank={t.w.blank}
+            onPick={(v) => setColFilter(groupBy, v)}
+          />
         )}
         {!running && result && allRows.length > 0 && (
           <div className="fl-scroll">

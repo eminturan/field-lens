@@ -70,6 +70,8 @@ describe("applyQuery (widget linked to a saved query)", () => {
   it("takes the query's projects", () => {
     expect(applyQuery({ ...base, view: "trend" }, { projects: ["A"] }).projects).toEqual(["A"]);
     expect(applyQuery(base, {}).projects).toBeUndefined();
+    const cond = { field: "Custom.Sistem", type: "string", op: "=" as const, value: "Mobil" };
+    expect((applyQuery(base, { conditions: [cond] }) as { conditions?: unknown }).conditions).toEqual([cond]);
   });
   it("keeps the widget's own range for trend", () => {
     const r = applyQuery({ ...base, view: "trend" }, s);

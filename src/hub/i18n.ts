@@ -1,4 +1,4 @@
-import { Assignee, Preset, Projects, View } from "./logic";
+import { Assignee, Op, Preset, Projects, View } from "./logic";
 
 export type Lang = "tr" | "en";
 
@@ -52,6 +52,24 @@ export interface WidgetStrings {
   barTip: (label: string, n: number) => string;
 }
 
+export interface ConditionStrings {
+  title: string;
+  add: string;
+  remove: string;
+  ops: Record<Op, string>;
+  yes: string;
+  no: string;
+  valuePlaceholder: string;
+  badValue: string;
+  count: (n: number) => string;
+}
+
+export interface GroupStrings {
+  label: string;
+  none: string;
+  tip: string;
+}
+
 export interface QueryStrings {
   label: string;
   none: string;
@@ -103,6 +121,12 @@ export interface Strings {
   locale: string;
   rule: RuleStrings;
   q: QueryStrings;
+  cond: ConditionStrings;
+  group: GroupStrings;
+  copyTable: string;
+  copyTableTip: string;
+  copied: (n: number) => string;
+  copyFailed: string;
   w: WidgetStrings;
   csvSeparator: string;
   title: string;
@@ -159,7 +183,7 @@ export interface Strings {
   comfortable: string;
   compact: string;
   empty: string;
-  need: { type: string; dateField: string; states: string; range: string; columns: string; projects: string };
+  need: { type: string; dateField: string; states: string; range: string; columns: string; projects: string; conditions: string };
   projects: string;
   projectModes: Record<"this" | "all" | "some", string>;
   searchProject: string;
@@ -170,6 +194,22 @@ export interface Strings {
 export const STRINGS: Record<Lang, Strings> = {
   tr: {
     locale: "tr-TR",
+    cond: {
+      title: "Ek koşullar",
+      add: "+ Koşul ekle",
+      remove: "Koşulu kaldır",
+      ops: { "=": "=", "<>": "≠", "<": "<", ">": ">", "<=": "≤", ">=": "≥", contains: "içerir", notContains: "içermez", under: "altında", notUnder: "altında değil" },
+      yes: "Evet",
+      no: "Hayır",
+      valuePlaceholder: "Değer (boş = alan boş)",
+      badValue: "Bu alan için geçerli bir değer girin.",
+      count: (n) => `${n} koşul`,
+    },
+    group: { label: "Grupla", none: "(gruplama yok)", tip: "Bir değere tıklayınca tablo o değere göre filtrelenir." },
+    copyTable: "Tabloyu kopyala",
+    copyTableTip: "Görünen kayıtların tamamını kolonlarıyla panoya kopyalar; Teams, e-posta ya da Excel'e tablo olarak yapışır.",
+    copied: (n) => `${n} satır kopyalandı.`,
+    copyFailed: "Tarayıcı panoya yazmaya izin vermedi; CSV indir'i kullanın.",
     q: {
       label: "Kayıtlı sorgu",
       none: "(kaydedilmemiş sorgu)",
@@ -314,10 +354,27 @@ export const STRINGS: Record<Lang, Strings> = {
       range: "Başlangıç tarihi bitişten sonra olamaz.",
       columns: "En az bir kolon seçin.",
       projects: "En az bir proje seçin.",
+      conditions: "Ek koşulları tamamlayın ya da kaldırın.",
     },
   },
   en: {
     locale: "en-US",
+    cond: {
+      title: "Extra conditions",
+      add: "+ Add condition",
+      remove: "Remove condition",
+      ops: { "=": "=", "<>": "≠", "<": "<", ">": ">", "<=": "≤", ">=": "≥", contains: "contains", notContains: "doesn't contain", under: "under", notUnder: "not under" },
+      yes: "Yes",
+      no: "No",
+      valuePlaceholder: "Value (empty = field is empty)",
+      badValue: "Enter a valid value for this field.",
+      count: (n) => `${n} ${n === 1 ? "condition" : "conditions"}`,
+    },
+    group: { label: "Group by", none: "(no grouping)", tip: "Click a value to filter the table to it." },
+    copyTable: "Copy table",
+    copyTableTip: "Copies every visible row with its columns; pastes as a table into Teams, email or Excel.",
+    copied: (n) => `${n} rows copied.`,
+    copyFailed: "The browser didn't allow writing to the clipboard; use Download CSV.",
     q: {
       label: "Saved query",
       none: "(unsaved query)",
@@ -462,6 +519,7 @@ export const STRINGS: Record<Lang, Strings> = {
       range: "Start date cannot be after end date.",
       columns: "Choose at least one column.",
       projects: "Choose at least one project.",
+      conditions: "Complete or remove the extra conditions.",
     },
   },
 };
