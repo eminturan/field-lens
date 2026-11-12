@@ -68,6 +68,38 @@ function download(name: string, text: string) {
   window.setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
+/** Sorgu çalışırken kartların ve tablonun yerinde gri yer tutucular. */
+function Skeleton({ cards, cols, label }: { cards: number; cols: number; label: string }) {
+  return (
+    <div className="fl-skeleton" role="status" aria-busy="true">
+      <span className="fl-sr">{label}</span>
+      <div className="fl-summary" aria-hidden="true">
+        {Array.from({ length: cards }, (_, i) => (
+          <div key={i} className="fl-card fl-card-ghost">
+            <span className="fl-bone" style={{ width: 48, height: 24 }} />
+            <span className="fl-bone" style={{ width: 72 }} />
+          </div>
+        ))}
+      </div>
+      <div className="fl-scroll" aria-hidden="true">
+        <table className="fl-table">
+          <tbody>
+            {Array.from({ length: 8 }, (_, r) => (
+              <tr key={r}>
+                {Array.from({ length: cols }, (_, c) => (
+                  <td key={c}>
+                    <span className="fl-bone" style={{ width: `${40 + ((r * 7 + c * 13) % 50)}%` }} />
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
 function App({ source, store, mock, t, itemUrl }: Props) {
   const [reload, setReload] = React.useState(0);
   const [loadError, setLoadError] = React.useState<string>();
@@ -409,9 +441,10 @@ function App({ source, store, mock, t, itemUrl }: Props) {
         )}
 
         {runError && <MessageCard severity={MessageCardSeverity.Error}>{t.runError(runError)}</MessageCard>}
-        {result?.data.truncated && <MessageCard severity={MessageCardSeverity.Warning}>{t.truncated}</MessageCard>}
-        {result && result.data.rows.length === 0 && <div className="fl-empty">{t.empty}</div>}
-        {result && allRows.length > 0 && (
+        {running && <Skeleton cards={Math.min(states.length + 1, 6)} cols={Math.min(Math.max(columns.length, 3), 8)} label={t.running} />}
+        {!running && result?.data.truncated && <MessageCard severity={MessageCardSeverity.Warning}>{t.truncated}</MessageCard>}
+        {!running && result && result.data.rows.length === 0 && <div className="fl-empty">{t.empty}</div>}
+        {!running && result && allRows.length > 0 && (
           <div className="fl-summary" role="group" aria-label={t.summary}>
             <button className="fl-card" aria-pressed={!stateFilter} onClick={() => filterBy(undefined)}>
               <span className="fl-card-num">{matched.length}</span>
@@ -439,7 +472,7 @@ function App({ source, store, mock, t, itemUrl }: Props) {
             ))}
           </div>
         )}
-        {result && allRows.length > 0 && (
+        {!running && result && allRows.length > 0 && (
           <div className="fl-actions">
             <input
               className="fl-input fl-search"
@@ -464,7 +497,7 @@ function App({ source, store, mock, t, itemUrl }: Props) {
             )}
           </div>
         )}
-        {result && allRows.length > 0 && (
+        {!running && result && allRows.length > 0 && (
           <div className="fl-scroll">
             <table className="fl-table">
               <thead>

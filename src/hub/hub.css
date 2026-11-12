@@ -505,3 +505,53 @@ section > .fl-button {
   text-align: center;
   white-space: normal;
 }
+
+/* Yüklenirken iskelet görünüm */
+.fl-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.fl-card-ghost {
+  cursor: default;
+  min-height: 64px;
+}
+
+.fl-bone {
+  display: block;
+  height: 12px;
+  border-radius: 3px;
+  background: linear-gradient(
+    90deg,
+    var(--palette-black-alpha-6, rgba(128, 128, 128, 0.14)) 25%,
+    var(--palette-black-alpha-10, rgba(128, 128, 128, 0.26)) 50%,
+    var(--palette-black-alpha-6, rgba(128, 128, 128, 0.14)) 75%
+  );
+  background-size: 200% 100%;
+  animation: fl-shimmer 1.2s ease-in-out infinite;
+}
+
+@keyframes fl-shimmer {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: -100% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fl-bone {
+    animation: none;
+  }
+}
+
+.fl-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
