@@ -18,7 +18,19 @@ Open a project → **Boards** → **Field Lens**.
 | **States** | One or more. An item counts when its **current** state is one of them. |
 | **Columns** | Any fields. Search by display name (large) or reference name (small). Drag a column chip to reorder it, or focus it with Tab and press Alt + ←/→. |
 
-The chosen date field is added to the columns automatically. Selections are saved per user (Extension Data Service, user scope) and restored next time; types or fields that no longer exist are dropped. **Reset settings** (at the right of the Run row, click twice to confirm) clears everything at once: type, date field, range, states, columns, rule and row density go back to their defaults and the saved selections are deleted.
+The chosen date field is added to the columns automatically. Selections are saved per user (Extension Data Service, user scope) and restored next time; types or fields that no longer exist are dropped. **Reset settings** (at the right of the Run row, click twice to confirm) clears everything at once: type, date field, range, states, columns, rule and row density go back to their defaults and the remembered selections are deleted; saved queries are kept.
+
+### Saved queries
+
+The **Saved query** bar above the filter panel:
+
+- **Save as** saves the form's settings (type, date field, range, states, columns, rule) under a name. The name can't be empty, is at most 80 characters, and must be unique (ignoring case).
+- Picking a query from the list loads its settings into the form; click **Run** for the report. Relative ranges (for example "Last month") are worked out on the day you open them; a custom range is fixed.
+- When the form differs from the selected query, **changed** appears next to it and **Save** updates the query. **Rename** and **Delete** (with a confirmation) are there too.
+- **Share with the project** (only when saving): unticked, the query is stored in user scope and only you see it. Ticked, it goes to a shared collection per project and everyone in the project sees it. The list groups "My queries" and "Project queries", and someone else's query shows its creator's name.
+- Only the creator can update, rename or delete a shared query; others use **Save as** for their own copy. This is a **UI restriction**: Extension Data Service doesn't check ownership. Every query read from the shared list is validated (unexpected fields are dropped, rules and fields go through the usual checks).
+- If two people save the same query at the same time, the second gets a warning and the list reloads (document version, `__etag`).
+- **Reset settings** doesn't touch saved queries.
 
 ### Column derived by a rule
 
@@ -106,6 +118,7 @@ Layout:
 
 ## To verify on a real server
 
+- Saved queries: the shared collection reads as an empty list the first time, another user sees a shared query but can't edit it, and a concurrent save shows the warning.
 - Saving and restoring selections through the Extension Data Service.
 - The inclusive end day on a month-end range with the real date field.
 - Time zone: WIQL compares dates on the server, while charts group by the browser's day. Items near midnight may land on a neighbouring day.

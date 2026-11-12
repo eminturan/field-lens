@@ -2,6 +2,10 @@
 
 [English](CHANGELOG.md)
 
+## 0.2.13
+
+- Rapor sayfası: **kayıtlı sorgular**. Formdaki ayarları isim vererek kaydedin, kayıtlı sorgular arasında geçiş yapın, güncelleyin, yeniden adlandırın ya da silin. **Projeyle paylaş** işaretlenmezse sorgu kişiseldir; paylaşılanları projedeki herkes görür, yalnızca oluşturan düzenleyip silebilir (arayüz kısıtı). Paylaşılan sorgular okunurken doğrulanır, eşzamanlı kaydetmede uyarı çıkar.
+
 ## 0.2.12
 
 - Rapor sayfası: Çalıştır satırının sağında **Ayarları sıfırla** düğmesi. İlk tık onay ister; ikincisi türü, tarih alanını, aralığı, state'leri, kolonları, kuralı, sonuçları ve satır görünümünü temizler, kayıtlı seçimleri siler.

@@ -22,6 +22,7 @@ Work item'larınızdan **herhangi bir tarih alanına** göre aylık rapor. Bir w
   - ID'ye tıklayınca kayıt açılır
 - **CSV dışa aktarma**: o an görünen kayıtlar iner. Dosya UTF-8 olduğu için Excel Türkçe karakterleri bozmaz; ayırıcı arayüz diline göre `;` ya da `,` olur.
 - Seçimleriniz hatırlanır.
+- **Kayıtlı sorgular**: ayarları isim vererek kaydedin, aralarında geçiş yapın, güncelleyin, yeniden adlandırın ya da silin. **Projeyle paylaş** işaretlenirse projedeki herkes görür; yalnızca oluşturan düzenleyip silebilir.
 
 ## Dashboard widget'ı
 
@@ -40,6 +41,8 @@ Widget kataloğundan **Field Lens**'i ekleyip ayarlarından görünümü seçin:
 Bir proje açın → **Boards** → **Field Lens**. Widget: **Dashboards → Edit → Add a widget**.
 
 ## Sürüm notları
+
+**0.2.13**: kişisel ya da projeyle paylaşılan kayıtlı sorgular.
 
 **0.2.12**: Ayarları sıfırla düğmesi rapor sayfasındaki tüm ayarları tek seferde temizliyor.
 

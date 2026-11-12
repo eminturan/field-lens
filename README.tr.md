@@ -18,7 +18,19 @@ Bir proje açın → **Boards** → **Field Lens**.
 | **State** | Bir ya da birkaç. Kaydın **şu anki** state'i bunlardan biriyse sayılır. |
 | **Kolonlar** | İstenen alanlar. Görünen ad (büyük) ya da referans adıyla (küçük) aranır. Etiketi sürükleyerek ya da Tab ile seçip Alt + ←/→ ile sıralanır. |
 
-Seçilen tarih alanı kolonlara kendiliğinden eklenir. Seçimler kullanıcı başına saklanır (Extension Data Service, kullanıcı kapsamı) ve sonraki açılışta geri gelir. Artık var olmayan tür ya da alanlar atlanır. **Ayarları sıfırla** (Çalıştır satırının sağında, onay için iki kez tıklanır) her şeyi tek seferde temizler: tür, tarih alanı, aralık, state'ler, kolonlar, kural ve satır görünümü varsayılana döner, kayıtlı seçimler silinir.
+Seçilen tarih alanı kolonlara kendiliğinden eklenir. Seçimler kullanıcı başına saklanır (Extension Data Service, kullanıcı kapsamı) ve sonraki açılışta geri gelir. Artık var olmayan tür ya da alanlar atlanır. **Ayarları sıfırla** (Çalıştır satırının sağında, onay için iki kez tıklanır) her şeyi tek seferde temizler: tür, tarih alanı, aralık, state'ler, kolonlar, kural ve satır görünümü varsayılana döner, hatırlanan son seçimler silinir; kayıtlı sorgulara dokunulmaz.
+
+### Kayıtlı sorgular
+
+Filtre panelinin üstündeki **Kayıtlı sorgu** çubuğu:
+
+- **Farklı kaydet**: formdaki ayarları (tür, tarih alanı, aralık, state'ler, kolonlar, kural) isim vererek kaydeder. Ad boş olamaz, en fazla 80 karakterdir ve aynı adda iki sorgu olamaz (büyük/küçük harf farkı gözetilmez).
+- Listeden bir sorgu seçince ayarları forma yüklenir; rapor için **Çalıştır**'a basılır. Göreli aralıklar (örneğin "Geçen ay") açıldığı güne göre hesaplanır, özel aralık sabittir.
+- Form seçili sorgudan farklılaşınca yanında **değişti** yazar; **Kaydet** sorguyu günceller. **Yeniden adlandır** ve **Sil** (onaylı) da buradadır.
+- **Projeyle paylaş** (yalnızca kaydederken): işaretlenmezse sorgu kullanıcı kapsamında saklanır ve yalnızca size görünür. İşaretlenirse proje başına ayrı bir ortak koleksiyona yazılır ve projedeki herkes görür. Listede "Sorgularım" ve "Proje sorguları" ayrı gruplanır; başkasının sorgusunun yanında oluşturanın adı yazar.
+- Paylaşılan bir sorguyu yalnızca oluşturan güncelleyip yeniden adlandırabilir ve silebilir; diğerleri **Farklı kaydet** ile kendi kopyasını alır. Bu bir **arayüz kısıtıdır**: Extension Data Service sahiplik denetlemez. Ortak listeden okunan her sorgu doğrulanır (beklenmedik alanlar atılır, kurallar ve alanlar normal denetimlerden geçer).
+- İki kişi aynı sorguyu aynı anda kaydederse ikincisi uyarı alır ve liste yenilenir (belge sürümü, `__etag`).
+- **Ayarları sıfırla** kayıtlı sorgulara dokunmaz.
 
 ### Kuralla türetilen kolon
 
@@ -107,6 +119,7 @@ Klasörler:
 ## Sunucuda doğrulanacaklar
 
 - Seçimlerin Extension Data Service ile kaydedilip geri gelmesi.
+- Kayıtlı sorgular: ortak koleksiyonun ilk okumada boş liste vermesi, başka bir kullanıcının paylaşılan sorguyu görmesi ama düzenleyememesi, eşzamanlı kaydetmede uyarı.
 - Gerçek tarih alanıyla ay sonuna denk gelen bir aralıkta bitiş gününün dahil olması.
 - Saat dilimi: WIQL tarihleri sunucuda karşılaştırır, grafikler ise tarayıcının gününe göre gruplar. Gece yarısına yakın kayıtlar komşu güne düşebilir.
 - Widget: katalogda görünmesi, ayar paneli, canlı önizleme ve Kaydet'ten sonra ayarların kalması.

@@ -46,6 +46,30 @@ export interface WidgetStrings {
   barTip: (label: string, n: number) => string;
 }
 
+export interface QueryStrings {
+  label: string;
+  none: string;
+  mine: string;
+  shared: string;
+  save: string;
+  saveAs: string;
+  saved: string;
+  rename: string;
+  remove: string;
+  changed: string;
+  changedTip: string;
+  namePlaceholder: string;
+  share: string;
+  shareTip: string;
+  ok: string;
+  cancel: string;
+  confirmRemove: (name: string) => string;
+  errors: Record<"empty" | "long" | "duplicate", string>;
+  conflict: string;
+  failed: (detail: string) => string;
+  ownerOnly: (owner: string) => string;
+}
+
 export interface RuleStrings {
   title: string;
   source: string;
@@ -66,6 +90,7 @@ export interface RuleStrings {
 export interface Strings {
   locale: string;
   rule: RuleStrings;
+  q: QueryStrings;
   w: WidgetStrings;
   csvSeparator: string;
   title: string;
@@ -126,6 +151,29 @@ export interface Strings {
 export const STRINGS: Record<Lang, Strings> = {
   tr: {
     locale: "tr-TR",
+    q: {
+      label: "Kayıtlı sorgu",
+      none: "(kaydedilmemiş sorgu)",
+      mine: "Sorgularım",
+      shared: "Proje sorguları",
+      save: "Kaydet",
+      saveAs: "Farklı kaydet",
+      saved: "Kaydedildi",
+      rename: "Yeniden adlandır",
+      remove: "Sil",
+      changed: "değişti",
+      changedTip: "Formdaki ayarlar kayıtlı sorgudan farklı. Güncellemek için Kaydet'e basın.",
+      namePlaceholder: "Sorgu adı, örneğin Bug – bu ay kapananlar",
+      share: "Projeyle paylaş",
+      shareTip: "Projedeki herkes görür ve kullanır; yalnızca siz düzenleyip silebilirsiniz.",
+      ok: "Tamam",
+      cancel: "Vazgeç",
+      confirmRemove: (n) => `"${n}" silinsin mi? Bu geri alınamaz.`,
+      errors: { empty: "Bir ad yazın.", long: "Ad en fazla 80 karakter olabilir.", duplicate: "Bu adda bir sorgu var." },
+      conflict: "Bu sorgu bu arada başka biri tarafından değiştirildi; liste yenilendi. Değişikliğinizi yeniden kaydedin.",
+      failed: (d) => `Sorgu kaydedilemedi: ${d}`,
+      ownerOnly: (o) => `${o} oluşturdu; yalnızca o düzenleyip silebilir. Kendi kopyanız için Farklı kaydet'i kullanın.`,
+    },
     rule: {
       title: "Kuralla türetilen kolon",
       source: "Kaynak alan",
@@ -231,6 +279,29 @@ export const STRINGS: Record<Lang, Strings> = {
   },
   en: {
     locale: "en-US",
+    q: {
+      label: "Saved query",
+      none: "(unsaved query)",
+      mine: "My queries",
+      shared: "Project queries",
+      save: "Save",
+      saveAs: "Save as",
+      saved: "Saved",
+      rename: "Rename",
+      remove: "Delete",
+      changed: "changed",
+      changedTip: "The form differs from the saved query. Click Save to update it.",
+      namePlaceholder: "Query name, for example Bugs closed this month",
+      share: "Share with the project",
+      shareTip: "Everyone in the project sees and uses it; only you can edit or delete it.",
+      ok: "OK",
+      cancel: "Cancel",
+      confirmRemove: (n) => `Delete "${n}"? This can't be undone.`,
+      errors: { empty: "Enter a name.", long: "Use at most 80 characters.", duplicate: "A query with this name already exists." },
+      conflict: "Someone else changed this query in the meantime, so the list was reloaded. Save your change again.",
+      failed: (d) => `Couldn't save the query: ${d}`,
+      ownerOnly: (o) => `Created by ${o}; only they can edit or delete it. Use Save as for your own copy.`,
+    },
     rule: {
       title: "Column derived by a rule",
       source: "Source field",

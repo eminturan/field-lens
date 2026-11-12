@@ -18,12 +18,14 @@ import { createRestSource, DataSource, RunResult } from "./api";
 import { fullDay } from "./chart";
 import { FieldPicker } from "./fieldPicker";
 import { RulePreview } from "./rulePreview";
+import { Docs, QueryBar, QueryStore, queryStore } from "./queryBar";
 import { firstOf, pickLang, Strings, STRINGS } from "./i18n";
 import {
   countStates,
   csvRows,
   filterRows,
   DEFAULT_COLUMNS,
+  DEFAULT_PRESET,
   Field,
   formatCell,
   moveItem,
@@ -38,6 +40,7 @@ import {
   deriveRows,
   Rule,
   sanitizeSettings,
+  SavedQuery,
   sortRows,
   Settings,
   toCsv,
@@ -45,7 +48,6 @@ import {
 import { mockSource } from "./mock";
 
 const PAGE_SIZE = 100;
-const DEFAULT_PRESET: Exclude<Preset, "custom"> = "thisMonth";
 
 /** Kullanıcı seçimlerinin saklandığı yer. */
 interface Store {
@@ -56,6 +58,7 @@ interface Store {
 interface Props {
   source: DataSource;
   store: Store;
+  queries: QueryStore;
   mock: boolean;
   t: Strings;
   itemUrl: (id: number) => string;
@@ -117,7 +120,7 @@ const readDense = () => {
 };
 
 
-function App({ source, store, mock, t, itemUrl }: Props) {
+function App({ source, store, queries, mock, t, itemUrl }: Props) {
   const [reload, setReload] = React.useState(0);
   const [loadError, setLoadError] = React.useState<string>();
   const [types, setTypes] = React.useState<string[]>();
@@ -171,6 +174,40 @@ function App({ source, store, mock, t, itemUrl }: Props) {
     focusChip.current = undefined;
   }, [columns]);
 
+  /** Formu verilen (temizlenmiş) ayarlarla doldurur; eksik olanlar varsayılana döner. */
+  const applySettings = (s: Settings, ts: string[]) => {
+    setType(s.type ?? (ts.length === 1 ? ts[0] : ""));
+    setDateField(s.dateField ?? "");
+    const p = s.preset ?? DEFAULT_PRESET;
+    setPreset(p);
+    const range = p !== "custom" ? presetRange(p, new Date()) : s.from && s.to ? { from: s.from, to: s.to } : presetRange(DEFAULT_PRESET, new Date());
+    setFrom(range.from);
+    setTo(range.to);
+    setStates(s.states ?? []);
+    setColumns(s.columns?.length ? s.columns : DEFAULT_COLUMNS);
+    setRule(s.derived ?? { source: "", pattern: "", name: "" });
+  };
+  /** Sonuçları ve sonuç içi filtreleri kaldırır, filtre panelini açar. */
+  const clearResults = () => {
+    runId.current++;
+    setResult(undefined);
+    setRunError(undefined);
+    setPrevCount(undefined);
+    setPage(0);
+    setStateFilter(undefined);
+    setSearch("");
+    setColFilters({});
+    setSort(undefined);
+    setCollapsed(false);
+  };
+  const [queryId, setQueryId] = React.useState<string>();
+  const pickQuery = (q: SavedQuery | undefined) => {
+    setQueryId(q?.id);
+    if (!q || !types) return;
+    applySettings(sanitizeSettings(q.settings, types, fields), types);
+    clearResults();
+  };
+
   // İlk yükleme: türler, alanlar ve kayıtlı seçimler.
   React.useEffect(() => {
     let live = true;
@@ -179,20 +216,9 @@ function App({ source, store, mock, t, itemUrl }: Props) {
     Promise.all([source.types(), source.fields(), store.load().catch(() => undefined)])
       .then(([ts, fs, saved]) => {
         if (!live) return;
-        const s = sanitizeSettings(saved, ts, fs);
         setTypes(ts);
         setFields(fs);
-        setType(s.type ?? (ts.length === 1 ? ts[0] : ""));
-        setDateField(s.dateField ?? "");
-        const p = s.preset ?? DEFAULT_PRESET;
-        setPreset(p);
-        const range =
-          p !== "custom" ? presetRange(p, new Date()) : s.from && s.to ? { from: s.from, to: s.to } : presetRange(DEFAULT_PRESET, new Date());
-        setFrom(range.from);
-        setTo(range.to);
-        setStates(s.states ?? []);
-        if (s.columns?.length) setColumns(s.columns);
-        if (s.derived) setRule(s.derived);
+        applySettings(sanitizeSettings(saved, ts, fs), ts);
       })
       .catch((e) => live && setLoadError(message(e)));
     return () => {
@@ -270,27 +296,13 @@ function App({ source, store, mock, t, itemUrl }: Props) {
     if (!confirmReset) return setConfirmReset(true);
     setConfirmReset(false);
     store.save({}).catch(() => undefined);
-    const r = presetRange(DEFAULT_PRESET, new Date());
-    setType(types?.length === 1 ? types[0] : "");
-    setDateField("");
-    setPreset(DEFAULT_PRESET);
-    setFrom(r.from);
-    setTo(r.to);
-    setStates([]);
-    setColumns(DEFAULT_COLUMNS);
-    setRule({ source: "", pattern: "", name: "" });
-    runId.current++;
-    setResult(undefined);
-    setRunError(undefined);
-    setPrevCount(undefined);
-    setPage(0);
-    setStateFilter(undefined);
-    setSearch("");
-    setColFilters({});
-    setSort(undefined);
-    setCollapsed(false);
+    applySettings({}, types ?? []);
+    clearResults();
+    setQueryId(undefined);
     chooseDense(false);
   };
+
+  const current: Settings = { type, dateField, preset, from, to, states, columns, derived: rule.source || rule.pattern ? rule : undefined };
 
   const run = () => {
     if (missing) return;
@@ -298,7 +310,7 @@ function App({ source, store, mock, t, itemUrl }: Props) {
     const activeRule = ruleReady && columns.includes(DERIVED) ? rule : undefined;
     // Türetilmiş kolon sunucudan istenmez; yerine kaynak alanı istenir.
     const fetched = [...new Set([...columns.filter((c) => c !== DERIVED), ...(activeRule ? [activeRule.source] : [])])];
-    store.save({ type, dateField, preset, from, to, states, columns, derived: rule.source || rule.pattern ? rule : undefined }).catch(() => undefined);
+    store.save(current).catch(() => undefined);
     setRunning(true);
     setRunError(undefined);
     setPrevCount(undefined);
@@ -401,6 +413,7 @@ function App({ source, store, mock, t, itemUrl }: Props) {
           </MessageCard>
         )}
         {!types && !loadError && <div className="fl-empty">{t.loading}</div>}
+        {types && <QueryBar store={queries} t={t.q} current={current} selectedId={queryId} onSelect={pickQuery} />}
         {types && result && collapsed && !running && (
           <section className="fl-report">
             <div className="fl-report-text">
@@ -780,6 +793,41 @@ function render(props: Omit<Props, "t">, culture: string | undefined) {
   ReactDOM.render(<App {...props} t={STRINGS[lang]} />, document.getElementById("root"));
 }
 
+/** Örnek veri modunda sorgular tarayıcıda; sahiplik denensin diye ortak listede başkasının bir sorgusu hazır gelir. */
+function localDocs(): Docs {
+  const key = (shared: boolean) => `field-lens-queries-${shared ? "shared" : "user"}`;
+  const read = (shared: boolean): Record<string, unknown>[] => {
+    try {
+      const raw = localStorage.getItem(key(shared));
+      if (raw) return JSON.parse(raw);
+    } catch {
+      return [];
+    }
+    return shared
+      ? [{ id: "seed", name: "Ekip – açık buglar", ownerId: "someone", ownerName: "Ayşe Yılmaz", settings: { type: "Bug", preset: "last30", states: ["New", "Active"] }, __etag: 1 }]
+      : [];
+  };
+  const write = (shared: boolean, docs: unknown[]) => {
+    try {
+      localStorage.setItem(key(shared), JSON.stringify(docs));
+    } catch {
+      // saklanamıyor
+    }
+  };
+  return {
+    get: async (shared) => read(shared),
+    async set(shared, doc) {
+      const docs = read(shared);
+      const old = docs.find((d) => d.id === doc.id);
+      if (old && doc.__etag !== undefined && old.__etag !== doc.__etag) throw new Error("409 etag conflict");
+      const next = { ...doc, __etag: ((old?.__etag as number) ?? 0) + 1 };
+      write(shared, [...docs.filter((d) => d.id !== doc.id), next]);
+      return next;
+    },
+    del: async (shared, id) => write(shared, read(shared).filter((d) => d.id !== id)),
+  };
+}
+
 /** Tarayıcıda yerel saklama; erişim engelliyse sessizce atlanır. */
 const localStore: Store = {
   async load() {
@@ -802,7 +850,7 @@ async function start() {
   // Azure DevOps dışında (npm run dev) açıldıysa örnek veriyle çalış; dil ?lang=tr|en ile seçilebilir.
   if (window.self === window.top) {
     render(
-      { source: mockSource(), store: localStore, mock: true, itemUrl: () => "#" },
+      { source: mockSource(), store: localStore, queries: queryStore(localDocs(), { id: "me", name: "Siz" }), mock: true, itemUrl: () => "#" },
       new URLSearchParams(window.location.search).get("lang") ?? navigator.language,
     );
     return;
@@ -817,8 +865,9 @@ async function start() {
       () => window.parent.document.documentElement.lang,
       () => navigator.language,
     ]);
-    const project = (await (await SDK.getService<IProjectPageService>(CommonServiceIds.ProjectPageService)).getProject())?.name;
-    if (!project) throw new Error("Project not found");
+    const projectInfo = await (await SDK.getService<IProjectPageService>(CommonServiceIds.ProjectPageService)).getProject();
+    const project = projectInfo?.name;
+    if (!project || !projectInfo) throw new Error("Project not found");
     const base = baseUrl.endsWith("/") ? baseUrl : baseUrl + "/";
     const dataService = await SDK.getService<IExtensionDataService>(CommonServiceIds.ExtensionDataService);
     const manager = dataService.getExtensionDataManager(SDK.getExtensionContext().id, await SDK.getAccessToken());
@@ -828,10 +877,20 @@ async function start() {
         await (await manager).setValue("settings", s, { scopeType: "User" });
       },
     };
+    // Kişisel sorgular kullanıcı kapsamında, paylaşılanlar her proje için ayrı bir ortak koleksiyonda.
+    const coll = (shared: boolean) => (shared ? `queries-${projectInfo.id}` : "queries");
+    const scope = (shared: boolean) => ({ scopeType: shared ? "Default" : "User" });
+    const docs: Docs = {
+      get: async (shared) => (await manager).getDocuments(coll(shared), scope(shared)),
+      set: async (shared, doc) => (await manager).setDocument(coll(shared), doc, scope(shared)),
+      del: async (shared, id) => (await manager).deleteDocument(coll(shared), id, scope(shared)),
+    };
+    const me = SDK.getUser();
     render(
       {
         source: createRestSource(baseUrl, () => SDK.getAccessToken(), project),
         store,
+        queries: queryStore(docs, { id: me.id, name: me.displayName || me.name }),
         mock: false,
         itemUrl: (id) => `${base}${encodeURIComponent(project)}/_workitems/edit/${id}`,
       },

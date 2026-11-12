@@ -618,3 +618,41 @@ section > .fl-button {
 .fl-reset {
   margin-left: auto;
 }
+
+/* Kayıtlı sorgu çubuğu */
+.fl-queries {
+  gap: 8px;
+  padding: 10px 16px;
+}
+.fl-queries .fl-actions {
+  padding-top: 0;
+  border-top: 0;
+  gap: 8px;
+}
+.fl-qpick {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.fl-qpick select {
+  min-width: 200px;
+  max-width: 420px;
+}
+.fl-qspacer {
+  flex: 1;
+}
+.fl-qchanged {
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  background: rgba(214, 127, 0, 0.15);
+  color: #8a5300;
+}
+.fl-qname {
+  flex: 1;
+  min-width: 220px;
+}
+.fl-qerror {
+  color: var(--status-error-foreground, #a4262c);
+  font-size: 12px;
+}

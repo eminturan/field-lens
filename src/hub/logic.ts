@@ -3,6 +3,8 @@ export type View = "summary" | "trend" | "weekly" | "daily" | "upcoming";
 export const VIEWS: View[] = ["summary", "trend", "weekly", "daily", "upcoming"];
 
 export type Preset = "last15" | "last30" | "last90" | "thisMonth" | "lastMonth" | "custom";
+/** Rapor sayfasının açılıştaki aralığı. */
+export const DEFAULT_PRESET: Exclude<Preset, "custom"> = "thisMonth";
 export const PRESETS: Preset[] = ["last15", "last30", "last90", "thisMonth", "lastMonth", "custom"];
 
 /** `_apis/wit/fields` kaydı; type örn. "dateTime", "identity", "html", "string". */
@@ -357,3 +359,84 @@ export function chunk<T>(list: T[], size: number): T[][] {
   for (let i = 0; i < list.length; i += size) out.push(list.slice(i, i + size));
   return out;
 }
+
+/** İsim verilerek saklanan sorgu. shared: proje genelindeki listede durur; __etag: Extension Data Service sürümü. */
+export interface SavedQuery {
+  id: string;
+  name: string;
+  shared: boolean;
+  ownerId: string;
+  ownerName: string;
+  settings: Settings;
+  __etag?: number;
+}
+
+export const QUERY_NAME_MAX = 80;
+
+/** Ad sorunu: boş, çok uzun ya da (büyük/küçük harf farkı gözetmeden) listede var; exceptId kendi adını korur. */
+export function nameError(name: string, list: SavedQuery[], exceptId?: string): "empty" | "long" | "duplicate" | undefined {
+  const n = name.trim();
+  if (!n) return "empty";
+  if (n.length > QUERY_NAME_MAX) return "long";
+  const low = n.toLocaleLowerCase("tr");
+  if (list.some((q) => q.id !== exceptId && q.name.toLocaleLowerCase("tr") === low)) return "duplicate";
+  return undefined;
+}
+
+/** Ayarların karşılaştırma anahtarı; eksik değerler formun varsayılanı sayılır, göreli aralıkta tarihler (o güne göre hesaplandığından) sayılmaz. */
+export function settingsKey(s: Settings): string {
+  const d = s.derived;
+  const preset = s.preset ?? DEFAULT_PRESET;
+  return JSON.stringify([
+    s.type ?? "",
+    s.dateField ?? "",
+    preset,
+    preset === "custom" ? [s.from ?? "", s.to ?? ""] : [],
+    s.states ?? [],
+    s.columns?.length ? s.columns : DEFAULT_COLUMNS,
+    d && (d.source || d.pattern) ? [d.source, d.pattern, d.name] : [],
+  ]);
+}
+
+const str = (v: unknown) => (typeof v === "string" ? v : undefined);
+const strs = (v: unknown) => (Array.isArray(v) ? v.map(String) : undefined);
+
+/** Sunucudaki belgeleri doğrular: ortak listeye herkes yazabildiği için içerik güvenilmez sayılır. */
+export function parseQueries(docs: unknown[], shared: boolean): SavedQuery[] {
+  const out: SavedQuery[] = [];
+  for (const raw of docs) {
+    if (!raw || typeof raw !== "object") continue;
+    const d = raw as Record<string, unknown>;
+    const name = str(d.name)?.trim().slice(0, QUERY_NAME_MAX);
+    const s = d.settings;
+    if (!str(d.id) || !name || !s || typeof s !== "object") continue;
+    const x = s as Record<string, unknown>;
+    const rule = x.derived as Record<string, unknown> | undefined;
+    const settings: Settings = {
+      type: str(x.type),
+      dateField: str(x.dateField),
+      preset: PRESETS.includes(x.preset as Preset) ? (x.preset as Preset) : undefined,
+      from: str(x.from),
+      to: str(x.to),
+      states: strs(x.states),
+      columns: strs(x.columns),
+      derived:
+        rule && typeof rule === "object" && str(rule.source) !== undefined && str(rule.pattern) !== undefined && str(rule.name) !== undefined
+          ? { source: rule.source as string, pattern: rule.pattern as string, name: rule.name as string }
+          : undefined,
+    };
+    out.push({
+      id: d.id as string,
+      name,
+      shared,
+      ownerId: str(d.ownerId) ?? "",
+      ownerName: str(d.ownerName) ?? "",
+      settings,
+      __etag: typeof d.__etag === "number" ? d.__etag : undefined,
+    });
+  }
+  return out.sort((a, b) => a.name.localeCompare(b.name, "tr"));
+}
+
+/** Kişisel sorgular her zaman, ortak olanlar yalnızca oluşturanınca düzenlenir (arayüz kısıtı; servis sahiplik denetlemez). */
+export const canEdit = (q: SavedQuery, userId: string) => !q.shared || q.ownerId === userId;

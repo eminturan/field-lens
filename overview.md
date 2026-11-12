@@ -22,6 +22,7 @@ Monthly reports from your work items, built on **any date field**. Pick a work i
   - the ID opens the work item
 - **CSV export** of the current view: UTF-8 so Excel keeps Turkish characters, with `;` or `,` as separator depending on the interface language.
 - Your selections are remembered.
+- **Saved queries**: save your settings under a name, switch between them, update, rename or delete them. Tick **Share with the project** and everyone in the project sees it; only its creator can edit or delete it.
 
 ## Dashboard widget
 
@@ -40,6 +41,8 @@ Use relative ranges such as "last month" so the dashboard stays current on its o
 Open a project → **Boards** → **Field Lens**. The widget is under **Dashboards → Edit → Add a widget**.
 
 ## Release notes
+
+**0.2.13**: saved queries, personal or shared with the project.
 
 **0.2.12**: a Reset settings button clears all report-page settings at once.
 

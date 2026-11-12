@@ -2,6 +2,10 @@
 
 [Türkçe](CHANGELOG.tr.md)
 
+## 0.2.13
+
+- Report page: **saved queries**. Save the form's settings under a name, switch between saved queries, update, rename or delete them. A query is personal unless **Share with the project** is ticked; shared queries are visible to everyone in the project, and only their creator can edit or delete them (a UI restriction). Shared queries are validated when read, and a concurrent save shows a warning.
+
 ## 0.2.12
 
 - Report page: a **Reset settings** button at the right of the Run row. The first click asks for confirmation, the second clears type, date field, range, states, columns, the rule, the results and row density, and deletes the saved selections.
