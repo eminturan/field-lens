@@ -62,7 +62,7 @@ Dashboard'da **Edit → Add a widget → Field Lens**, ardından ayarlar için d
 
 | Görünüm | Gösterdiği | Aralık ayarı |
 | --- | --- | --- |
-| **Özet** | Ortasında toplam yazan halka, önceki döneme göre fark ve sayılarla yüzdeleri gösteren açıklama. State'lere ya da isteğe bağlı **kırılım alanına** göre bölünür (en büyük 7 değer ve "Diğer"; boş değerler "(boş)"). Kırılım önce bir kuraldan geçirilebilir (türetilen kolonla aynı yazım); ayarlarda canlı önizleme vardır | Göreli aralık ya da özel |
+| **Özet** | Toplam ve önceki döneme göre fark. Kırılım alanı yoksa: state'lere bölünmüş, sayı ve yüzdeli halka. İsteğe bağlı **kırılım alanı** seçilirse: her değer için bir yatay çubuk, en büyük önce, her biri state'lere bölünmüş (boş değerler "(boş)", uzun listeler kayar). Kırılım önce bir kuraldan geçirilebilir (türetilen kolonla aynı yazım); ayarlarda canlı önizleme vardır | Göreli aralık ya da özel |
 | **Aylık trend** | Her takvim ayı için yığılmış bir çubuk | Son 3 / 6 / 12 ay ya da özel |
 | **Haftalık** | Her pazartesi–pazar haftası için `13–19.10` etiketli bir çubuk | Göreli aralık ya da özel |
 | **Tarihe göre** | Kayıt olan her gün için tarihiyle etiketlenmiş bir çubuk | Göreli aralık ya da özel |

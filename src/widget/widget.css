@@ -336,3 +336,33 @@ body {
   font: inherit;
   cursor: pointer;
 }
+
+/* Özet, kırılımlı: değer başına state'lere bölünmüş yatay çubuk */
+.flw-total {
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--text-primary-color, rgba(0, 0, 0, 0.9));
+  margin-right: 10px;
+  font-variant-numeric: tabular-nums;
+}
+
+.flw-hbar {
+  display: grid;
+  grid-template-columns: minmax(80px, 38%) minmax(0, 1fr) 44px;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  margin: 5px 0;
+}
+
+.flw-track {
+  height: 12px;
+}
+
+.flw-fill {
+  display: flex;
+  height: 100%;
+  min-width: 2px;
+  border-radius: 2px;
+  overflow: hidden;
+}

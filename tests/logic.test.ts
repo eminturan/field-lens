@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { applyRule, buildWiql, chunk, compileRule, countBy, DERIVED, deriveRows, dayBuckets, monthBuckets, monthsRange, upcomingRange, countStates, previousRange, weekBuckets, csvRows, filterRows, sortRows, Field, formatCell, moveItem, pageSlice, presetRange, Query, sanitizeSettings, searchFields, toCsv } from "../src/hub/logic";
+import { applyRule, buildWiql, chunk, compileRule, crossCount, DERIVED, deriveRows, dayBuckets, monthBuckets, monthsRange, upcomingRange, countStates, previousRange, weekBuckets, csvRows, filterRows, sortRows, Field, formatCell, moveItem, pageSlice, presetRange, Query, sanitizeSettings, searchFields, toCsv } from "../src/hub/logic";
 
 const q: Query = {
   type: "Kart",
@@ -268,26 +268,6 @@ describe("dayBuckets", () => {
   });
 });
 
-describe("countBy", () => {
-  const col: Field = { referenceName: "S", name: "Sistem", type: "string" };
-  const rows = ["Mobil", "Core", "Mobil", undefined, "Web", "Core", "Mobil", "Kiosk"].map((S) => ({ S }));
-  it("counts displayed values, biggest first, ties by name, rest summed into other", () => {
-    expect(countBy(rows, col, 3)).toEqual({
-      items: [
-        { value: "Mobil", count: 3 },
-        { value: "Core", count: 2 },
-        { value: "", count: 1 },
-      ],
-      other: 2,
-    });
-    expect(countBy(rows, col, 10).other).toBe(0);
-  });
-  it("identity values count by display name", () => {
-    const people = [{ P: { displayName: "Ayşe" } }, { P: { displayName: "Ayşe" } }];
-    expect(countBy(people, { referenceName: "P", name: "P", type: "identity" }, 5).items).toEqual([{ value: "Ayşe", count: 2 }]);
-  });
-});
-
 describe("rules", () => {
   it("compileRule returns a RegExp, or the error message for an invalid pattern", () => {
     expect(compileRule("\\b(ABC|XY)\\b.*")).toBeInstanceOf(RegExp);
@@ -326,5 +306,25 @@ describe("sanitizeSettings with a derived column", () => {
   it("drops the rule and its column when the source is gone", () => {
     const s = { columns: [DERIVED], derived: { source: "Custom.Gone", pattern: "XY.*", name: "Birim" } };
     expect(sanitizeSettings(s, [], fields)).toEqual({ columns: [], derived: undefined });
+  });
+});
+
+describe("crossCount", () => {
+  it("counts each displayed value per state, biggest total first, ties by name, empty value as \"\"", () => {
+    const col: Field = { referenceName: "U", name: "Birim", type: "string" };
+    const rows = [
+      { U: "ABC Kart", "System.State": "Kapalı" },
+      { U: "XY", "System.State": "Kapalı" },
+      { U: "XY", "System.State": "İptal" },
+      { U: "XY", "System.State": "Kapalı" },
+      { U: undefined, "System.State": "İptal" },
+      { U: "Aaa", "System.State": "Kapalı" },
+    ];
+    expect(crossCount(rows, col)).toEqual([
+      { value: "XY", total: 3, counts: { Kapalı: 2, İptal: 1 } },
+      { value: "", total: 1, counts: { İptal: 1 } },
+      { value: "Aaa", total: 1, counts: { Kapalı: 1 } },
+      { value: "ABC Kart", total: 1, counts: { Kapalı: 1 } },
+    ]);
   });
 });

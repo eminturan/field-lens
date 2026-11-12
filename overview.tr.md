@@ -27,7 +27,7 @@ Work item'larınızdan **herhangi bir tarih alanına** göre aylık rapor. Bir w
 
 Widget kataloğundan **Field Lens**'i ekleyip ayarlarından görünümü seçin:
 
-1. **Özet**: ortasında toplam yazan bir halka grafik ve önceki döneme göre fark. Grafik state'lere ya da seçtiğiniz bir **kırılım alanına** (sistem, atanan kişi…) göre bölünür. İsteğe bağlı bir kural, alanın değerini önce bir gruba çevirebilir; örneğin kişiyi birimine.
+1. **Özet**: toplam ve önceki döneme göre fark. Tek başına, state'lere bölünmüş bir halka grafiktir. Bir **kırılım alanı** (sistem, atanan kişi…) seçilince her değer için bir yatay çubuk olur ve her çubuk state'lere bölünür. İsteğe bağlı bir kural, alanın değerini önce bir gruba çevirebilir; örneğin kişiyi birimine.
 2. **Aylık trend**: son 3, 6 ya da 12 ay (ya da özel aralık), state'lere göre yığılmış.
 3. **Haftalık**: seçilen aralıkta takvim haftası başına kayıt.
 4. **Tarihe göre**: kayıt olan her gün için tarihiyle etiketlenmiş bir çubuk.
@@ -40,6 +40,8 @@ Widget kataloğundan **Field Lens**'i ekleyip ayarlarından görünümü seçin:
 Bir proje açın → **Boards** → **Field Lens**. Widget: **Dashboards → Edit → Add a widget**.
 
 ## Sürüm notları
+
+**0.2.8**: kırılım alanlı Özet, state'lere bölünmüş yatay çubuklar olarak çiziliyor.
 
 **0.2.7**: rapor sayfasında kuralla (regex) türetilen kolon, aynı kuralın widget kırılımında kullanımı ve canlı önizleme.
 

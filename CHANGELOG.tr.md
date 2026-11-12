@@ -2,6 +2,10 @@
 
 [English](CHANGELOG.md)
 
+## 0.2.8
+
+- Widget, kırılım alanı seçili **Özet**: artık her değer için bir **yatay çubuk** olarak, en büyük önce çiziliyor. Her çubuk seçili state'lere, panodaki renkleriyle bölünüyor; çubuğun üzerine gelince state başına sayılar görünüyor. Bütün değerler gösteriliyor ("Diğer" yok), uzun listeler widget içinde kayıyor. Kırılım alanı yoksa Özet, state'lere bölünmüş halka grafik olarak kalıyor.
+
 ## 0.2.7
 
 - Rapor sayfası: **kuralla türetilen kolon**. Bir kaynak alan seçip bir kural (regex) ve kolon adı yazarsınız. Yeni kolona, alanın görünen değerinde kurala uyan ilk kısım yazılır. Örneğin `\b(ABC|XY)\b.*` kuralı "Deniz Arslan ABC Ödeme Hizmetleri" değerini "ABC Ödeme Hizmetleri" yapar. Eşleşmeyen değerler "(eşleşmedi)" olarak görünür, boş değerler boş kalır.

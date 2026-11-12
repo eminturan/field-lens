@@ -2,6 +2,10 @@
 
 [Türkçe](CHANGELOG.tr.md)
 
+## 0.2.8
+
+- Widget, **Summary** with a breakdown field: it is now drawn as **horizontal bars**, one per value, biggest first. Each bar is split by the chosen states in the board's colors, and hovering a bar shows the counts per state. All values are shown (no "Other"), and long lists scroll inside the widget. Without a breakdown field, the Summary stays a donut split by state.
+
 ## 0.2.7
 
 - Report page: a **column derived by a rule**. Pick a source field, write a rule (regex) and a column name. The new column holds the first part of the field's displayed value that matches the rule. For example, `\b(ABC|XY)\b.*` turns "Deniz Arslan ABC Ödeme Hizmetleri" into "ABC Ödeme Hizmetleri". Values that don't match show "(no match)" and empty values stay empty.

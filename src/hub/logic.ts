@@ -307,19 +307,6 @@ export function monthBuckets(rows: Row[], dateField: string, from: string, to: s
   return out;
 }
 
-/** Görünen değere göre sayım: çoktan aza (eşitlikte ada göre), ilk `top` tanesi; kalanların toplamı other. Boş değer "". */
-export function countBy(rows: Row[], col: Field, top: number): { items: { value: string; count: number }[]; other: number } {
-  const counts = new Map<string, number>();
-  for (const r of rows) {
-    const v = formatCell(r[col.referenceName], col.type);
-    counts.set(v, (counts.get(v) ?? 0) + 1);
-  }
-  const all = [...counts]
-    .map(([value, count]) => ({ value, count }))
-    .sort((a, b) => b.count - a.count || a.value.localeCompare(b.value, "tr"));
-  return { items: all.slice(0, top), other: all.slice(top).reduce((n, x) => n + x.count, 0) };
-}
-
 /** Kuralı derler; geçersizse (ya da boşsa) hata metnini döner. Kullanıcının kendi tarayıcısında çalışır. */
 export function compileRule(pattern: string): RegExp | string {
   if (!pattern.trim()) return "empty";
@@ -342,6 +329,20 @@ export function deriveRows(rows: Row[], source: Field, re: RegExp, unmatched: st
     const text = formatCell(r[source.referenceName], source.type);
     return { ...r, [DERIVED]: text ? (applyRule(text, re) ?? unmatched) : "" };
   });
+}
+
+/** Görünen değer × state sayımı: toplamı büyük olan önce (eşitlikte ada göre); boş değer "". */
+export function crossCount(rows: Row[], col: Field): { value: string; total: number; counts: Record<string, number> }[] {
+  const by = new Map<string, { value: string; total: number; counts: Record<string, number> }>();
+  for (const r of rows) {
+    const value = formatCell(r[col.referenceName], col.type);
+    const state = String(r["System.State"] ?? "");
+    const e = by.get(value) ?? { value, total: 0, counts: {} };
+    e.total++;
+    e.counts[state] = (e.counts[state] ?? 0) + 1;
+    by.set(value, e);
+  }
+  return [...by.values()].sort((a, b) => b.total - a.total || a.value.localeCompare(b.value, "tr"));
 }
 
 export function chunk<T>(list: T[], size: number): T[][] {

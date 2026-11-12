@@ -4,7 +4,7 @@ import { WidgetSettings } from "azure-devops-extension-api/Dashboard";
 import { RunResult } from "../hub/api";
 import { Bar, Donut, fullDay, shortDay, Slice, StackChart, weekLabel } from "../hub/chart";
 import {
-  countBy,
+  crossCount,
   dayBuckets,
   Field,
   formatCell,
@@ -158,45 +158,65 @@ function Legend({ states, colors }: { states: string[]; colors: Record<string, s
   );
 }
 
-/** Kırılım alanı değerleri için renkler (Azure DevOps grafik paletine yakın); "Diğer" gri. */
-const PALETTE = ["#4c9bd6", "#e8913a", "#bfbfbf", "#f2c04e", "#3b7dd8", "#8a4fb0", "#a6c85a"];
 const OTHER = "#8a8a8a";
-/** Halkada ayrı dilim olarak gösterilen en fazla değer; kalanlar "Diğer"de toplanır. */
-const TOP = 7;
 
-/** 1: toplam ve önceki dönemle fark; halka state'lere ya da seçilen kırılım alanının değerlerine göre bölünür. */
+/** 1: toplam ve önceki dönemle fark. Kırılım yoksa state'lere göre halka; varsa değer başına state'lere bölünmüş yatay çubuklar. */
 function Summary(props: { rows: Row[]; prev?: number; states: string[]; colors: Record<string, string>; breakdown?: Field; rule?: string; env: Env }) {
   const { rows, prev, states, colors, breakdown, env } = props;
   const { t } = env;
   const total = rows.length;
-  let slices: Slice[];
+  const delta = prev !== undefined && (
+    <div className="flw-delta">
+      {breakdown && <span className="flw-total">{total}</span>}
+      {t.prevPeriod(prev)}
+      {prev > 0 && (
+        <span className={total >= prev ? "fl-up" : "fl-down"}>
+          {" · "}
+          {total >= prev ? "+" : "−"}%{Math.round((Math.abs(total - prev) / prev) * 100)}
+        </span>
+      )}
+    </div>
+  );
+
   if (breakdown) {
     // Kural varsa değerler önce kuraldan geçirilir (örn. kişi adı atılıp birim bırakılır).
     const re = props.rule ? compileRule(props.rule) : undefined;
-    const { items, other } =
+    const groups =
       re instanceof RegExp
-        ? countBy(deriveRows(rows, breakdown, re, t.rule.unmatched), { referenceName: DERIVED, name: breakdown.name, type: "string" }, TOP)
-        : countBy(rows, breakdown, TOP);
-    slices = items.map((x, i) => ({ label: x.value || t.w.blank, value: x.count, color: PALETTE[i] }));
-    if (other) slices.push({ label: t.w.other, value: other, color: OTHER });
-  } else {
-    slices = states
-      .map((s) => ({ label: s, value: rows.filter((r) => r["System.State"] === s).length, color: colors[s] || OTHER }))
-      .filter((x) => x.value > 0);
+        ? crossCount(deriveRows(rows, breakdown, re, t.rule.unmatched), { referenceName: DERIVED, name: breakdown.name, type: "string" })
+        : crossCount(rows, breakdown);
+    const max = groups[0]?.total ?? 1;
+    const shown = states.filter((s) => groups.some((g) => g.counts[s]));
+    return (
+      <div className="flw-summary">
+        {delta || <div className="flw-delta"><span className="flw-total">{total}</span></div>}
+        <div className="flw-scroll">
+          {groups.map((g) => {
+            const name = g.value || t.w.blank;
+            return (
+              <div key={g.value} className="flw-hbar" title={[name, ...shown.filter((s) => g.counts[s]).map((s) => `${s}: ${g.counts[s]}`)].join("\n")}>
+                <span className="flw-name">{name}</span>
+                <span className="flw-track">
+                  <span className="flw-fill" style={{ width: `${(g.total / max) * 100}%` }}>
+                    {shown.map((s) => (g.counts[s] ? <span key={s} style={{ flex: g.counts[s], background: colors[s] || OTHER }} /> : null))}
+                  </span>
+                </span>
+                <span className="flw-n">{g.total}</span>
+              </div>
+            );
+          })}
+        </div>
+        <Legend states={shown} colors={colors} />
+      </div>
+    );
   }
+
+  const slices: Slice[] = states
+    .map((s) => ({ label: s, value: rows.filter((r) => r["System.State"] === s).length, color: colors[s] || OTHER }))
+    .filter((x) => x.value > 0);
   return (
     <div className="flw-summary">
-      {prev !== undefined && (
-        <div className="flw-delta">
-          {t.prevPeriod(prev)}
-          {prev > 0 && (
-            <span className={total >= prev ? "fl-up" : "fl-down"}>
-              {" · "}
-              {total >= prev ? "+" : "−"}%{Math.round((Math.abs(total - prev) / prev) * 100)}
-            </span>
-          )}
-        </div>
-      )}
+      {delta}
       <div className="flw-donut">
         <Donut slices={slices} label={slices.map((x) => `${x.label} ${x.value}`).join(", ")} />
         <div className="flw-rows">

@@ -62,7 +62,7 @@ On a dashboard: **Edit → Add a widget → Field Lens**, then the edit icon for
 
 | View | Shows | Range setting |
 | --- | --- | --- |
-| **Summary** | A donut with the total in the middle, the change against the previous period, and a legend with counts and percentages. It is split by state, or by an optional **breakdown field** (7 largest values plus "Other", empty values as "(empty)"). The breakdown can go through a rule first (same syntax as the derived column), with a live preview in the settings | Relative preset or custom |
+| **Summary** | Total and change against the previous period. Without a breakdown field: a donut split by state, with counts and percentages. With an optional **breakdown field**: one horizontal bar per value, biggest first, each split by state (empty values as "(empty)", long lists scroll). The breakdown can go through a rule first (same syntax as the derived column), with a live preview in the settings | Relative preset or custom |
 | **Monthly trend** | One stacked bar per calendar month | Last 3 / 6 / 12 months or custom |
 | **Weekly** | One stacked bar per Monday–Sunday week, labelled `13–19.10` | Relative preset or custom |
 | **By date** | One bar for each day that has items, labelled with its date | Relative preset or custom |
