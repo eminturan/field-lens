@@ -2,6 +2,10 @@
 
 [English](CHANGELOG.md)
 
+## 0.2.19
+
+- Widget: kendi ayarlarında artık rapor sayfasındaki gibi **Projeler** (bu, tümü ya da seçili), **Atanan** ve **Ek koşullar** var. Önceden bunları yalnızca kayıtlı sorgudan alabiliyordu. Kaydet, bir proje seçildiğini ve her koşulun tamamlandığını kontrol ediyor.
+
 ## 0.2.18
 
 - Rapor sayfası: herhangi bir alana **Ek koşullar**; VE ile bağlanır, alan türüne uygun koşullarla (içerir, altında, ≤ vb.). Değerler sorguya girmeden önce türüne göre denetlenir ve kaçışlanır. Koşullar kayıtlı sorgulara, bağlantılara ve bağlı widget'lara girer.

@@ -90,7 +90,7 @@ On a dashboard: **Edit → Add a widget → Field Lens**, then the edit icon for
 | **Upcoming** | Items whose date falls from today to the next 7 / 14 / 30 / 60 days, earliest first; up to 100 are listed, the ID opens the item | Always from today |
 
 - **Source**: the widget's own settings, or a saved query shared with the project. With a query, the projects, extra conditions, type, date field, states, assigned-to filter and (for Summary, Weekly and By date) range come from it and follow its changes; Monthly trend keeps its month count and Upcoming its day count. If the query is deleted, the widget says so.
-- With its own settings, the other settings are work item type, date field and states. No state is preselected: you pick them.
+- With its own settings, the other settings are projects (this, all or chosen), work item type, date field, states, assigned to and extra conditions, the same as on the report page. No state is preselected: you pick them.
 - Relative ranges move with the calendar, so a "Last month" dashboard is always current. A custom range stays fixed.
 - The widget can be 2–6 columns wide and 1–4 rows tall. Charts scale to the widget. When bars get narrow, counts move into the hover tooltip and date labels are written at 45°. Only when bars are very narrow (a long range by date) are labels thinned out.
 - **Open report** opens the Field Lens page. For a widget linked to a saved query it opens that query and runs it; otherwise the widget's filters are not carried over.

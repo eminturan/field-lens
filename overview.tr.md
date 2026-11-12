@@ -46,6 +46,8 @@ Bir proje açın → **Boards** → **Field Lens**. Widget: **Dashboards → Edi
 
 ## Sürüm notları
 
+**0.2.19**: widget'ın kendi ayarlarında projeler, atanan ve ek koşullar.
+
 **0.2.18**: ek alan koşulları, gruplama ve tabloyu kopyalama.
 
 **0.2.17**: kayıtlı sorguya bağlı widget'lar kaydedilebiliyor.

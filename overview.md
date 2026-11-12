@@ -46,6 +46,8 @@ Open a project → **Boards** → **Field Lens**. The widget is under **Dashboar
 
 ## Release notes
 
+**0.2.19**: projects, assigned to and extra conditions in the widget's own settings.
+
 **0.2.18**: extra field conditions, group by, and copy table.
 
 **0.2.17**: widgets linked to a saved query can be saved.

@@ -2,6 +2,10 @@
 
 [Türkçe](CHANGELOG.tr.md)
 
+## 0.2.19
+
+- Widget: its own settings now include **Projects** (this, all or chosen), **Assigned to** and **Extra conditions**, as on the report page. Before, a widget could only get them from a saved query. Saving checks that a project is chosen and every condition is complete.
+
 ## 0.2.18
 
 - Report page: **Extra conditions** on any field, joined with AND, with operators that fit the field type (contains, under, ≤ and so on). Values are validated by type and escaped before they reach the query. Conditions are part of saved queries, links and linked widgets.

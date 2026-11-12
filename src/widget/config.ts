@@ -1,15 +1,15 @@
-import { Assignee, Condition, compileRule, monthsRange, Preset, presetRange, Projects, upcomingRange, View, VIEWS } from "../hub/logic";
+import { Assignee, checkCondition, Condition, compileRule, monthsRange, Preset, presetRange, Projects, upcomingRange, View, VIEWS } from "../hub/logic";
 
 /** Widget ayarları ve doğrulaması; SDK'ya bağlı olmadığı için birim testlerde kullanılabilir. */
 export interface WidgetConfig {
   view: View;
   /** Doluysa tür, tarih alanı, state'ler, atanan (ve aralık seçen görünümlerde aralık) bu paylaşılan kayıtlı sorgudan gelir. */
   queryId: string;
-  /** Yalnızca kayıtlı sorgudan gelir. */
+  /** Kendi ayarı ya da (bağlıysa) kayıtlı sorgudan. */
   assignee?: Assignee;
-  /** Yalnızca kayıtlı sorgudan gelir; yoksa dashboard'un projesi. */
+  /** Kendi ayarı ya da kayıtlı sorgudan; yoksa dashboard'un projesi. */
   projects?: Projects;
-  /** Yalnızca kayıtlı sorgudan gelir. */
+  /** Kendi ayarı ya da kayıtlı sorgudan; hepsi VE ile. */
   conditions?: Condition[];
   type: string;
   dateField: string;
@@ -41,6 +41,8 @@ export const configured = (c: WidgetConfig) =>
   !!c.type &&
   !!c.dateField &&
   c.states.length > 0 &&
+  !(Array.isArray(c.projects) && c.projects.length === 0) &&
+  !(c.conditions ?? []).some((x) => !x.field || checkCondition(x)) &&
   (!usesCustom(c) || customValid(c)) &&
   (c.view !== "summary" || !c.breakdown || !c.breakdownRule || typeof compileRule(c.breakdownRule) !== "string");
 

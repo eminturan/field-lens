@@ -369,3 +369,45 @@ body {
   border-radius: 2px;
   overflow: hidden;
 }
+
+/* Ayar paneli: seçili projeler ve ek koşullar (hub bileşeni) */
+.flc-projects {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 160px;
+  overflow-y: auto;
+  padding: 4px 0;
+}
+.flc .fl-cond {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+.flc .fl-cond .fl-picker {
+  flex: 1 1 180px;
+}
+.flc .fl-cond select,
+.flc .fl-cond .fl-cond-value {
+  width: auto;
+  flex: 0 1 140px;
+}
+.flc .fl-button {
+  align-self: flex-start;
+  padding: 4px 10px;
+  border: 1px solid var(--component-grid-cell-bottom-border-color, rgba(0, 0, 0, 0.25));
+  border-radius: 2px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+.flc .fl-qerror {
+  color: var(--status-error-foreground, #a4262c);
+  font-size: 12px;
+}
+.flc .fl-muted {
+  font-size: inherit;
+}

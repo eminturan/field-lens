@@ -19,3 +19,16 @@ describe("widget settings can be saved", () => {
     expect(savable({ ...DEFAULTS, queryId: "q1", breakdown: "System.AssignedTo", breakdownRule: "(a+)+" })).toBe(false);
   });
 });
+
+describe("widget's own projects, assignee and conditions", () => {
+  const own = { ...DEFAULTS, type: "Change", dateField: "Custom.TargetDate", states: ["Kapalı"] };
+  it("accepts complete conditions and a project scope", () => {
+    expect(savable({ ...own, projects: "all", assignee: "me", conditions: [{ field: "Custom.Sistem", type: "string", op: "=", value: "Mobil" }] })).toBe(true);
+    expect(savable({ ...own, projects: ["A"] })).toBe(true);
+  });
+  it("rejects an empty project list and incomplete or invalid conditions", () => {
+    expect(savable({ ...own, projects: [] })).toBe(false);
+    expect(savable({ ...own, conditions: [{ field: "", type: "string", op: "=", value: "" }] })).toBe(false);
+    expect(savable({ ...own, conditions: [{ field: "Microsoft.VSTS.Common.Priority", type: "integer", op: "<", value: "x" }] })).toBe(false);
+  });
+});

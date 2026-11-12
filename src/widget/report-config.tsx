@@ -1,8 +1,9 @@
 import * as React from "react";
 
 import { FieldPicker } from "../hub/fieldPicker";
-import { applyQuery, Field, formatCell, monthsRange, Preset, PRESETS, presetRange, SavedQuery, VIEWS } from "../hub/logic";
+import { applyQuery, Assignee, fold, Projects, Field, formatCell, monthsRange, Preset, PRESETS, presetRange, SavedQuery, VIEWS } from "../hub/logic";
 import { RulePreview } from "../hub/rulePreview";
+import { ConditionsEditor } from "../hub/conditions";
 import { customValid, DAYS, DEFAULTS, Env, inHost, MONTHS, plan, startConfig, usesCustom, WidgetConfig } from "./shared";
 
 /** Özel aralığa geçerken boş tarihler o an görünen aralıkla doldurulur. */
@@ -29,19 +30,39 @@ function Form({ value, onChange, env }: { value: WidgetConfig; onChange: (v: Wid
   const r = linked ? applyQuery(value, linked.settings) : value;
   const ranged = r.view === "summary" || r.view === "weekly" || r.view === "daily";
 
+  const [projectNames, setProjectNames] = React.useState<string[]>([]);
+  const [projectSearch, setProjectSearch] = React.useState("");
+  const projectsKey = JSON.stringify(value.projects ?? null);
   React.useEffect(() => {
-    Promise.all([source.types(), source.fields()]).then(([ts, fs]) => {
-      setTypes(ts);
-      setFields(fs);
-    }, (e) => setError(String(e?.message ?? e)));
+    source.fields().then(setFields, (e) => setError(String(e?.message ?? e)));
+    source.projects().then(setProjectNames, () => undefined);
   }, [source]);
+  // Tür listesi widget'ın proje kapsamına göre; kapsamda olmayan tür seçimi düşer.
+  React.useEffect(() => {
+    if (Array.isArray(value.projects) && value.projects.length === 0) return;
+    let live = true;
+    source.types(value.projects).then((ts) => {
+      if (!live) return;
+      setTypes(ts);
+      if (value.type && !ts.includes(value.type)) set({ type: "", states: [] });
+    }, (e) => live && setError(String(e?.message ?? e)));
+    return () => {
+      live = false;
+    };
+  }, [source, projectsKey]);
+  const scope = value.projects === undefined ? "this" : value.projects === "all" ? "all" : "some";
+  const chooseScope = (s: string) => set({ projects: s === "this" ? undefined : s === "all" ? "all" : [] });
+  const toggleProject = (n: string) =>
+    Array.isArray(value.projects) &&
+    set({ projects: value.projects.includes(n) ? value.projects.filter((x) => x !== n) : projectNames.filter((x) => x === n || value.projects!.includes(x)) });
 
   // Tür değişince state listesi yenilenir; bu türde olmayan seçimler düşer. Varsayılan seçim yok, kullanıcı seçer.
   React.useEffect(() => {
     if (!value.type) return setStateList([]);
+    if (Array.isArray(value.projects) && value.projects.length === 0) return;
     let live = true;
     setStateList(undefined);
-    source.states(value.type).then((info) => {
+    source.states(value.type, value.projects).then((info) => {
       if (!live) return;
       const names = info.map((s) => s.name);
       setStateList(names);
@@ -51,7 +72,7 @@ function Form({ value, onChange, env }: { value: WidgetConfig; onChange: (v: Wid
     return () => {
       live = false;
     };
-  }, [source, value.type]);
+  }, [source, value.type, projectsKey]);
 
   const byRef = new Map(fields.map((f) => [f.referenceName, f]));
 
@@ -122,6 +143,31 @@ function Form({ value, onChange, env }: { value: WidgetConfig; onChange: (v: Wid
         </div>
       )}
       {!value.queryId && (<>
+      <label className="flc-field">
+        <span>{t.projects}</span>
+        <select value={scope} onChange={(e) => chooseScope(e.target.value)}>
+          <option value="this">{t.projectModes.this}</option>
+          <option value="all">{t.projectModes.all}</option>
+          {projectNames.length > 0 && <option value="some">{t.projectModes.some}</option>}
+        </select>
+        {scope === "all" && <span className="flc-hint">{t.allProjectsHint}</span>}
+      </label>
+      {Array.isArray(value.projects) && (
+        <div className="flc-field">
+          <input className="fl-input" placeholder={t.searchProject} value={projectSearch} onChange={(e) => setProjectSearch(e.target.value)} />
+          <div className="flc-projects">
+            {projectNames
+              .filter((n) => fold(n).includes(fold(projectSearch.trim())))
+              .map((n) => (
+                <label key={n} className="flc-check">
+                  <input type="checkbox" checked={value.projects!.includes(n)} onChange={() => toggleProject(n)} />
+                  {n}
+                </label>
+              ))}
+          </div>
+          {value.projects.length === 0 && <span className="flc-hint flw-error">{t.need.projects}</span>}
+        </div>
+      )}
       <label className="flc-field">
         <span>{t.type}</span>
         <select value={value.type} onChange={(e) => set({ type: e.target.value, states: [] })}>
@@ -247,6 +293,26 @@ function Form({ value, onChange, env }: { value: WidgetConfig; onChange: (v: Wid
           ))
         )}
       </fieldset>}
+      {!value.queryId && (
+        <label className="flc-field">
+          <span>{t.assignee}</span>
+          <select value={value.assignee ?? ""} onChange={(e) => set({ assignee: (e.target.value || undefined) as Assignee | undefined })}>
+            <option value="">{t.assignees.all}</option>
+            <option value="me">{t.assignees.me}</option>
+            <option value="none">{t.assignees.none}</option>
+          </select>
+        </label>
+      )}
+      {!value.queryId && (
+        <ConditionsEditor
+          value={value.conditions ?? []}
+          onChange={(cs) => set({ conditions: cs.length ? cs : undefined })}
+          fields={fields}
+          t={t.cond}
+          searchField={t.w.searchField}
+          noMatch={t.noMatch}
+        />
+      )}
     </div>
   );
 }

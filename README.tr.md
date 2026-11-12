@@ -90,7 +90,7 @@ Dashboard'da **Edit → Add a widget → Field Lens**, ardından ayarlar için d
 | **Yaklaşanlar** | Tarihi bugünden önümüzdeki 7 / 14 / 30 / 60 güne düşen kayıtlar, en yakın önce; en fazla 100 kayıt listelenir, ID kaydı açar | Her zaman bugünden itibaren |
 
 - **Kaynak**: widget'ın kendi ayarları ya da projeyle paylaşılmış bir kayıtlı sorgu. Sorgu seçilirse projeler, ek koşullar, tür, tarih alanı, state'ler, atanan ve (Özet, Haftalık, Tarihe göre için) aralık sorgudan gelir ve sorgu değiştikçe güncellenir; Aylık trend ay sayısını, Yaklaşanlar gün sayısını korur. Sorgu silinirse widget bunu yazar.
-- Kendi ayarlarıyla diğer ayarlar work item türü, tarih alanı ve state'lerdir. State'ler önceden seçili gelmez, siz seçersiniz.
+- Kendi ayarlarıyla diğer ayarlar rapor sayfasındakiyle aynıdır: projeler (bu, tümü ya da seçili), work item türü, tarih alanı, state'ler, atanan ve ek koşullar. State'ler önceden seçili gelmez, siz seçersiniz.
 - Göreli aralıklar takvimle birlikte ilerler; "Geçen ay" ayarlı bir dashboard hep güncel kalır. Özel aralık sabittir.
 - Widget 2–6 sütun genişliğinde, 1–4 satır yüksekliğinde olabilir ve grafikler boyuta göre ölçeklenir. Çubuklar daraldığında sayılar fareyle üzerine gelince çıkan ipucuna taşınır ve tarih etiketleri 45° çapraz yazılır. Etiketler yalnızca çubuklar çok daraldığında (uzun bir aralık, tarihe göre) aralıklı yazılır.
 - **Raporu aç** bağlantısı Field Lens sayfasını açar. Kayıtlı sorguya bağlı widget'ta o sorguyu açıp çalıştırır; kendi ayarlı widget'ta filtreler sayfaya taşınmaz.
