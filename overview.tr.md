@@ -14,7 +14,6 @@ Work item'larınızdan **herhangi bir tarih alanına** göre aylık rapor. Bir w
 - **Toplamlar**:
   - toplam ve önceki döneme göre fark (+/− %)
   - panodaki state renklerinde her state için bir kart; karta tıklayınca yalnızca o state gösterilir
-- **Haftalara göre grafik**: pazartesi–pazar haftaları, state'lere göre yığılmış.
 - **Sonuç tablosu**:
   - tüm kolonlarda arama, kolon bazında filtre, başlığa tıklayarak sıralama
   - sayfa başına 100 satır, sabit başlık
@@ -27,7 +26,7 @@ Work item'larınızdan **herhangi bir tarih alanına** göre aylık rapor. Bir w
 
 Widget kataloğundan **Field Lens**'i ekleyip ayarlarından görünümü seçin:
 
-1. **Özet**: toplam, önceki döneme göre fark ve her state'in payı.
+1. **Özet**: ortasında toplam yazan bir halka grafik ve önceki döneme göre fark. Grafik state'lere ya da seçtiğiniz bir **kırılım alanına** (sistem, atanan kişi…) göre bölünür.
 2. **Aylık trend**: son 3, 6 ya da 12 ay (ya da özel aralık), state'lere göre yığılmış.
 3. **Haftalık**: seçilen aralıkta takvim haftası başına kayıt.
 4. **Tarihe göre**: kayıt olan her gün için tarihiyle etiketlenmiş bir çubuk.
@@ -40,6 +39,8 @@ Widget kataloğundan **Field Lens**'i ekleyip ayarlarından görünümü seçin:
 Bir proje açın → **Boards** → **Field Lens**. Widget: **Dashboards → Edit → Add a widget**.
 
 ## Sürüm notları
+
+**0.2.6**: widget Özet görünümü halka grafik oldu ve isteğe bağlı kırılım alanı eklendi. Haftalara göre grafik rapor sayfasından kaldırıldı.
 
 **0.2.5**: sürüm notları İngilizce ve Türkçe.
 

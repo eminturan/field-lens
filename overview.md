@@ -14,7 +14,6 @@ Monthly reports from your work items, built on **any date field**. Pick a work i
 - **Totals**:
   - the total compared with the previous period (+/− %)
   - one card per state in the board's state colors; click a card to show only that state
-- **By-week chart**: Monday-to-Sunday weeks stacked by state.
 - **Results table**:
   - search across all columns, filter each column, and sort by clicking a header
   - 100 rows per page with a sticky header
@@ -27,7 +26,7 @@ Monthly reports from your work items, built on **any date field**. Pick a work i
 
 Add **Field Lens** from the widget catalog and choose a view in its settings:
 
-1. **Summary**: total, change against the previous period, and the share of each state.
+1. **Summary**: a donut chart with the total in the middle and the change against the previous period. It is split by state, or by any **breakdown field** you choose (system, assignee, …).
 2. **Monthly trend**: the last 3, 6 or 12 months (or a custom range), stacked by state.
 3. **Weekly**: items per calendar week in the chosen range.
 4. **By date**: one bar for every day that has items, labelled with its date.
@@ -40,6 +39,8 @@ Use relative ranges such as "last month" so the dashboard stays current on its o
 Open a project → **Boards** → **Field Lens**. The widget is under **Dashboards → Edit → Add a widget**.
 
 ## Release notes
+
+**0.2.6**: the widget Summary view is a donut chart and has an optional breakdown field. The by-week chart is removed from the report page.
 
 **0.2.5**: release notes in English and Turkish.
 

@@ -27,6 +27,12 @@ export interface WidgetStrings {
   cfgMonths: string;
   months: (n: number) => string;
   customRange: string;
+  cfgBreakdown: string;
+  breakdownHint: string;
+  searchField: string;
+  clear: string;
+  other: string;
+  blank: string;
   cfgDays: string;
   nextDays: (n: number) => string;
   notConfigured: string;
@@ -86,7 +92,6 @@ export interface Strings {
   statesN: (n: number) => string;
   prevPeriod: (n: number) => string;
   prevTip: (from: string, to: string) => string;
-  weekly: string;
   weekTip: (from: string, to: string, n: number) => string;
   density: string;
   comfortable: string;
@@ -105,6 +110,12 @@ export const STRINGS: Record<Lang, Strings> = {
       cfgMonths: "Ay sayısı",
       months: (n) => `Son ${n} ay`,
       customRange: "Özel aralık",
+      cfgBreakdown: "Kırılım alanı (isteğe bağlı)",
+      breakdownHint: "Boşsa grafik state'lere göre bölünür. Bir alan seçilirse seçili state'lerdeki kayıtlar o alanın değerlerine göre sayılır.",
+      searchField: "Alan ara…",
+      clear: "Temizle",
+      other: "Diğer",
+      blank: "(boş)",
       cfgDays: "Süre",
       nextDays: (n) => `Sonraki ${n} gün`,
       notConfigured: "Ayarlamak için widget'ın düzenle simgesini kullanın.",
@@ -161,7 +172,6 @@ export const STRINGS: Record<Lang, Strings> = {
     prevPeriod: (n) => `önceki dönem ${n}`,
     prevTip: (f, to) =>
       `Önceki dönem: ${f} – ${to}. Aynı tür, state'ler ve tarih alanıyla sayıldı. Arama ya da kolon filtresi açıkken karşılaştırma gizlenir.`,
-    weekly: "Haftalara göre",
     weekTip: (f, to, n) => `${f}–${to}: ${n} kayıt`,
     density: "Satır yoğunluğu",
     comfortable: "Rahat",
@@ -184,6 +194,12 @@ export const STRINGS: Record<Lang, Strings> = {
       cfgMonths: "Months",
       months: (n) => `Last ${n} months`,
       customRange: "Custom range",
+      cfgBreakdown: "Breakdown field (optional)",
+      breakdownHint: "Empty: the chart is split by state. With a field: items in the chosen states are counted by that field's values.",
+      searchField: "Search field…",
+      clear: "Clear",
+      other: "Other",
+      blank: "(empty)",
       cfgDays: "Period",
       nextDays: (n) => `Next ${n} days`,
       notConfigured: "Use the widget's edit icon to configure it.",
@@ -240,7 +256,6 @@ export const STRINGS: Record<Lang, Strings> = {
     prevPeriod: (n) => `previous period ${n}`,
     prevTip: (f, to) =>
       `Previous period: ${f} – ${to}, counted with the same type, states and date field. Hidden while a search or column filter is on.`,
-    weekly: "By week",
     weekTip: (f, to, n) => `${f}–${to}: ${n} items`,
     density: "Row density",
     comfortable: "Comfortable",

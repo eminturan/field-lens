@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildWiql, chunk, dayBuckets, monthBuckets, monthsRange, upcomingRange, countStates, previousRange, weekBuckets, csvRows, filterRows, sortRows, Field, formatCell, moveItem, pageSlice, presetRange, Query, sanitizeSettings, searchFields, toCsv } from "../src/hub/logic";
+import { buildWiql, chunk, countBy, dayBuckets, monthBuckets, monthsRange, upcomingRange, countStates, previousRange, weekBuckets, csvRows, filterRows, sortRows, Field, formatCell, moveItem, pageSlice, presetRange, Query, sanitizeSettings, searchFields, toCsv } from "../src/hub/logic";
 
 const q: Query = {
   type: "Kart",
@@ -265,5 +265,25 @@ describe("dayBuckets", () => {
       ["2026-10-09", "2026-10-09", 1],
     ]);
     expect(b[0].counts).toEqual({ A: 1, B: 1 });
+  });
+});
+
+describe("countBy", () => {
+  const col: Field = { referenceName: "S", name: "Sistem", type: "string" };
+  const rows = ["Mobil", "Core", "Mobil", undefined, "Web", "Core", "Mobil", "Kiosk"].map((S) => ({ S }));
+  it("counts displayed values, biggest first, ties by name, rest summed into other", () => {
+    expect(countBy(rows, col, 3)).toEqual({
+      items: [
+        { value: "Mobil", count: 3 },
+        { value: "Core", count: 2 },
+        { value: "", count: 1 },
+      ],
+      other: 2,
+    });
+    expect(countBy(rows, col, 10).other).toBe(0);
+  });
+  it("identity values count by display name", () => {
+    const people = [{ P: { displayName: "Ayşe" } }, { P: { displayName: "Ayşe" } }];
+    expect(countBy(people, { referenceName: "P", name: "P", type: "identity" }, 5).items).toEqual([{ value: "Ayşe", count: 2 }]);
   });
 });

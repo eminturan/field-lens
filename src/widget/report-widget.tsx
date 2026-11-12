@@ -2,8 +2,9 @@ import * as React from "react";
 import { WidgetSettings } from "azure-devops-extension-api/Dashboard";
 
 import { RunResult } from "../hub/api";
-import { Bar, fullDay, shortDay, StackChart, weekLabel } from "../hub/chart";
+import { Bar, Donut, fullDay, shortDay, Slice, StackChart, weekLabel } from "../hub/chart";
 import {
+  countBy,
   dayBuckets,
   Field,
   formatCell,
@@ -37,7 +38,12 @@ function plan(cfg: WidgetConfig, now: Date): { from: string; to: string; columns
       : cfg.view === "upcoming"
         ? upcomingRange(cfg.days, now)
         : presetRange(cfg.preset as Exclude<Preset, "custom">, now);
-  const columns = cfg.view === "upcoming" ? ["System.Title", "System.State", cfg.dateField] : ["System.State", cfg.dateField];
+  const columns =
+    cfg.view === "upcoming"
+      ? ["System.Title", "System.State", cfg.dateField]
+      : cfg.view === "summary" && cfg.breakdown
+        ? ["System.State", cfg.dateField, cfg.breakdown]
+        : ["System.State", cfg.dateField];
   return { ...range, columns };
 }
 
@@ -62,6 +68,7 @@ function Report({ settings }: { settings?: WidgetSettings }) {
         dateField: "Custom.TargetDate",
         states: ["New", "Active", "Resolved", "Closed"],
         preset: "last90",
+        breakdown: new URLSearchParams(window.location.search).get("breakdown") ?? "",
       };
   const ok = configured(cfg);
   const req = plan(cfg, new Date());
@@ -100,7 +107,8 @@ function Report({ settings }: { settings?: WidgetSettings }) {
   const span = custom ? t.presets.custom : cfg.view === "trend" ? t.w.months(cfg.months) : cfg.view === "upcoming" ? t.w.nextDays(cfg.days) : t.presets[cfg.preset];
   // Özel aralık yıl değiştirebilir; o yüzden yılıyla yazılır.
   const day = custom ? fullDay : shortDay;
-  const sub = [t.w.views[cfg.view], cfg.type, field(cfg.dateField).name, `${span} (${day(req.from)} – ${day(req.to)})`].join(" · ");
+  const viewName = cfg.view === "summary" && cfg.breakdown ? `${t.w.views.summary}: ${field(cfg.breakdown).name}` : t.w.views[cfg.view];
+  const sub = [viewName, cfg.type, field(cfg.dateField).name, `${span} (${day(req.from)} – ${day(req.to)})`].join(" · ");
   const link = { href: env.hubUrl, label: t.w.openReport };
   if (error) return <Frame title={title} sub={sub} link={link} message={t.loadError(error)} error />;
   if (!meta || data?.key !== key) return <Frame title={title} sub={sub} link={link} message={t.loading} />;
@@ -110,7 +118,16 @@ function Report({ settings }: { settings?: WidgetSettings }) {
   const body = (() => {
     switch (cfg.view) {
       case "summary":
-        return <Summary rows={rows} prev={data.prev} states={cfg.states} colors={meta.colors} env={env} />;
+        return (
+          <Summary
+            rows={rows}
+            prev={data.prev}
+            states={cfg.states}
+            colors={meta.colors}
+            breakdown={cfg.breakdown ? field(cfg.breakdown) : undefined}
+            env={env}
+          />
+        );
       case "trend":
       case "weekly":
       case "daily": {
@@ -158,42 +175,51 @@ function Legend({ states, colors }: { states: string[]; colors: Record<string, s
   );
 }
 
-/** 1: toplam, önceki dönemle fark ve state oranları. */
-function Summary({ rows, prev, states, colors, env }: { rows: Row[]; prev?: number; states: string[]; colors: Record<string, string>; env: Env }) {
+/** Kırılım alanı değerleri için renkler (Azure DevOps grafik paletine yakın); "Diğer" gri. */
+const PALETTE = ["#4c9bd6", "#e8913a", "#bfbfbf", "#f2c04e", "#3b7dd8", "#8a4fb0", "#a6c85a"];
+const OTHER = "#8a8a8a";
+/** Halkada ayrı dilim olarak gösterilen en fazla değer; kalanlar "Diğer"de toplanır. */
+const TOP = 7;
+
+/** 1: toplam ve önceki dönemle fark; halka state'lere ya da seçilen kırılım alanının değerlerine göre bölünür. */
+function Summary({ rows, prev, states, colors, breakdown, env }: { rows: Row[]; prev?: number; states: string[]; colors: Record<string, string>; breakdown?: Field; env: Env }) {
   const { t } = env;
   const total = rows.length;
-  const counts = states.map((s) => ({ s, n: rows.filter((r) => r["System.State"] === s).length })).filter((x) => x.n > 0);
-  const pct = (n: number) => Math.round((n / total) * 100);
+  let slices: Slice[];
+  if (breakdown) {
+    const { items, other } = countBy(rows, breakdown, TOP);
+    slices = items.map((x, i) => ({ label: x.value || t.w.blank, value: x.count, color: PALETTE[i] }));
+    if (other) slices.push({ label: t.w.other, value: other, color: OTHER });
+  } else {
+    slices = states
+      .map((s) => ({ label: s, value: rows.filter((r) => r["System.State"] === s).length, color: colors[s] || OTHER }))
+      .filter((x) => x.value > 0);
+  }
   return (
     <div className="flw-summary">
-      <div className="flw-big">
-        <span className="flw-num">{total}</span>
-        {prev !== undefined && (
-          <span className="flw-delta">
-            {t.prevPeriod(prev)}
-            {prev > 0 && (
-              <span className={total >= prev ? "fl-up" : "fl-down"}>
-                {" · "}
-                {total >= prev ? "+" : "−"}%{Math.round((Math.abs(total - prev) / prev) * 100)}
-              </span>
-            )}
-          </span>
-        )}
-      </div>
-      <div className="flw-stack" role="img" aria-label={counts.map((c) => `${c.s} ${c.n}`).join(", ")}>
-        {counts.map((c) => (
-          <span key={c.s} title={`${c.s}: ${c.n}`} style={{ width: `${(c.n / total) * 100}%`, background: colors[c.s] || "#8a8a8a" }} />
-        ))}
-      </div>
-      <div className="flw-rows">
-        {counts.map((c) => (
-          <div key={c.s} className="flw-row" style={dot(colors[c.s])}>
-            <span className="fl-dot" />
-            <span className="flw-name">{c.s}</span>
-            <span className="flw-n">{c.n}</span>
-            <span className="flw-pct">%{pct(c.n)}</span>
-          </div>
-        ))}
+      {prev !== undefined && (
+        <div className="flw-delta">
+          {t.prevPeriod(prev)}
+          {prev > 0 && (
+            <span className={total >= prev ? "fl-up" : "fl-down"}>
+              {" · "}
+              {total >= prev ? "+" : "−"}%{Math.round((Math.abs(total - prev) / prev) * 100)}
+            </span>
+          )}
+        </div>
+      )}
+      <div className="flw-donut">
+        <Donut slices={slices} label={slices.map((x) => `${x.label} ${x.value}`).join(", ")} />
+        <div className="flw-rows">
+          {slices.map((x) => (
+            <div key={x.label} className="flw-row" style={dot(x.color)} title={`${x.label}: ${x.value}`}>
+              <span className="fl-dot" />
+              <span className="flw-name">{x.label}</span>
+              <span className="flw-n">{x.value}</span>
+              <span className="flw-pct">%{Math.round((x.value / total) * 100)}</span>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );

@@ -294,6 +294,19 @@ export function monthBuckets(rows: Row[], dateField: string, from: string, to: s
   return out;
 }
 
+/** Görünen değere göre sayım: çoktan aza (eşitlikte ada göre), ilk `top` tanesi; kalanların toplamı other. Boş değer "". */
+export function countBy(rows: Row[], col: Field, top: number): { items: { value: string; count: number }[]; other: number } {
+  const counts = new Map<string, number>();
+  for (const r of rows) {
+    const v = formatCell(r[col.referenceName], col.type);
+    counts.set(v, (counts.get(v) ?? 0) + 1);
+  }
+  const all = [...counts]
+    .map(([value, count]) => ({ value, count }))
+    .sort((a, b) => b.count - a.count || a.value.localeCompare(b.value, "tr"));
+  return { items: all.slice(0, top), other: all.slice(top).reduce((n, x) => n + x.count, 0) };
+}
+
 export function chunk<T>(list: T[], size: number): T[][] {
   const out: T[][] = [];
   for (let i = 0; i < list.length; i += size) out.push(list.slice(i, i + size));

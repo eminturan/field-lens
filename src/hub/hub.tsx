@@ -15,7 +15,7 @@ import { MessageCard, MessageCardSeverity } from "azure-devops-ui/MessageCard";
 import { Page } from "azure-devops-ui/Page";
 
 import { createRestSource, DataSource, RunResult } from "./api";
-import { fullDay, shortDay, StackChart, weekLabel } from "./chart";
+import { fullDay } from "./chart";
 import { FieldPicker } from "./fieldPicker";
 import { firstOf, pickLang, Strings, STRINGS } from "./i18n";
 import {
@@ -36,7 +36,6 @@ import {
   sortRows,
   Settings,
   toCsv,
-  weekBuckets,
 } from "./logic";
 import { mockSource } from "./mock";
 
@@ -321,10 +320,6 @@ function App({ source, store, mock, t, itemUrl }: Props) {
   };
   const shown = pageSlice(visible, page, PAGE_SIZE);
   const textFiltered = matched.length !== allRows.length;
-  const buckets = React.useMemo(
-    () => (result ? weekBuckets(matched, result.query.dateField, result.query.from, result.query.to) : []),
-    [matched, result],
-  );
   const csvButton = (
     <button className="fl-button" disabled={!result || visible.length === 0} onClick={exportCsv}>
       {filtering ? `${t.exportCsv} (${visible.length})` : t.exportCsv}
@@ -552,20 +547,6 @@ function App({ source, store, mock, t, itemUrl }: Props) {
               </button>
             ))}
           </div>
-        )}
-        {!running && result && allRows.length > 0 && buckets.length > 1 && (
-          <section className="fl-box">
-            <h3 className="fl-box-title">
-              {t.weekly}
-              <span className="fl-muted">{byRef.get(result.query.dateField)?.name ?? result.query.dateField}</span>
-            </h3>
-            <StackChart
-              bars={buckets.map((b) => ({ ...b, label: weekLabel(b.start, b.end), tip: t.weekTip(shortDay(b.start), shortDay(b.end), b.total) }))}
-              states={result.query.states}
-              colors={stateColors}
-              label={t.weekly}
-            />
-          </section>
         )}
         {!running && result && allRows.length > 0 && (
           <div className="fl-actions">

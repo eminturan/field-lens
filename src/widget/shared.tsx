@@ -30,6 +30,8 @@ export interface WidgetConfig {
   states: string[];
   /** Özet, haftalık ve tarihe göre için aralık. Göreli olanlar dashboard'u kendiliğinden güncel tutar; "custom" from–to kullanır. */
   preset: Preset;
+  /** Özet için isteğe bağlı kırılım alanı: doluysa halka state yerine bu alanın değerlerine göre bölünür. */
+  breakdown: string;
   /** Aylık trend için ay sayısı; 0 = özel aralık (from–to). */
   months: number;
   from: string;
@@ -37,7 +39,7 @@ export interface WidgetConfig {
   days: number;
 }
 
-export const DEFAULTS: WidgetConfig = { view: "summary", type: "", dateField: "", states: [], preset: "lastMonth", months: 6, from: "", to: "", days: 14 };
+export const DEFAULTS: WidgetConfig = { view: "summary", type: "", dateField: "", states: [], preset: "lastMonth", months: 6, from: "", to: "", breakdown: "", days: 14 };
 export const MONTHS = [3, 6, 12];
 export const DAYS = [7, 14, 30, 60];
 

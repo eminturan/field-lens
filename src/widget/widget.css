@@ -118,22 +118,7 @@ body {
   min-height: 0;
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  margin-top: 4px;
-}
-
-.flw-big {
-  display: flex;
-  align-items: baseline;
-  flex-wrap: wrap;
-  gap: 4px 10px;
-}
-
-.flw-num {
-  font-size: 40px;
-  font-weight: 600;
-  line-height: 1;
-  font-variant-numeric: tabular-nums;
+  gap: 4px;
 }
 
 .flw-delta {
@@ -141,21 +126,27 @@ body {
   color: var(--text-secondary-color, rgba(0, 0, 0, 0.55));
 }
 
-.flw-stack {
+/* Halka solda, açıklama sağda; dar widget'ta açıklama alta iner ve kayar. */
+.flw-donut {
+  flex: 1;
+  min-height: 0;
   display: flex;
-  height: 10px;
-  border-radius: 5px;
-  overflow: hidden;
-  background: rgba(128, 128, 128, 0.15);
+  align-items: center;
+  gap: 14px;
 }
 
-.flw-stack > span {
+.flw-donut .fl-donut {
+  flex: none;
   height: 100%;
+  max-height: 100%;
+  max-width: 55%;
+  min-width: 90px;
 }
 
 .flw-rows {
   flex: 1;
-  min-height: 0;
+  min-width: 0;
+  max-height: 100%;
   overflow: auto;
   display: flex;
   flex-direction: column;
@@ -165,7 +156,7 @@ body {
 
 .flw-row {
   display: grid;
-  grid-template-columns: 8px minmax(0, 1fr) auto 40px;
+  grid-template-columns: 8px minmax(0, 1fr) auto 36px;
   align-items: center;
   gap: 6px;
 }
@@ -322,4 +313,26 @@ body {
   background: var(--callout-background-color, #fff);
   color: inherit;
   font: inherit;
+}
+
+.flc-inline {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.flc-inline .fl-picker {
+  flex: 1;
+  min-width: 0;
+}
+
+.flc-clear {
+  height: 32px;
+  padding: 0 10px;
+  border: 1px solid var(--component-grid-cell-bottom-border-color, rgba(0, 0, 0, 0.25));
+  border-radius: 2px;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
 }

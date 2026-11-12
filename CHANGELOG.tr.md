@@ -2,6 +2,12 @@
 
 [English](CHANGELOG.md)
 
+## 0.2.6
+
+- Widget, **Özet** görünümü: ortasında toplam yazan bir **halka grafik** ve sayılarla yüzdeleri gösteren bir açıklama. State çubuğunun yerini aldı.
+- Widget, **Özet** görünümü: isteğe bağlı **kırılım alanı**. Boşsa halka state'lere göre bölünür. Bir alan seçilirse seçili state'lerdeki kayıtlar o alanın değerlerine göre sayılır: en büyük 7 değer ayrı gösterilir, kalanlar "Diğer"de toplanır, boş değerler "(boş)" olarak görünür.
+- Rapor sayfası: haftalara göre grafik kaldırıldı. Haftalık görünüm widget'ta duruyor.
+
 ## 0.2.5
 
 - Sürüm notları İngilizce (`CHANGELOG.md`) ve Türkçe (`CHANGELOG.tr.md`) olarak eklendi. Marketplace sayfası ve README'ler bu dosyalara bağlantı veriyor.

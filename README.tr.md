@@ -29,14 +29,13 @@ Seçilen tarih alanı kolonlara kendiliğinden eklenir. Seçimler kullanıcı ba
   - Kartın üzerine gelince tarihler görünür.
   - Arama ya da kolon filtresi açıkken karşılaştırma gizlenir.
 - **State kartları** panodaki state renklerini kullanır. Bir karta tıklayınca tabloda ve CSV'de yalnızca o state kalır.
-- **Haftalara göre grafik** pazartesi–pazar haftalarını kullanır; aralığın uçlarında hafta kesilir ve çubuklar state'lere göre yığılır.
 - **Tablo**:
   - tüm kolonlarda arama, her başlığın altında filtre kutusu, başlığa tıklayarak sıralama (artan → azalan → kapalı)
   - sayfa başına 100 satır, sabit başlık
   - rahat ya da sıkı satır görünümü
   - uzun hücreler kendi içinde kaydırılır
   - ID'ye tıklayınca kayıt açılır
-- Metin filtreleri state kartlarını ve grafiği de günceller.
+- Metin filtreleri state kartlarını da günceller.
 
 ### CSV dışa aktarma
 
@@ -53,7 +52,7 @@ Dashboard'da **Edit → Add a widget → Field Lens**, ardından ayarlar için d
 
 | Görünüm | Gösterdiği | Aralık ayarı |
 | --- | --- | --- |
-| **Özet** | Toplam, önceki döneme göre fark, state çubuğu ve yüzdeli sayılar | Göreli aralık ya da özel |
+| **Özet** | Ortasında toplam yazan halka, önceki döneme göre fark ve sayılarla yüzdeleri gösteren açıklama. State'lere ya da isteğe bağlı **kırılım alanına** göre bölünür (en büyük 7 değer ve "Diğer"; boş değerler "(boş)") | Göreli aralık ya da özel |
 | **Aylık trend** | Her takvim ayı için yığılmış bir çubuk | Son 3 / 6 / 12 ay ya da özel |
 | **Haftalık** | Her pazartesi–pazar haftası için `13–19.10` etiketli bir çubuk | Göreli aralık ya da özel |
 | **Tarihe göre** | Kayıt olan her gün için tarihiyle etiketlenmiş bir çubuk | Göreli aralık ya da özel |

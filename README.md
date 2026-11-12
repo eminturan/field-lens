@@ -29,14 +29,13 @@ The chosen date field is added to the columns automatically. Selections are save
   - Hovering the card shows the exact dates.
   - The comparison is hidden while a search or column filter is on.
 - **State cards** use the board's state colors. Clicking one shows only that state in the table and the CSV.
-- The **by-week chart** uses Monday–Sunday weeks, cut at the ends of the range, and is stacked by state.
 - **Table**:
   - search across all columns, a filter box under every header, and sorting by clicking a header (ascending → descending → off)
   - 100 rows per page and a sticky header
   - comfortable or compact density
   - long cells scroll inside the cell
   - the ID opens the work item
-- Text filters also update the state cards and the chart.
+- Text filters also update the state cards.
 
 ### CSV export
 
@@ -53,7 +52,7 @@ On a dashboard: **Edit → Add a widget → Field Lens**, then the edit icon for
 
 | View | Shows | Range setting |
 | --- | --- | --- |
-| **Summary** | Total, change against the previous period, a state bar and counts with percentages | Relative preset or custom |
+| **Summary** | A donut with the total in the middle, the change against the previous period, and a legend with counts and percentages. It is split by state, or by an optional **breakdown field** (7 largest values plus "Other", empty values as "(empty)") | Relative preset or custom |
 | **Monthly trend** | One stacked bar per calendar month | Last 3 / 6 / 12 months or custom |
 | **Weekly** | One stacked bar per Monday–Sunday week, labelled `13–19.10` | Relative preset or custom |
 | **By date** | One bar for each day that has items, labelled with its date | Relative preset or custom |

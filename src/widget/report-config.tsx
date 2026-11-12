@@ -134,6 +134,28 @@ function Form({ value, onChange, env }: { value: WidgetConfig; onChange: (v: Wid
           </select>
         </label>
       )}
+      {value.view === "summary" && (
+        <div className="flc-field">
+          <span>{t.w.cfgBreakdown}</span>
+          <div className="flc-inline">
+            <FieldPicker
+              id="flc-breakdown"
+              single
+              fields={fields.filter((f) => f.referenceName !== value.dateField)}
+              selected={byRef.get(value.breakdown)}
+              placeholder={t.w.searchField}
+              empty={t.noMatch}
+              onPick={(ref) => set({ breakdown: ref })}
+            />
+            {value.breakdown && (
+              <button className="flc-clear" onClick={() => set({ breakdown: "" })}>
+                {t.w.clear}
+              </button>
+            )}
+          </div>
+          <span className="flc-hint">{t.w.breakdownHint}</span>
+        </div>
+      )}
       <fieldset className="flc-states">
         <legend>{t.states}</legend>
         {!value.type ? (

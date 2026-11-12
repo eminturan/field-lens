@@ -67,3 +67,50 @@ export function StackChart({ bars, states, colors, label, height = 150 }: { bars
     </svg>
   );
 }
+
+export interface Slice {
+  label: string;
+  value: number;
+  color: string;
+}
+
+/** Halka dilimi: dış yarıçap r, iç yarıçap ri, a0→a1 radyan (0 = saat 12, saat yönünde). */
+function arc(r: number, ri: number, a0: number, a1: number) {
+  const p = (rad: number, a: number) => `${(rad * Math.sin(a)).toFixed(2)} ${(-rad * Math.cos(a)).toFixed(2)}`;
+  const large = a1 - a0 > Math.PI ? 1 : 0;
+  return `M ${p(r, a0)} A ${r} ${r} 0 ${large} 1 ${p(r, a1)} L ${p(ri, a1)} A ${ri} ${ri} 0 ${large} 0 ${p(ri, a0)} Z`;
+}
+
+/** Ortasında toplam yazan halka grafik; yeterince büyük dilimlerde sayı yazar. */
+export function Donut({ slices, label }: { slices: Slice[]; label: string }) {
+  const R = 100;
+  const RI = 58;
+  const total = slices.reduce((n, s) => n + s.value, 0);
+  let a = 0;
+  return (
+    <svg className="fl-donut" viewBox="-102 -102 204 204" role="img" aria-label={label}>
+      {slices.map((s) => {
+        // Tam daire tek yayla çizilemez; tek dilimde bitişi bir tık geride bırakılır.
+        const sweep = Math.min((s.value / total) * Math.PI * 2, Math.PI * 2 - 0.0001);
+        const a0 = a;
+        a += (s.value / total) * Math.PI * 2;
+        const mid = a0 + sweep / 2;
+        const rm = (R + RI) / 2;
+        return (
+          <g key={s.label}>
+            <title>{`${s.label}: ${s.value}`}</title>
+            <path d={arc(R, RI, a0, a0 + sweep)} fill={s.color} stroke="var(--background-color, #fff)" strokeWidth={1} />
+            {sweep > 0.4 && (
+              <text x={rm * Math.sin(mid)} y={-rm * Math.cos(mid) + 4} textAnchor="middle" className="fl-donut-num">
+                {s.value}
+              </text>
+            )}
+          </g>
+        );
+      })}
+      <text x={0} y={14} textAnchor="middle" className="fl-donut-total">
+        {total}
+      </text>
+    </svg>
+  );
+}

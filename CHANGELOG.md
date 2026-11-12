@@ -2,6 +2,12 @@
 
 [Türkçe](CHANGELOG.tr.md)
 
+## 0.2.6
+
+- Widget, **Summary** view: a **donut chart** with the total in the middle and a legend with counts and percentages. It replaces the state bar.
+- Widget, **Summary** view: an optional **breakdown field**. When it is empty, the donut is split by state. When a field is chosen, items in the chosen states are counted by that field's values: the 7 largest are shown, the rest are grouped as "Other", and empty values appear as "(empty)".
+- Report page: the by-week chart is removed. The weekly view remains in the widget.
+
 ## 0.2.5
 
 - Release notes in English and Turkish (`CHANGELOG.md`, `CHANGELOG.tr.md`). The Marketplace page and the READMEs link to them.

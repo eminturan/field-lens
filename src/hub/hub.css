@@ -543,23 +543,6 @@ section > .fl-button {
   color: var(--status-error-foreground, #a4262c);
 }
 
-/* Haftalık grafik */
-.fl-box {
-  padding: 14px 16px;
-  border: 1px solid var(--component-grid-cell-bottom-border-color, rgba(0, 0, 0, 0.1));
-  border-radius: 4px;
-  background: var(--callout-background-color, #fff);
-}
-
-.fl-box-title {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  margin: 0 0 8px;
-  font-size: 14px;
-  font-weight: 600;
-}
-
 /* Rahat / Sıkı */
 .fl-segment {
   display: inline-flex;
