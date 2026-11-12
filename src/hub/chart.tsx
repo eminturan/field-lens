@@ -23,13 +23,18 @@ export function StackChart({ bars, states, colors, label, height = 150 }: { bars
   const W = 640;
   const H = height;
   const top = 18;
-  const bottom = 22;
   const max = Math.max(1, ...bars.map((b) => b.total));
   const slot = W / Math.max(1, bars.length);
   const bar = Math.min(48, slot * 0.7);
-  // Etiketler üst üste binmesin: en uzun etiketin genişliği (11px yazıda karakter başına ~6.5 birim) kadar yer açılır.
+  // Etiketler üst üste binmesin: en uzun etiketin genişliği 11px yazıda karakter başına ~6.5 birim.
   const longest = Math.max(1, ...bars.map((b) => b.label.length));
-  const labelEvery = Math.max(1, Math.ceil((longest * 6.5 + 6) / slot));
+  const flat = longest * 6.5 + 6 <= slot;
+  // Yan yana sığmıyorsa 45° çapraz yazılır; çaprazda her etiket yalnızca ~13 birim yatay yer ister.
+  const rotate = !flat;
+  const labelEvery = flat ? 1 : Math.max(1, Math.ceil(13 / slot));
+  const bottom = rotate ? Math.round(longest * 6.5 * 0.71) + 12 : 22;
+  // Çapraz etiket sola doğru uzar; ilki kesilmesin diye solda pay bırakılır.
+  const pad = rotate ? Math.max(0, Math.round(longest * 6.5 * 0.71 - slot / 2)) : 0;
   // Sayılar ancak çubuğun üstüne sığıyorsa yazılır; değer her durumda çubuğun ipucunda.
   const longestNum = Math.max(...bars.map((b) => String(b.total).length));
   const showNums = longestNum * 6.5 + 10 <= slot;
@@ -37,7 +42,7 @@ export function StackChart({ bars, states, colors, label, height = 150 }: { bars
   const labelX = (x: number, text: string) => Math.min(Math.max(x, (text.length * 6.5) / 2), W - (text.length * 6.5) / 2);
   const scale = (n: number) => (n / max) * (H - top - bottom);
   return (
-    <svg className="fl-chart" viewBox={`0 0 ${W} ${H}`} role="img" aria-label={label}>
+    <svg className="fl-chart" viewBox={`${-pad} 0 ${W + pad} ${H}`} role="img" aria-label={label}>
       <line x1={0} x2={W} y1={H - bottom} y2={H - bottom} className="fl-axis" />
       {bars.map((b, i) => {
         const x = i * slot + (slot - bar) / 2;
@@ -56,11 +61,22 @@ export function StackChart({ bars, states, colors, label, height = 150 }: { bars
                 {b.total}
               </text>
             )}
-            {i % labelEvery === 0 && (
-              <text x={labelX(x + bar / 2, b.label)} y={H - 6} textAnchor="middle" className="fl-chart-label">
-                {b.label}
-              </text>
-            )}
+            {i % labelEvery === 0 &&
+              (rotate ? (
+                <text
+                  x={x + bar / 2 + 4}
+                  y={H - bottom + 12}
+                  textAnchor="end"
+                  transform={`rotate(-45 ${x + bar / 2 + 4} ${H - bottom + 12})`}
+                  className="fl-chart-label"
+                >
+                  {b.label}
+                </text>
+              ) : (
+                <text x={labelX(x + bar / 2, b.label)} y={H - 6} textAnchor="middle" className="fl-chart-label">
+                  {b.label}
+                </text>
+              ))}
           </g>
         );
       })}

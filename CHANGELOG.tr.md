@@ -2,6 +2,11 @@
 
 [English](CHANGELOG.md)
 
+## 0.2.9
+
+- Widget grafikleri (Tarihe göre, Haftalık, Aylık trend): tarih etiketleri yan yana sığmadığında 45° çapraz yazılıyor, böylece her çubuğun tarihi görünüyor. Önceden etiketler birer atlanıyordu. İlk etiket artık sol kenardan kesilmiyor.
+- Grafiklerin altındaki açıklamanın altında biraz daha boşluk var.
+
 ## 0.2.8
 
 - Widget, kırılım alanı seçili **Özet**: artık her değer için bir **yatay çubuk** olarak, en büyük önce çiziliyor. Her çubuk seçili state'lere, panodaki renkleriyle bölünüyor; çubuğun üzerine gelince state başına sayılar görünüyor. Bütün değerler gösteriliyor ("Diğer" yok), uzun listeler widget içinde kayıyor. Kırılım alanı yoksa Özet, state'lere bölünmüş halka grafik olarak kalıyor.

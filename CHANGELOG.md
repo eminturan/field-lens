@@ -2,6 +2,11 @@
 
 [Türkçe](CHANGELOG.tr.md)
 
+## 0.2.9
+
+- Widget charts (By date, Weekly, Monthly trend): when date labels don't fit side by side, they are written at 45° so every bar keeps its date. Before, every other label was skipped. The first label is no longer cut off at the left edge.
+- The legend under the charts has a little more room at the bottom.
+
 ## 0.2.8
 
 - Widget, **Summary** with a breakdown field: it is now drawn as **horizontal bars**, one per value, biggest first. Each bar is split by the chosen states in the board's colors, and hovering a bar shows the counts per state. All values are shown (no "Other"), and long lists scroll inside the widget. Without a breakdown field, the Summary stays a donut split by state.

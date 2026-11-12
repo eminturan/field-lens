@@ -48,7 +48,7 @@ function Report({ settings }: { settings?: WidgetSettings }) {
         type: "Kart",
         dateField: "Custom.TargetDate",
         states: ["New", "Active", "Resolved", "Closed"],
-        preset: "last90",
+        preset: (new URLSearchParams(window.location.search).get("preset") as WidgetConfig["preset"]) || "last90",
         breakdown: new URLSearchParams(window.location.search).get("breakdown") ?? "",
         breakdownRule: new URLSearchParams(window.location.search).get("rule") ?? "",
       };

@@ -70,7 +70,7 @@ Dashboard'da **Edit → Add a widget → Field Lens**, ardından ayarlar için d
 
 - Diğer ayarlar work item türü, tarih alanı ve state'lerdir. State'ler önceden seçili gelmez, siz seçersiniz.
 - Göreli aralıklar takvimle birlikte ilerler; "Geçen ay" ayarlı bir dashboard hep güncel kalır. Özel aralık sabittir.
-- Widget 2–6 sütun genişliğinde, 1–4 satır yüksekliğinde olabilir ve grafikler boyuta göre ölçeklenir. Çubuklar daraldığında sayılar fareyle üzerine gelince çıkan ipucuna taşınır; tarih etiketleri üst üste binmesin diye aralıklı yazılır.
+- Widget 2–6 sütun genişliğinde, 1–4 satır yüksekliğinde olabilir ve grafikler boyuta göre ölçeklenir. Çubuklar daraldığında sayılar fareyle üzerine gelince çıkan ipucuna taşınır ve tarih etiketleri 45° çapraz yazılır. Etiketler yalnızca çubuklar çok daraldığında (uzun bir aralık, tarihe göre) aralıklı yazılır.
 - **Raporu aç** bağlantısı Field Lens sayfasını açar. Widget'taki filtreleri sayfaya taşımaz.
 
 ## Sınırlar ve hesaplama

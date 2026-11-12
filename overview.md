@@ -41,6 +41,8 @@ Open a project → **Boards** → **Field Lens**. The widget is under **Dashboar
 
 ## Release notes
 
+**0.2.9**: chart dates are written at an angle when they don't fit, so no date is skipped.
+
 **0.2.8**: a Summary with a breakdown field is drawn as state-stacked horizontal bars.
 
 **0.2.7**: columns derived by a rule (regex) on the report page, and the same rule for the widget's breakdown, with a live preview.

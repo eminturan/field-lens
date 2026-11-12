@@ -70,7 +70,7 @@ On a dashboard: **Edit → Add a widget → Field Lens**, then the edit icon for
 
 - The other settings are work item type, date field and states. No state is preselected: you pick them.
 - Relative ranges move with the calendar, so a "Last month" dashboard is always current. A custom range stays fixed.
-- The widget can be 2–6 columns wide and 1–4 rows tall. Charts scale to the widget. When bars get narrow, counts move into the hover tooltip and date labels are thinned out so they don't overlap.
+- The widget can be 2–6 columns wide and 1–4 rows tall. Charts scale to the widget. When bars get narrow, counts move into the hover tooltip and date labels are written at 45°. Only when bars are very narrow (a long range by date) are labels thinned out.
 - **Open report** opens the Field Lens page. It does not carry the widget's filters over.
 
 ## Limits and calculation details

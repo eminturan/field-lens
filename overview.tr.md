@@ -41,6 +41,8 @@ Bir proje açın → **Boards** → **Field Lens**. Widget: **Dashboards → Edi
 
 ## Sürüm notları
 
+**0.2.9**: grafik tarihleri sığmadığında çapraz yazılıyor, hiçbir tarih atlanmıyor.
+
 **0.2.8**: kırılım alanlı Özet, state'lere bölünmüş yatay çubuklar olarak çiziliyor.
 
 **0.2.7**: rapor sayfasında kuralla (regex) türetilen kolon, aynı kuralın widget kırılımında kullanımı ve canlı önizleme.
