@@ -2,6 +2,10 @@
 
 [English](CHANGELOG.md)
 
+## 0.2.12
+
+- Rapor sayfası: Çalıştır satırının sağında **Ayarları sıfırla** düğmesi. İlk tık onay ister; ikincisi türü, tarih alanını, aralığı, state'leri, kolonları, kuralı, sonuçları ve satır görünümünü temizler, kayıtlı seçimleri siler.
+
 ## 0.2.11
 
 - Güvenlik: kurallar (türetilen kolon ve widget kırılımı) `(a+)+` gibi iç içe tekrarları kabul etmiyor; bunlar panoyu açan herkesin tarayıcısını dondurabilirdi. Kural bir değerin yalnızca ilk 500 karakterine bakar. Böyle bir kuralla kaydedilmiş widget yeniden ayarlanmak ister.

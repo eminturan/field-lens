@@ -264,6 +264,34 @@ function App({ source, store, mock, t, itemUrl }: Props) {
             ? t.need.columns
             : undefined;
 
+  /** İlk tık onay ister, ikincisi sıfırlar (iframe'de window.confirm engellenebilir). */
+  const [confirmReset, setConfirmReset] = React.useState(false);
+  const resetAll = () => {
+    if (!confirmReset) return setConfirmReset(true);
+    setConfirmReset(false);
+    store.save({}).catch(() => undefined);
+    const r = presetRange(DEFAULT_PRESET, new Date());
+    setType(types?.length === 1 ? types[0] : "");
+    setDateField("");
+    setPreset(DEFAULT_PRESET);
+    setFrom(r.from);
+    setTo(r.to);
+    setStates([]);
+    setColumns(DEFAULT_COLUMNS);
+    setRule({ source: "", pattern: "", name: "" });
+    runId.current++;
+    setResult(undefined);
+    setRunError(undefined);
+    setPrevCount(undefined);
+    setPage(0);
+    setStateFilter(undefined);
+    setSearch("");
+    setColFilters({});
+    setSort(undefined);
+    setCollapsed(false);
+    chooseDense(false);
+  };
+
   const run = () => {
     if (missing) return;
     const query: Query = { type, dateField, from, to, states, columns };
@@ -570,6 +598,15 @@ function App({ source, store, mock, t, itemUrl }: Props) {
               {csvButton}
               {missing && <span className="fl-muted">{missing}</span>}
               {result && !missing && <span className="fl-muted">{t.count(result.data.rows.length)}</span>}
+              <button
+                className="fl-button fl-reset"
+                disabled={running}
+                title={t.resetTip}
+                onClick={resetAll}
+                onBlur={() => setConfirmReset(false)}
+              >
+                {confirmReset ? t.resetConfirm : t.reset}
+              </button>
             </div>
           </section>
         )}

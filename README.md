@@ -18,7 +18,7 @@ Open a project → **Boards** → **Field Lens**.
 | **States** | One or more. An item counts when its **current** state is one of them. |
 | **Columns** | Any fields. Search by display name (large) or reference name (small). Drag a column chip to reorder it, or focus it with Tab and press Alt + ←/→. |
 
-The chosen date field is added to the columns automatically. Selections are saved per user (Extension Data Service, user scope) and restored next time; types or fields that no longer exist are dropped.
+The chosen date field is added to the columns automatically. Selections are saved per user (Extension Data Service, user scope) and restored next time; types or fields that no longer exist are dropped. **Reset settings** (at the right of the Run row, click twice to confirm) clears everything at once: type, date field, range, states, columns, rule and row density go back to their defaults and the saved selections are deleted.
 
 ### Column derived by a rule
 

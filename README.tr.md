@@ -18,7 +18,7 @@ Bir proje açın → **Boards** → **Field Lens**.
 | **State** | Bir ya da birkaç. Kaydın **şu anki** state'i bunlardan biriyse sayılır. |
 | **Kolonlar** | İstenen alanlar. Görünen ad (büyük) ya da referans adıyla (küçük) aranır. Etiketi sürükleyerek ya da Tab ile seçip Alt + ←/→ ile sıralanır. |
 
-Seçilen tarih alanı kolonlara kendiliğinden eklenir. Seçimler kullanıcı başına saklanır (Extension Data Service, kullanıcı kapsamı) ve sonraki açılışta geri gelir. Artık var olmayan tür ya da alanlar atlanır.
+Seçilen tarih alanı kolonlara kendiliğinden eklenir. Seçimler kullanıcı başına saklanır (Extension Data Service, kullanıcı kapsamı) ve sonraki açılışta geri gelir. Artık var olmayan tür ya da alanlar atlanır. **Ayarları sıfırla** (Çalıştır satırının sağında, onay için iki kez tıklanır) her şeyi tek seferde temizler: tür, tarih alanı, aralık, state'ler, kolonlar, kural ve satır görünümü varsayılana döner, kayıtlı seçimler silinir.
 
 ### Kuralla türetilen kolon
 

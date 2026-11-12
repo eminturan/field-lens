@@ -109,6 +109,9 @@ export interface Strings {
   sortHint: string;
   reportTitle: (type: string) => string;
   edit: string;
+  reset: string;
+  resetConfirm: string;
+  resetTip: string;
   statesN: (n: number) => string;
   prevPeriod: (n: number) => string;
   prevTip: (from: string, to: string) => string;
@@ -206,6 +209,9 @@ export const STRINGS: Record<Lang, Strings> = {
     sortHint: "Sıralamak için tıklayın",
     reportTitle: (ty) => `${ty} raporu`,
     edit: "Düzenle",
+    reset: "Ayarları sıfırla",
+    resetConfirm: "Emin misiniz? Sıfırlamak için tekrar tıklayın",
+    resetTip: "Tür, tarih alanı, aralık, state'ler, kolonlar, kural ve satır görünümü varsayılana döner; kayıtlı seçimleriniz silinir.",
     statesN: (n) => `${n} state`,
     prevPeriod: (n) => `önceki dönem ${n}`,
     prevTip: (f, to) =>
@@ -308,6 +314,9 @@ export const STRINGS: Record<Lang, Strings> = {
     sortHint: "Click to sort",
     reportTitle: (ty) => `${ty} report`,
     edit: "Edit",
+    reset: "Reset settings",
+    resetConfirm: "Sure? Click again to reset",
+    resetTip: "Type, date field, range, states, columns, rule and row density go back to their defaults, and your saved selections are deleted.",
     statesN: (n) => `${n} ${n === 1 ? "state" : "states"}`,
     prevPeriod: (n) => `previous period ${n}`,
     prevTip: (f, to) =>

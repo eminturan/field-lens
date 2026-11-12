@@ -41,6 +41,8 @@ Bir proje açın → **Boards** → **Field Lens**. Widget: **Dashboards → Edi
 
 ## Sürüm notları
 
+**0.2.12**: Ayarları sıfırla düğmesi rapor sayfasındaki tüm ayarları tek seferde temizliyor.
+
 **0.2.11**: tarayıcıyı dondurabilecek kurallar kabul edilmiyor.
 
 **0.2.10**: örnek veri ve belge örnekleri uydurma adlar kullanıyor.

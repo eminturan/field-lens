@@ -41,6 +41,8 @@ Open a project → **Boards** → **Field Lens**. The widget is under **Dashboar
 
 ## Release notes
 
+**0.2.12**: a Reset settings button clears all report-page settings at once.
+
 **0.2.11**: rules refuse patterns that could freeze the browser.
 
 **0.2.10**: the sample data and documentation examples use made-up names.

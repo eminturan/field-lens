@@ -2,6 +2,10 @@
 
 [Türkçe](CHANGELOG.tr.md)
 
+## 0.2.12
+
+- Report page: a **Reset settings** button at the right of the Run row. The first click asks for confirmation, the second clears type, date field, range, states, columns, the rule, the results and row density, and deletes the saved selections.
+
 ## 0.2.11
 
 - Security: rules (the derived column and the widget breakdown) refuse nested repeats such as `(a+)+`, which could freeze the browser of everyone who opens the dashboard. A rule only looks at the first 500 characters of a value. A widget saved with such a rule asks to be configured again.

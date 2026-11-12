@@ -613,3 +613,8 @@ section > .fl-button {
 .fl-rule-input {
   width: 260px;
 }
+
+/* Sıfırla, eylem satırının sağ ucunda; yanlışlıkla tıklanmasın diye Çalıştır'dan uzak. */
+.fl-reset {
+  margin-left: auto;
+}
