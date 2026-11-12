@@ -2,7 +2,7 @@
   "manifestVersion": 1,
   "id": "field-lens",
   "publisher": "turanemin",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "name": "Field Lens",
   "description": "Lists work items of one type whose chosen date field falls in a date range, with selectable states and columns, exportable as CSV.",
   "public": true,
@@ -74,7 +74,7 @@
       ],
       "properties": {
         "name": "Field Lens",
-        "description": "Monthly report by any date field: summary, monthly trend, weekly chart, distribution by a field or upcoming items.",
+        "description": "Monthly report by any date field: summary, monthly trend, weekly chart, items by date or upcoming items.",
         "catalogIconUrl": "static/icon.png",
         "uri": "dist/report-widget/report-widget.html",
         "supportedSizes": [

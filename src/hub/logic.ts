@@ -1,6 +1,6 @@
 /** Dashboard widget görünümleri, oluşturulma sırasıyla. */
-export type View = "summary" | "trend" | "weekly" | "distribution" | "upcoming";
-export const VIEWS: View[] = ["summary", "trend", "weekly", "distribution", "upcoming"];
+export type View = "summary" | "trend" | "weekly" | "daily" | "upcoming";
+export const VIEWS: View[] = ["summary", "trend", "weekly", "daily", "upcoming"];
 
 export type Preset = "last15" | "last30" | "last90" | "thisMonth" | "lastMonth" | "custom";
 export const PRESETS: Preset[] = ["last15", "last30", "last90", "thisMonth", "lastMonth", "custom"];
@@ -229,23 +229,40 @@ export interface WeekBucket {
   counts: Record<string, number>;
 }
 
-/** Aralığın başından itibaren 7 günlük dilimler (sonuncusu aralık sonunda kesilir); her dilimde state başına sayı. */
+/** Pazartesi–pazar takvim haftaları (ilk ve son hafta aralıkla kesilir); her dilimde state başına sayı. */
 export function weekBuckets(rows: Row[], dateField: string, from: string, to: string): WeekBucket[] {
+  const monday = addDays(from, -((parseDay(from).getDay() + 6) % 7));
   const out: WeekBucket[] = [];
-  for (let i = 0; i <= daysBetween(from, to); i += 7) {
-    const start = addDays(from, i);
-    const end = addDays(from, i + 6);
-    out.push({ start, end: end > to ? to : end, total: 0, counts: {} });
+  for (let i = 0; addDays(monday, i) <= to; i += 7) {
+    const start = addDays(monday, i);
+    const end = addDays(monday, i + 6);
+    out.push({ start: start < from ? from : start, end: end > to ? to : end, total: 0, counts: {} });
   }
   for (const r of rows) {
     const day = localDay(r[dateField]);
     if (!day || day < from || day > to) continue;
-    const b = out[Math.floor(daysBetween(from, day) / 7)];
-    const s = String(r["System.State"] ?? "");
-    b.total++;
-    b.counts[s] = (b.counts[s] ?? 0) + 1;
+    add(out[Math.floor(daysBetween(monday, day) / 7)], r);
   }
   return out;
+}
+
+/** Kaydı dilime state'iyle sayar. */
+function add(b: WeekBucket, r: Row) {
+  const s = String(r["System.State"] ?? "");
+  b.total++;
+  b.counts[s] = (b.counts[s] ?? 0) + 1;
+}
+
+/** Tarih alanında kayıt olan her yerel gün için bir dilim, tarih sırasıyla; boş günler yok. */
+export function dayBuckets(rows: Row[], dateField: string, from: string, to: string): WeekBucket[] {
+  const days = new Map<string, WeekBucket>();
+  for (const r of rows) {
+    const day = localDay(r[dateField]);
+    if (!day || day < from || day > to) continue;
+    if (!days.has(day)) days.set(day, { start: day, end: day, total: 0, counts: {} });
+    add(days.get(day)!, r);
+  }
+  return [...days.values()].sort((a, b) => a.start.localeCompare(b.start));
 }
 
 /** Son N takvim ayı: (N-1) ay önceki ayın ilk günü – bugün. */
@@ -272,25 +289,9 @@ export function monthBuckets(rows: Row[], dateField: string, from: string, to: s
   for (const r of rows) {
     const day = localDay(r[dateField]);
     const b = day && day >= from && day <= to ? index.get(day.slice(0, 7)) : undefined;
-    if (!b) continue;
-    const s = String(r["System.State"] ?? "");
-    b.total++;
-    b.counts[s] = (b.counts[s] ?? 0) + 1;
+    if (b) add(b, r);
   }
   return out;
-}
-
-/** Görünen değere göre sayım: çoktan aza (eşitlikte ada göre), ilk `top` tanesi; kalanların toplamı other. Boş değer "". */
-export function countBy(rows: Row[], col: Field, top: number): { items: { value: string; count: number }[]; other: number } {
-  const counts = new Map<string, number>();
-  for (const r of rows) {
-    const v = formatCell(r[col.referenceName], col.type);
-    counts.set(v, (counts.get(v) ?? 0) + 1);
-  }
-  const all = [...counts]
-    .map(([value, count]) => ({ value, count }))
-    .sort((a, b) => b.count - a.count || a.value.localeCompare(b.value, "tr"));
-  return { items: all.slice(0, top), other: all.slice(top).reduce((n, x) => n + x.count, 0) };
 }
 
 export function chunk<T>(list: T[], size: number): T[][] {

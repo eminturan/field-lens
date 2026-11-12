@@ -18,8 +18,8 @@ Monthly reports from your work items, by any date field.
 Add **Field Lens** from the widget catalog and pick a view in its settings:
 1. **Summary**: total, change against the previous period and the share of each state.
 2. **Monthly trend**: the last 3, 6 or 12 months, stacked by state.
-3. **Weekly**: items per week in the chosen range.
-4. **Distribution**: counts by any field (system, assignee, …).
+3. **Weekly**: items per calendar week (Monday–Sunday) in the chosen range.
+4. **By date**: one bar for every day that has items, labelled with its date.
 5. **Upcoming**: items whose date falls in the next 7–60 days, with links.
 
 Ranges can be relative (last month, last 90 days, …), so the dashboard stays current on its own, or a fixed custom range.

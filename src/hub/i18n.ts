@@ -27,19 +27,15 @@ export interface WidgetStrings {
   cfgMonths: string;
   months: (n: number) => string;
   customRange: string;
-  cfgGroup: string;
-  searchField: string;
   cfgDays: string;
   nextDays: (n: number) => string;
   notConfigured: string;
   noData: string;
   noUpcoming: string;
   openReport: string;
-  other: string;
-  blank: string;
   truncated: string;
   more: (n: number) => string;
-  monthTip: (month: string, n: number) => string;
+  barTip: (label: string, n: number) => string;
 }
 
 export interface Strings {
@@ -103,25 +99,21 @@ export const STRINGS: Record<Lang, Strings> = {
   tr: {
     locale: "tr-TR",
     w: {
-      views: { summary: "Özet", trend: "Aylık trend", weekly: "Haftalık", distribution: "Dağılım", upcoming: "Yaklaşanlar" },
+      views: { summary: "Özet", trend: "Aylık trend", weekly: "Haftalık", daily: "Tarihe göre", upcoming: "Yaklaşanlar" },
       cfgView: "Görünüm",
       cfgRange: "Aralık",
       cfgMonths: "Ay sayısı",
       months: (n) => `Son ${n} ay`,
       customRange: "Özel aralık",
-      cfgGroup: "Gruplanacak alan",
-      searchField: "Alan ara…",
       cfgDays: "Süre",
       nextDays: (n) => `Sonraki ${n} gün`,
       notConfigured: "Ayarlamak için widget'ın düzenle simgesini kullanın.",
       noData: "Bu filtrelerle kayıt yok.",
       noUpcoming: "Bu sürede planlanmış kayıt yok.",
       openReport: "Raporu aç",
-      other: "Diğer",
-      blank: "(boş)",
       truncated: "20.000 kayıt sınırına ulaşıldı; sayılar eksik olabilir.",
       more: (n) => `+${n} kayıt daha`,
-      monthTip: (m, n) => `${m}: ${n} kayıt`,
+      barTip: (m, n) => `${m}: ${n} kayıt`,
     },
     csvSeparator: ";",
     title: "Field Lens",
@@ -186,25 +178,21 @@ export const STRINGS: Record<Lang, Strings> = {
   en: {
     locale: "en-US",
     w: {
-      views: { summary: "Summary", trend: "Monthly trend", weekly: "Weekly", distribution: "Distribution", upcoming: "Upcoming" },
+      views: { summary: "Summary", trend: "Monthly trend", weekly: "Weekly", daily: "By date", upcoming: "Upcoming" },
       cfgView: "View",
       cfgRange: "Range",
       cfgMonths: "Months",
       months: (n) => `Last ${n} months`,
       customRange: "Custom range",
-      cfgGroup: "Group by field",
-      searchField: "Search field…",
       cfgDays: "Period",
       nextDays: (n) => `Next ${n} days`,
       notConfigured: "Use the widget's edit icon to configure it.",
       noData: "No items match these filters.",
       noUpcoming: "Nothing planned in this period.",
       openReport: "Open report",
-      other: "Other",
-      blank: "(empty)",
       truncated: "The 20,000 item limit was reached; counts may be incomplete.",
       more: (n) => `+${n} more`,
-      monthTip: (m, n) => `${m}: ${n} items`,
+      barTip: (m, n) => `${m}: ${n} items`,
     },
     csvSeparator: ",",
     title: "Field Lens",

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildWiql, chunk, countBy, monthBuckets, monthsRange, upcomingRange, countStates, previousRange, weekBuckets, csvRows, filterRows, sortRows, Field, formatCell, moveItem, pageSlice, presetRange, Query, sanitizeSettings, searchFields, toCsv } from "../src/hub/logic";
+import { buildWiql, chunk, dayBuckets, monthBuckets, monthsRange, upcomingRange, countStates, previousRange, weekBuckets, csvRows, filterRows, sortRows, Field, formatCell, moveItem, pageSlice, presetRange, Query, sanitizeSettings, searchFields, toCsv } from "../src/hub/logic";
 
 const q: Query = {
   type: "Kart",
@@ -204,16 +204,17 @@ describe("weekBuckets", () => {
     { D: undefined, "System.State": "A" },
   ];
 
-  it("7-day buckets from the range start, last one cut at the range end, counted per state", () => {
+  it("Monday-to-Sunday calendar weeks, first and last cut at the range, counted per state", () => {
+    // 2026-10-01 perşembe, 2026-10-31 cumartesi
     const b = weekBuckets(rows, "D", "2026-10-01", "2026-10-31");
     expect(b.map((x) => [x.start, x.end, x.total])).toEqual([
-      ["2026-10-01", "2026-10-07", 2],
-      ["2026-10-08", "2026-10-14", 1],
-      ["2026-10-15", "2026-10-21", 0],
-      ["2026-10-22", "2026-10-28", 0],
-      ["2026-10-29", "2026-10-31", 1],
+      ["2026-10-01", "2026-10-04", 1],
+      ["2026-10-05", "2026-10-11", 2],
+      ["2026-10-12", "2026-10-18", 0],
+      ["2026-10-19", "2026-10-25", 0],
+      ["2026-10-26", "2026-10-31", 1],
     ]);
-    expect(b[0].counts).toEqual({ A: 1, B: 1 });
+    expect(b[1].counts).toEqual({ A: 1, B: 1 });
   });
 });
 
@@ -248,22 +249,21 @@ describe("monthBuckets", () => {
   });
 });
 
-describe("countBy", () => {
-  const col: Field = { referenceName: "S", name: "Sistem", type: "string" };
-  const rows = ["Mobil", "Core", "Mobil", undefined, "Web", "Core", "Mobil", "Kiosk"].map((S) => ({ S }));
-  it("counts displayed values, biggest first, ties by name, rest summed into other", () => {
-    expect(countBy(rows, col, 3)).toEqual({
-      items: [
-        { value: "Mobil", count: 3 },
-        { value: "Core", count: 2 },
-        { value: "", count: 1 },
-      ],
-      other: 2,
-    });
-    expect(countBy(rows, col, 10).other).toBe(0);
-  });
-  it("identity values count by display name", () => {
-    const people = [{ P: { displayName: "Ayşe" } }, { P: { displayName: "Ayşe" } }];
-    expect(countBy(people, { referenceName: "P", name: "P", type: "identity" }, 5).items).toEqual([{ value: "Ayşe", count: 2 }]);
+describe("dayBuckets", () => {
+  const at = (d: string, h = 10) => new Date(`${d}T${String(h).padStart(2, "0")}:00:00`).toISOString();
+  it("one bucket per local day that has items, in date order, counted per state", () => {
+    const rows = [
+      { D: at("2026-10-09"), "System.State": "A" },
+      { D: at("2026-10-02", 23), "System.State": "B" },
+      { D: at("2026-10-02", 1), "System.State": "A" },
+      { D: at("2026-11-01"), "System.State": "A" },
+      { D: undefined, "System.State": "A" },
+    ];
+    const b = dayBuckets(rows, "D", "2026-10-01", "2026-10-31");
+    expect(b.map((x) => [x.start, x.end, x.total])).toEqual([
+      ["2026-10-02", "2026-10-02", 2],
+      ["2026-10-09", "2026-10-09", 1],
+    ]);
+    expect(b[0].counts).toEqual({ A: 1, B: 1 });
   });
 });

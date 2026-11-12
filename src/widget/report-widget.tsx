@@ -2,9 +2,9 @@ import * as React from "react";
 import { WidgetSettings } from "azure-devops-extension-api/Dashboard";
 
 import { RunResult } from "../hub/api";
-import { Bar, fullDay, shortDay, StackChart } from "../hub/chart";
+import { Bar, fullDay, shortDay, StackChart, weekLabel } from "../hub/chart";
 import {
-  countBy,
+  dayBuckets,
   Field,
   formatCell,
   monthBuckets,
@@ -20,8 +20,6 @@ import {
 } from "../hub/logic";
 import { configured, usesCustom, DEFAULTS, Env, Frame, inHost, parseSettings, startWidget, useEnv, WidgetConfig } from "./shared";
 
-/** Dağılımda gösterilen en fazla değer; kalanlar "Diğer"de toplanır. */
-const TOP = 8;
 /** Yaklaşanlar listesinde gösterilen en fazla kayıt. */
 const LIST_LIMIT = 100;
 
@@ -39,12 +37,7 @@ function plan(cfg: WidgetConfig, now: Date): { from: string; to: string; columns
       : cfg.view === "upcoming"
         ? upcomingRange(cfg.days, now)
         : presetRange(cfg.preset as Exclude<Preset, "custom">, now);
-  const columns =
-    cfg.view === "distribution"
-      ? [cfg.groupField, "System.State"]
-      : cfg.view === "upcoming"
-        ? ["System.Title", "System.State", cfg.dateField]
-        : ["System.State", cfg.dateField];
+  const columns = cfg.view === "upcoming" ? ["System.Title", "System.State", cfg.dateField] : ["System.State", cfg.dateField];
   return { ...range, columns };
 }
 
@@ -68,7 +61,6 @@ function Report({ settings }: { settings?: WidgetSettings }) {
         type: "Kart",
         dateField: "Custom.TargetDate",
         states: ["New", "Active", "Resolved", "Closed"],
-        groupField: "Custom.Sistem",
         preset: "last90",
       };
   const ok = configured(cfg);
@@ -108,8 +100,7 @@ function Report({ settings }: { settings?: WidgetSettings }) {
   const span = custom ? t.presets.custom : cfg.view === "trend" ? t.w.months(cfg.months) : cfg.view === "upcoming" ? t.w.nextDays(cfg.days) : t.presets[cfg.preset];
   // Özel aralık yıl değiştirebilir; o yüzden yılıyla yazılır.
   const day = custom ? fullDay : shortDay;
-  const viewName = cfg.view === "distribution" ? `${t.w.views.distribution}: ${field(cfg.groupField).name}` : t.w.views[cfg.view];
-  const sub = [viewName, cfg.type, field(cfg.dateField).name, `${span} (${day(req.from)} – ${day(req.to)})`].join(" · ");
+  const sub = [t.w.views[cfg.view], cfg.type, field(cfg.dateField).name, `${span} (${day(req.from)} – ${day(req.to)})`].join(" · ");
   const link = { href: env.hubUrl, label: t.w.openReport };
   if (error) return <Frame title={title} sub={sub} link={link} message={t.loadError(error)} error />;
   if (!meta || data?.key !== key) return <Frame title={title} sub={sub} link={link} message={t.loading} />;
@@ -121,13 +112,17 @@ function Report({ settings }: { settings?: WidgetSettings }) {
       case "summary":
         return <Summary rows={rows} prev={data.prev} states={cfg.states} colors={meta.colors} env={env} />;
       case "trend":
-      case "weekly": {
-        const buckets = (cfg.view === "trend" ? monthBuckets : weekBuckets)(rows, cfg.dateField, req.from, req.to);
-        const bars: Bar[] = buckets.map((b) => {
-          const month = new Date(`${b.start}T00:00:00`).toLocaleDateString(t.locale, { month: "short", year: "2-digit" });
-          return cfg.view === "trend"
-            ? { ...b, label: month, tip: t.w.monthTip(month, b.total) }
-            : { ...b, label: shortDay(b.start), tip: t.weekTip(shortDay(b.start), shortDay(b.end), b.total) };
+      case "weekly":
+      case "daily": {
+        const bucket = cfg.view === "trend" ? monthBuckets : cfg.view === "weekly" ? weekBuckets : dayBuckets;
+        const bars: Bar[] = bucket(rows, cfg.dateField, req.from, req.to).map((b) => {
+          if (cfg.view === "trend") {
+            const month = new Date(`${b.start}T00:00:00`).toLocaleDateString(t.locale, { month: "short", year: "2-digit" });
+            return { ...b, label: month, tip: t.w.barTip(month, b.total) };
+          }
+          return cfg.view === "weekly"
+            ? { ...b, label: weekLabel(b.start, b.end), tip: t.weekTip(fullDay(b.start), fullDay(b.end), b.total) }
+            : { ...b, label: shortDay(b.start), tip: t.w.barTip(fullDay(b.start), b.total) };
         });
         return (
           <div className="flw-chart">
@@ -136,8 +131,6 @@ function Report({ settings }: { settings?: WidgetSettings }) {
           </div>
         );
       }
-      case "distribution":
-        return <Distribution rows={rows} col={field(cfg.groupField)} env={env} />;
       case "upcoming":
         return <Upcoming rows={rows} dateField={field(cfg.dateField)} colors={meta.colors} env={env} />;
     }
@@ -202,29 +195,6 @@ function Summary({ rows, prev, states, colors, env }: { rows: Row[]; prev?: numb
           </div>
         ))}
       </div>
-    </div>
-  );
-}
-
-/** 4: seçilen alana göre yatay çubuklar. */
-function Distribution({ rows, col, env }: { rows: Row[]; col: Field; env: Env }) {
-  const { t } = env;
-  const { items, other } = countBy(rows, col, TOP);
-  const list = other ? [...items, { value: t.w.other, count: other, rest: true }] : items;
-  const max = Math.max(...list.map((x) => x.count));
-  return (
-    <div className="flw-scroll">
-      {list.map((x) => (
-        <div key={x.value + ("rest" in x ? "*" : "")} className={"rest" in x ? "flw-dist flw-rest" : "flw-dist"}>
-          <span className="flw-name" title={x.value || t.w.blank}>
-            {x.value || t.w.blank}
-          </span>
-          <span className="flw-track">
-            <span style={{ width: `${(x.count / max) * 100}%` }} />
-          </span>
-          <span className="flw-n">{x.count}</span>
-        </div>
-      ))}
     </div>
   );
 }

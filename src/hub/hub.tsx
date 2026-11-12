@@ -15,7 +15,7 @@ import { MessageCard, MessageCardSeverity } from "azure-devops-ui/MessageCard";
 import { Page } from "azure-devops-ui/Page";
 
 import { createRestSource, DataSource, RunResult } from "./api";
-import { fullDay, shortDay, StackChart } from "./chart";
+import { fullDay, shortDay, StackChart, weekLabel } from "./chart";
 import { FieldPicker } from "./fieldPicker";
 import { firstOf, pickLang, Strings, STRINGS } from "./i18n";
 import {
@@ -560,7 +560,7 @@ function App({ source, store, mock, t, itemUrl }: Props) {
               <span className="fl-muted">{byRef.get(result.query.dateField)?.name ?? result.query.dateField}</span>
             </h3>
             <StackChart
-              bars={buckets.map((b) => ({ ...b, label: shortDay(b.start), tip: t.weekTip(shortDay(b.start), shortDay(b.end), b.total) }))}
+              bars={buckets.map((b) => ({ ...b, label: weekLabel(b.start, b.end), tip: t.weekTip(shortDay(b.start), shortDay(b.end), b.total) }))}
               states={result.query.states}
               colors={stateColors}
               label={t.weekly}

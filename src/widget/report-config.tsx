@@ -84,7 +84,7 @@ function Form({ value, onChange, env }: { value: WidgetConfig; onChange: (v: Wid
           onPick={(ref) => set({ dateField: ref })}
         />
       </div>
-      {(value.view === "summary" || value.view === "weekly" || value.view === "distribution") && (
+      {(value.view === "summary" || value.view === "weekly" || value.view === "daily") && (
         <label className="flc-field">
           <span>{t.w.cfgRange}</span>
           <select value={value.preset} onChange={(e) => set({ preset: e.target.value as Preset })}>
@@ -133,20 +133,6 @@ function Form({ value, onChange, env }: { value: WidgetConfig; onChange: (v: Wid
             ))}
           </select>
         </label>
-      )}
-      {value.view === "distribution" && (
-        <div className="flc-field">
-          <span>{t.w.cfgGroup}</span>
-          <FieldPicker
-            id="flc-group"
-            single
-            fields={fields}
-            selected={byRef.get(value.groupField)}
-            placeholder={t.w.searchField}
-            empty={t.noMatch}
-            onPick={(ref) => set({ groupField: ref })}
-          />
-        </div>
       )}
       <fieldset className="flc-states">
         <legend>{t.states}</legend>

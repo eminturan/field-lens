@@ -205,31 +205,6 @@ body {
   gap: 5px;
 }
 
-/* 4: Dağılım */
-.flw-dist {
-  display: grid;
-  grid-template-columns: minmax(60px, 34%) minmax(0, 1fr) 40px;
-  align-items: center;
-  gap: 8px;
-  font-size: 12px;
-  margin: 4px 0;
-}
-
-.flw-track {
-  height: 10px;
-}
-
-.flw-track > span {
-  display: block;
-  height: 100%;
-  border-radius: 2px;
-  background: var(--communication-background, #0078d4);
-}
-
-.flw-rest .flw-track > span {
-  opacity: 0.45;
-}
-
 /* 5: Yaklaşanlar */
 .flw-table {
   width: 100%;
