@@ -10,6 +10,7 @@ Work item'larınızdan **herhangi bir tarih alanına** göre aylık rapor. Bir w
   - bir ya da birkaç state
   - aralık: son 15 / 30 / 90 gün, bu ay, geçen ay ya da özel başlangıç–bitiş
 - **İstediğiniz kolonlar**: görünen ad ya da referans adıyla arayın, sürükleyerek (ya da Alt + ←/→ ile) sıralayın.
+- **Kuralla türetilen kolon**: bir alanın değerinin yalnızca bir kısmını yeni bir kolona alır. Örneğin `\b(ABC|XY)\b.*` kuralı "Deniz Arslan ABC Ödeme Hizmetleri" değerini "ABC Ödeme Hizmetleri" yapar. Canlı önizleme sonucu gösterir.
 - **Rapor başlığı**: çalıştırdıktan sonra filtreler tek satıra iner ("Change raporu · Hedef tarih · 2026-10-01 – 2026-10-31 · 3 state"). Yanında Düzenle ve CSV bulunur.
 - **Toplamlar**:
   - toplam ve önceki döneme göre fark (+/− %)
@@ -26,7 +27,7 @@ Work item'larınızdan **herhangi bir tarih alanına** göre aylık rapor. Bir w
 
 Widget kataloğundan **Field Lens**'i ekleyip ayarlarından görünümü seçin:
 
-1. **Özet**: ortasında toplam yazan bir halka grafik ve önceki döneme göre fark. Grafik state'lere ya da seçtiğiniz bir **kırılım alanına** (sistem, atanan kişi…) göre bölünür.
+1. **Özet**: ortasında toplam yazan bir halka grafik ve önceki döneme göre fark. Grafik state'lere ya da seçtiğiniz bir **kırılım alanına** (sistem, atanan kişi…) göre bölünür. İsteğe bağlı bir kural, alanın değerini önce bir gruba çevirebilir; örneğin kişiyi birimine.
 2. **Aylık trend**: son 3, 6 ya da 12 ay (ya da özel aralık), state'lere göre yığılmış.
 3. **Haftalık**: seçilen aralıkta takvim haftası başına kayıt.
 4. **Tarihe göre**: kayıt olan her gün için tarihiyle etiketlenmiş bir çubuk.
@@ -39,6 +40,8 @@ Widget kataloğundan **Field Lens**'i ekleyip ayarlarından görünümü seçin:
 Bir proje açın → **Boards** → **Field Lens**. Widget: **Dashboards → Edit → Add a widget**.
 
 ## Sürüm notları
+
+**0.2.7**: rapor sayfasında kuralla (regex) türetilen kolon, aynı kuralın widget kırılımında kullanımı ve canlı önizleme.
 
 **0.2.6**: widget Özet görünümü halka grafik oldu ve isteğe bağlı kırılım alanı eklendi. Haftalara göre grafik rapor sayfasından kaldırıldı.
 

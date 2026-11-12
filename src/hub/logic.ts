@@ -22,7 +22,18 @@ export interface Query {
   columns: string[];
 }
 
+/** Türetilmiş kolon: kaynak alanın görünen değerine regex uygulanır, eşleşen ilk kısım yeni kolona yazılır. */
+export interface Rule {
+  source: string;
+  pattern: string;
+  name: string;
+}
+
+/** Türetilmiş kolonun sanal referans adı; sunucudan istenmez, satırlara tarayıcıda eklenir. */
+export const DERIVED = "FieldLens.Derived";
+
 export interface Settings {
+  derived?: Rule;
   type?: string;
   dateField?: string;
   preset?: Preset;
@@ -123,7 +134,9 @@ export function sanitizeSettings(s: Settings | undefined, types: string[], field
     out.states = [];
   }
   if ("dateField" in s && !fields.some((f) => f.referenceName === s.dateField && f.type === "dateTime")) out.dateField = undefined;
-  if (s.columns) out.columns = s.columns.filter((c) => refs.has(c));
+  const derivedOk = !!s.derived && refs.has(s.derived.source);
+  if ("derived" in s && !derivedOk) out.derived = undefined;
+  if (s.columns) out.columns = s.columns.filter((c) => refs.has(c) || (c === DERIVED && derivedOk));
   return out;
 }
 
@@ -305,6 +318,30 @@ export function countBy(rows: Row[], col: Field, top: number): { items: { value:
     .map(([value, count]) => ({ value, count }))
     .sort((a, b) => b.count - a.count || a.value.localeCompare(b.value, "tr"));
   return { items: all.slice(0, top), other: all.slice(top).reduce((n, x) => n + x.count, 0) };
+}
+
+/** Kuralı derler; geçersizse (ya da boşsa) hata metnini döner. Kullanıcının kendi tarayıcısında çalışır. */
+export function compileRule(pattern: string): RegExp | string {
+  if (!pattern.trim()) return "empty";
+  try {
+    return new RegExp(pattern, "u");
+  } catch (e) {
+    return e instanceof Error ? e.message : String(e);
+  }
+}
+
+/** Metinde kurala uyan ilk kısım (kırpılmış); eşleşme yoksa undefined. */
+export function applyRule(text: string, re: RegExp): string | undefined {
+  const m = re.exec(text);
+  return m ? m[0].trim() : undefined;
+}
+
+/** Satırların kopyasına DERIVED kolonunu ekler: kaynak boşsa "", eşleşmezse `unmatched`. */
+export function deriveRows(rows: Row[], source: Field, re: RegExp, unmatched: string): Row[] {
+  return rows.map((r) => {
+    const text = formatCell(r[source.referenceName], source.type);
+    return { ...r, [DERIVED]: text ? (applyRule(text, re) ?? unmatched) : "" };
+  });
 }
 
 export function chunk<T>(list: T[], size: number): T[][] {

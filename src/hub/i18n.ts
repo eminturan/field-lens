@@ -28,6 +28,8 @@ export interface WidgetStrings {
   months: (n: number) => string;
   customRange: string;
   cfgBreakdown: string;
+  cfgRule: string;
+  ruleHint: string;
   breakdownHint: string;
   searchField: string;
   clear: string;
@@ -44,8 +46,26 @@ export interface WidgetStrings {
   barTip: (label: string, n: number) => string;
 }
 
+export interface RuleStrings {
+  title: string;
+  source: string;
+  pattern: string;
+  name: string;
+  defaultName: string;
+  hint: string;
+  example: string;
+  invalid: (msg: string) => string;
+  unmatched: string;
+  preview: string;
+  needData: string;
+  noValues: string;
+  addColumn: string;
+  remove: string;
+}
+
 export interface Strings {
   locale: string;
+  rule: RuleStrings;
   w: WidgetStrings;
   csvSeparator: string;
   title: string;
@@ -103,6 +123,22 @@ export interface Strings {
 export const STRINGS: Record<Lang, Strings> = {
   tr: {
     locale: "tr-TR",
+    rule: {
+      title: "Kuralla türetilen kolon",
+      source: "Kaynak alan",
+      pattern: "Kural (regex)",
+      name: "Kolon adı",
+      defaultName: "Birim",
+      hint: "Kaynak alanın görünen değerinde kurala uyan ilk kısım yeni kolona yazılır. Örnek kural, ABC ya da XY kelimesinden başlayıp sonuna kadar olan kısmı alır.",
+      example: "\\b(ABC|XY)\\b.*",
+      invalid: (m) => (m === "empty" ? "Kural boş." : `Kural geçersiz: ${m}`),
+      unmatched: "(eşleşmedi)",
+      preview: "Önizleme",
+      needData: "Önizleme için raporu çalıştırın.",
+      noValues: "Bu alanda değer yok.",
+      addColumn: "Kolonlara ekle",
+      remove: "Kuralı kaldır",
+    },
     w: {
       views: { summary: "Özet", trend: "Aylık trend", weekly: "Haftalık", daily: "Tarihe göre", upcoming: "Yaklaşanlar" },
       cfgView: "Görünüm",
@@ -111,6 +147,8 @@ export const STRINGS: Record<Lang, Strings> = {
       months: (n) => `Son ${n} ay`,
       customRange: "Özel aralık",
       cfgBreakdown: "Kırılım alanı (isteğe bağlı)",
+      cfgRule: "Değere uygulanacak kural (isteğe bağlı, regex)",
+      ruleHint: "Grafik, alanın görünen değerinde kurala uyan ilk kısma göre bölünür. Örnek kural, ABC ya da XY kelimesinden başlayıp sonuna kadar olan kısmı alır.",
       breakdownHint: "Boşsa grafik state'lere göre bölünür. Bir alan seçilirse seçili state'lerdeki kayıtlar o alanın değerlerine göre sayılır.",
       searchField: "Alan ara…",
       clear: "Temizle",
@@ -187,6 +225,22 @@ export const STRINGS: Record<Lang, Strings> = {
   },
   en: {
     locale: "en-US",
+    rule: {
+      title: "Column derived by a rule",
+      source: "Source field",
+      pattern: "Rule (regex)",
+      name: "Column name",
+      defaultName: "Unit",
+      hint: "The first part of the source field's displayed value that matches the rule goes into the new column. The example rule keeps everything from the word ABC or XY to the end.",
+      example: "\\b(ABC|XY)\\b.*",
+      invalid: (m) => (m === "empty" ? "The rule is empty." : `Invalid rule: ${m}`),
+      unmatched: "(no match)",
+      preview: "Preview",
+      needData: "Run the report to see a preview.",
+      noValues: "This field has no values.",
+      addColumn: "Add to columns",
+      remove: "Remove rule",
+    },
     w: {
       views: { summary: "Summary", trend: "Monthly trend", weekly: "Weekly", daily: "By date", upcoming: "Upcoming" },
       cfgView: "View",
@@ -195,6 +249,8 @@ export const STRINGS: Record<Lang, Strings> = {
       months: (n) => `Last ${n} months`,
       customRange: "Custom range",
       cfgBreakdown: "Breakdown field (optional)",
+      cfgRule: "Rule applied to the value (optional, regex)",
+      ruleHint: "The chart is split by the first part of the field's displayed value that matches the rule. The example rule keeps everything from the word ABC or XY to the end.",
       breakdownHint: "Empty: the chart is split by state. With a field: items in the chosen states are counted by that field's values.",
       searchField: "Search field…",
       clear: "Clear",

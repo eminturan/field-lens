@@ -9,17 +9,16 @@ import {
   Field,
   formatCell,
   monthBuckets,
-  monthsRange,
-  presetRange,
-  Preset,
+  compileRule,
+  DERIVED,
+  deriveRows,
   previousRange,
   Query,
   Row,
-  upcomingRange,
   View,
   weekBuckets,
 } from "../hub/logic";
-import { configured, usesCustom, DEFAULTS, Env, Frame, inHost, parseSettings, startWidget, useEnv, WidgetConfig } from "./shared";
+import { configured, DEFAULTS, Env, Frame, inHost, parseSettings, plan, startWidget, useEnv, usesCustom, WidgetConfig } from "./shared";
 
 /** Yaklaşanlar listesinde gösterilen en fazla kayıt. */
 const LIST_LIMIT = 100;
@@ -27,24 +26,6 @@ const LIST_LIMIT = 100;
 interface Meta {
   fields: Map<string, Field>;
   colors: Record<string, string>;
-}
-
-/** Görünümün veri isteği: hangi aralık ve hangi kolonlar. */
-function plan(cfg: WidgetConfig, now: Date): { from: string; to: string; columns: string[] } {
-  const range = usesCustom(cfg)
-    ? { from: cfg.from, to: cfg.to }
-    : cfg.view === "trend"
-      ? monthsRange(cfg.months, now)
-      : cfg.view === "upcoming"
-        ? upcomingRange(cfg.days, now)
-        : presetRange(cfg.preset as Exclude<Preset, "custom">, now);
-  const columns =
-    cfg.view === "upcoming"
-      ? ["System.Title", "System.State", cfg.dateField]
-      : cfg.view === "summary" && cfg.breakdown
-        ? ["System.State", cfg.dateField, cfg.breakdown]
-        : ["System.State", cfg.dateField];
-  return { ...range, columns };
 }
 
 /** Widget boyutuna göre grafik oranı: SVG genişliği 640 birim, yükseklik alanın oranına göre. */
@@ -69,6 +50,7 @@ function Report({ settings }: { settings?: WidgetSettings }) {
         states: ["New", "Active", "Resolved", "Closed"],
         preset: "last90",
         breakdown: new URLSearchParams(window.location.search).get("breakdown") ?? "",
+        breakdownRule: new URLSearchParams(window.location.search).get("rule") ?? "",
       };
   const ok = configured(cfg);
   const req = plan(cfg, new Date());
@@ -125,6 +107,7 @@ function Report({ settings }: { settings?: WidgetSettings }) {
             states={cfg.states}
             colors={meta.colors}
             breakdown={cfg.breakdown ? field(cfg.breakdown) : undefined}
+            rule={cfg.breakdownRule}
             env={env}
           />
         );
@@ -182,12 +165,18 @@ const OTHER = "#8a8a8a";
 const TOP = 7;
 
 /** 1: toplam ve önceki dönemle fark; halka state'lere ya da seçilen kırılım alanının değerlerine göre bölünür. */
-function Summary({ rows, prev, states, colors, breakdown, env }: { rows: Row[]; prev?: number; states: string[]; colors: Record<string, string>; breakdown?: Field; env: Env }) {
+function Summary(props: { rows: Row[]; prev?: number; states: string[]; colors: Record<string, string>; breakdown?: Field; rule?: string; env: Env }) {
+  const { rows, prev, states, colors, breakdown, env } = props;
   const { t } = env;
   const total = rows.length;
   let slices: Slice[];
   if (breakdown) {
-    const { items, other } = countBy(rows, breakdown, TOP);
+    // Kural varsa değerler önce kuraldan geçirilir (örn. kişi adı atılıp birim bırakılır).
+    const re = props.rule ? compileRule(props.rule) : undefined;
+    const { items, other } =
+      re instanceof RegExp
+        ? countBy(deriveRows(rows, breakdown, re, t.rule.unmatched), { referenceName: DERIVED, name: breakdown.name, type: "string" }, TOP)
+        : countBy(rows, breakdown, TOP);
     slices = items.map((x, i) => ({ label: x.value || t.w.blank, value: x.count, color: PALETTE[i] }));
     if (other) slices.push({ label: t.w.other, value: other, color: OTHER });
   } else {

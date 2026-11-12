@@ -584,3 +584,32 @@ section > .fl-button {
 .fl-dense .fl-clip {
   max-height: 1.45em;
 }
+
+/* Kuralla türetilen kolon */
+.fl-rule {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.fl-rule > summary {
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--text-secondary-color, rgba(0, 0, 0, 0.55));
+}
+
+.fl-rule[open] > summary {
+  margin-bottom: 8px;
+}
+
+.fl-rule > .fl-toolbar,
+.fl-rule > .fl-muted,
+.fl-rule > .fl-rule-preview,
+.fl-rule > .fl-rule-hint,
+.fl-rule > .fl-rule-error {
+  margin-bottom: 8px;
+}
+
+.fl-rule-input {
+  width: 260px;
+}

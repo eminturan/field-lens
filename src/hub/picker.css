@@ -45,3 +45,51 @@
 .fl-picker-empty {
   padding: 6px 12px;
 }
+
+/* Türetilmiş kolon kuralı: önizleme ve hata */
+.fl-rule-preview {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-size: 12px;
+}
+
+.fl-rule-preview li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  gap: 8px;
+  align-items: baseline;
+}
+
+.fl-rule-in {
+  color: var(--text-secondary-color, rgba(0, 0, 0, 0.55));
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fl-rule-out {
+  font-weight: 600;
+}
+
+.fl-rule-miss {
+  color: var(--status-warning-foreground, #8a6100);
+  font-style: italic;
+}
+
+.fl-rule-hint {
+  font-size: 12px;
+  color: var(--text-secondary-color, rgba(0, 0, 0, 0.55));
+}
+
+.fl-rule-error {
+  font-size: 12px;
+  color: var(--status-error-foreground, #cd4a45);
+}
+
+.fl-mono {
+  font-family: Consolas, "SF Mono", Menlo, monospace;
+}

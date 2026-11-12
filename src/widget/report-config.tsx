@@ -1,8 +1,9 @@
 import * as React from "react";
 
 import { FieldPicker } from "../hub/fieldPicker";
-import { Field, monthsRange, Preset, PRESETS, presetRange, VIEWS } from "../hub/logic";
-import { customValid, DAYS, DEFAULTS, Env, inHost, MONTHS, startConfig, usesCustom, WidgetConfig } from "./shared";
+import { Field, formatCell, monthsRange, Preset, PRESETS, presetRange, VIEWS } from "../hub/logic";
+import { RulePreview } from "../hub/rulePreview";
+import { customValid, DAYS, DEFAULTS, Env, inHost, MONTHS, plan, startConfig, usesCustom, WidgetConfig } from "./shared";
 
 /** Özel aralığa geçerken boş tarihler o an görünen aralıkla doldurulur. */
 function withDates(c: WidgetConfig): WidgetConfig {
@@ -45,6 +46,28 @@ function Form({ value, onChange, env }: { value: WidgetConfig; onChange: (v: Wid
   }, [source, value.type]);
 
   const byRef = new Map(fields.map((f) => [f.referenceName, f]));
+
+  // Kural önizlemesi için kırılım alanının gerçek değerleri: widget'ın filtreleriyle tek sorgu.
+  const [samples, setSamples] = React.useState<{ key: string; values: string[] }>();
+  const req = plan(value, new Date());
+  const sampleKey = JSON.stringify([value.type, value.dateField, value.states, value.breakdown, req.from, req.to]);
+  const wantSamples = value.view === "summary" && !!value.breakdown && !!value.type && !!value.dateField && value.states.length > 0;
+  React.useEffect(() => {
+    if (!wantSamples || samples?.key === sampleKey) return;
+    let live = true;
+    const timer = window.setTimeout(() => {
+      source
+        .run({ type: value.type, dateField: value.dateField, states: value.states, from: req.from, to: req.to, columns: [value.breakdown] })
+        .then(
+          (r) => live && setSamples({ key: sampleKey, values: r.rows.map((row) => formatCell(row[value.breakdown], byRef.get(value.breakdown)?.type)) }),
+          () => undefined,
+        );
+    }, 400);
+    return () => {
+      live = false;
+      window.clearTimeout(timer);
+    };
+  }, [source, sampleKey, wantSamples]);
   const toggle = (s: string) =>
     set({ states: value.states.includes(s) ? value.states.filter((x) => x !== s) : (stateList ?? []).filter((x) => x === s || value.states.includes(x)) });
 
@@ -154,6 +177,20 @@ function Form({ value, onChange, env }: { value: WidgetConfig; onChange: (v: Wid
             )}
           </div>
           <span className="flc-hint">{t.w.breakdownHint}</span>
+        </div>
+      )}
+      {value.view === "summary" && value.breakdown && (
+        <div className="flc-field">
+          <span>{t.w.cfgRule}</span>
+          <input
+            className="fl-input fl-mono"
+            value={value.breakdownRule}
+            placeholder={t.rule.example}
+            spellCheck={false}
+            onChange={(e) => set({ breakdownRule: e.target.value })}
+          />
+          <span className="flc-hint">{t.w.ruleHint}</span>
+          <RulePreview pattern={value.breakdownRule} values={samples?.key === sampleKey ? samples.values : undefined} t={t} pending={t.loading} />
         </div>
       )}
       <fieldset className="flc-states">

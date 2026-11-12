@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildWiql, chunk, countBy, dayBuckets, monthBuckets, monthsRange, upcomingRange, countStates, previousRange, weekBuckets, csvRows, filterRows, sortRows, Field, formatCell, moveItem, pageSlice, presetRange, Query, sanitizeSettings, searchFields, toCsv } from "../src/hub/logic";
+import { applyRule, buildWiql, chunk, compileRule, countBy, DERIVED, deriveRows, dayBuckets, monthBuckets, monthsRange, upcomingRange, countStates, previousRange, weekBuckets, csvRows, filterRows, sortRows, Field, formatCell, moveItem, pageSlice, presetRange, Query, sanitizeSettings, searchFields, toCsv } from "../src/hub/logic";
 
 const q: Query = {
   type: "Kart",
@@ -285,5 +285,46 @@ describe("countBy", () => {
   it("identity values count by display name", () => {
     const people = [{ P: { displayName: "Ayşe" } }, { P: { displayName: "Ayşe" } }];
     expect(countBy(people, { referenceName: "P", name: "P", type: "identity" }, 5).items).toEqual([{ value: "Ayşe", count: 2 }]);
+  });
+});
+
+describe("rules", () => {
+  it("compileRule returns a RegExp, or the error message for an invalid pattern", () => {
+    expect(compileRule("\\b(ABC|XY)\\b.*")).toBeInstanceOf(RegExp);
+    expect(typeof compileRule("(ABC")).toBe("string");
+    expect(typeof compileRule("")).toBe("string");
+  });
+
+  it("applyRule keeps the first matching part; undefined when nothing matches", () => {
+    const re = compileRule("\\b(ABC|XY)\\b.*") as RegExp;
+    expect(applyRule("Deniz Arslan ABC Ödeme Hizmetleri", re)).toBe("ABC Ödeme Hizmetleri");
+    expect(applyRule("Selin Koç XY Yazılım Destek", re)).toBe("XY Yazılım Destek");
+    expect(applyRule("Ali Veli DGM Operasyon", re)).toBeUndefined();
+    // "AXY" içindeki XY kelime sınırında olmadığı için eşleşmez
+    expect(applyRule("Can AXYS", re)).toBeUndefined();
+  });
+
+  it("deriveRows fills the derived column from the source's displayed value; empty stays empty, misses get the label", () => {
+    const re = compileRule("\\b(ABC|XY)\\b.*") as RegExp;
+    const src: Field = { referenceName: "Custom.Requester", name: "Requester", type: "identity" };
+    const rows = [
+      { "Custom.Requester": { displayName: "Deniz Arslan ABC Ödeme Hizmetleri" } },
+      { "Custom.Requester": undefined },
+      { "Custom.Requester": { displayName: "Ali Veli" } },
+    ];
+    expect(deriveRows(rows, src, re, "(eşleşmedi)").map((r) => r[DERIVED])).toEqual(["ABC Ödeme Hizmetleri", "", "(eşleşmedi)"]);
+    expect(rows[0]).not.toHaveProperty(DERIVED);
+  });
+});
+
+describe("sanitizeSettings with a derived column", () => {
+  const fields: Field[] = [{ referenceName: "Custom.Requester", name: "Requester", type: "identity" }];
+  it("keeps the derived column while its source exists", () => {
+    const s = { columns: ["Custom.Requester", DERIVED], derived: { source: "Custom.Requester", pattern: "XY.*", name: "Birim" } };
+    expect(sanitizeSettings(s, [], fields)).toEqual(s);
+  });
+  it("drops the rule and its column when the source is gone", () => {
+    const s = { columns: [DERIVED], derived: { source: "Custom.Gone", pattern: "XY.*", name: "Birim" } };
+    expect(sanitizeSettings(s, [], fields)).toEqual({ columns: [], derived: undefined });
   });
 });

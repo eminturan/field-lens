@@ -2,6 +2,13 @@
 
 [English](CHANGELOG.md)
 
+## 0.2.7
+
+- Rapor sayfası: **kuralla türetilen kolon**. Bir kaynak alan seçip bir kural (regex) ve kolon adı yazarsınız. Yeni kolona, alanın görünen değerinde kurala uyan ilk kısım yazılır. Örneğin `\b(ABC|XY)\b.*` kuralı "Deniz Arslan ABC Ödeme Hizmetleri" değerini "ABC Ödeme Hizmetleri" yapar. Eşleşmeyen değerler "(eşleşmedi)" olarak görünür, boş değerler boş kalır.
+  - Kolonda arama, filtre ve sıralama yapılabilir; kolon CSV'ye girer ve seçimlerle birlikte saklanır.
+  - Çalıştırdıktan sonra canlı önizleme, kuralı gerçek değerler üzerinde gösterir. Geçersiz kural bildirilir ve düzeltilene kadar kolon raporda yer almaz.
+- Widget, **Özet**: kırılım alanına isteğe bağlı kural. Böylece halka grafik kişiye göre değil birime göre bölünebilir. Ayar panelinde, widget'ın kendi filtreleriyle canlı önizleme gösterilir.
+
 ## 0.2.6
 
 - Widget, **Özet** görünümü: ortasında toplam yazan bir **halka grafik** ve sayılarla yüzdeleri gösteren bir açıklama. State çubuğunun yerini aldı.

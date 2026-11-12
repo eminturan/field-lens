@@ -2,6 +2,13 @@
 
 [Türkçe](CHANGELOG.tr.md)
 
+## 0.2.7
+
+- Report page: a **column derived by a rule**. Pick a source field, write a rule (regex) and a column name. The new column holds the first part of the field's displayed value that matches the rule. For example, `\b(ABC|XY)\b.*` turns "Deniz Arslan ABC Ödeme Hizmetleri" into "ABC Ödeme Hizmetleri". Values that don't match show "(no match)" and empty values stay empty.
+  - The column can be searched, filtered and sorted, is included in the CSV, and is saved with your selections.
+  - A live preview shows the rule applied to real values after a run. An invalid rule is reported and its column is left out until it is fixed.
+- Widget, **Summary**: an optional rule for the breakdown field, so the donut can be split by unit instead of by person. The settings panel shows a live preview using the widget's own filters.
+
 ## 0.2.6
 
 - Widget, **Summary** view: a **donut chart** with the total in the middle and a legend with counts and percentages. It replaces the state bar.

@@ -17,6 +17,7 @@ import { Page } from "azure-devops-ui/Page";
 import { createRestSource, DataSource, RunResult } from "./api";
 import { fullDay } from "./chart";
 import { FieldPicker } from "./fieldPicker";
+import { RulePreview } from "./rulePreview";
 import { firstOf, pickLang, Strings, STRINGS } from "./i18n";
 import {
   countStates,
@@ -32,6 +33,10 @@ import {
   presetRange,
   previousRange,
   Query,
+  compileRule,
+  DERIVED,
+  deriveRows,
+  Rule,
   sanitizeSettings,
   sortRows,
   Settings,
@@ -133,7 +138,10 @@ function App({ source, store, mock, t, itemUrl }: Props) {
 
   const [running, setRunning] = React.useState(false);
   const [runError, setRunError] = React.useState<string>();
-  const [result, setResult] = React.useState<{ query: Query; data: RunResult }>();
+  /** Türetilmiş kolon kuralı; kaynak, geçerli kural ve ad doluysa kolon olarak kullanılabilir. */
+  const [rule, setRule] = React.useState<Rule>({ source: "", pattern: "", name: "" });
+  /** fetched: sunucudan istenen alanlar (önizleme kaynağın gelip gelmediğini buradan anlar); rule: çalıştırıldığı andaki kural. */
+  const [result, setResult] = React.useState<{ query: Query; data: RunResult; fetched: string[]; rule?: Rule }>();
   const [page, setPage] = React.useState(0);
   /** Özet kartına tıklanınca tablo ve CSV yalnızca bu state'i gösterir. */
   const [stateFilter, setStateFilter] = React.useState<string>();
@@ -184,6 +192,7 @@ function App({ source, store, mock, t, itemUrl }: Props) {
         setTo(range.to);
         setStates(s.states ?? []);
         if (s.columns?.length) setColumns(s.columns);
+        if (s.derived) setRule(s.derived);
       })
       .catch((e) => live && setLoadError(message(e)));
     return () => {
@@ -211,7 +220,17 @@ function App({ source, store, mock, t, itemUrl }: Props) {
     };
   }, [source, type, reload]);
 
-  const byRef = React.useMemo(() => new Map(fields.map((f) => [f.referenceName, f])), [fields]);
+  const ruleRe = compileRule(rule.pattern);
+  const ruleReady = !!rule.source && typeof ruleRe !== "string" && !!rule.name.trim();
+  // Kural tamamlanınca kolon kendiliğinden eklenir, bozulunca çıkarılır.
+  React.useEffect(() => {
+    setColumns((cols) => (ruleReady ? (cols.includes(DERIVED) ? cols : [...cols, DERIVED]) : cols.filter((c) => c !== DERIVED)));
+  }, [ruleReady]);
+  const byRef = React.useMemo(() => {
+    const map = new Map(fields.map((f) => [f.referenceName, f]));
+    map.set(DERIVED, { referenceName: DERIVED, name: rule.name.trim() || t.rule.defaultName, type: "string" });
+    return map;
+  }, [fields, rule.name, t]);
   const dateFields = React.useMemo(() => fields.filter((f) => f.type === "dateTime"), [fields]);
   const columnFields = columns.map((c) => byRef.get(c) ?? { referenceName: c, name: c, type: "string" });
 
@@ -248,7 +267,10 @@ function App({ source, store, mock, t, itemUrl }: Props) {
   const run = () => {
     if (missing) return;
     const query: Query = { type, dateField, from, to, states, columns };
-    store.save({ type, dateField, preset, from, to, states, columns }).catch(() => undefined);
+    const activeRule = ruleReady && columns.includes(DERIVED) ? rule : undefined;
+    // Türetilmiş kolon sunucudan istenmez; yerine kaynak alanı istenir.
+    const fetched = [...new Set([...columns.filter((c) => c !== DERIVED), ...(activeRule ? [activeRule.source] : [])])];
+    store.save({ type, dateField, preset, from, to, states, columns, derived: rule.source || rule.pattern ? rule : undefined }).catch(() => undefined);
     setRunning(true);
     setRunError(undefined);
     setPrevCount(undefined);
@@ -259,9 +281,9 @@ function App({ source, store, mock, t, itemUrl }: Props) {
       .then((n) => id === runId.current && setPrevCount(n))
       .catch(() => undefined);
     source
-      .run(query)
+      .run({ ...query, columns: fetched })
       .then((data) => {
-        setResult({ query, data });
+        setResult({ query, data, fetched, rule: activeRule });
         setCollapsed(true);
         setPage(0);
         setStateFilter(undefined);
@@ -285,7 +307,18 @@ function App({ source, store, mock, t, itemUrl }: Props) {
     download(name, toCsv(csvRows(visible, cols), t.csvSeparator));
   };
 
-  const allRows = result?.data.rows ?? [];
+  const allRows = React.useMemo(() => {
+    const rows = result?.data.rows ?? [];
+    const r = result?.rule;
+    const re = r && compileRule(r.pattern);
+    const src = r && byRef.get(r.source);
+    return r && src && re instanceof RegExp ? deriveRows(rows, src, re, t.rule.unmatched) : rows;
+  }, [result, byRef, t]);
+  // Önizleme: son çalıştırmada kaynak alan istendiyse onun görünen değerleri.
+  const previewValues =
+    result && rule.source && result.fetched.includes(rule.source)
+      ? result.data.rows.map((r) => formatCell(r[rule.source], byRef.get(rule.source)?.type))
+      : undefined;
   const shownCols = React.useMemo(
     () => (result ? result.query.columns.map((c) => byRef.get(c) ?? { referenceName: c, name: c, type: "string" }) : []),
     [result, byRef],
@@ -485,6 +518,50 @@ function App({ source, store, mock, t, itemUrl }: Props) {
                 />
               </div>
             </div>
+
+            <details className="fl-rule" open={!!rule.source || !!rule.pattern}>
+              <summary>{t.rule.title}</summary>
+              <div className="fl-toolbar">
+                <div className="fl-field">
+                  <span className="fl-muted">{t.rule.source}</span>
+                  <FieldPicker
+                    id="fl-rule-source"
+                    single
+                    fields={fields}
+                    selected={byRef.get(rule.source)}
+                    placeholder={t.w.searchField}
+                    empty={t.noMatch}
+                    onPick={(ref) => setRule({ ...rule, source: ref, name: rule.name || t.rule.defaultName })}
+                  />
+                </div>
+                <label className="fl-field">
+                  <span className="fl-muted">{t.rule.pattern}</span>
+                  <input
+                    className="fl-input fl-mono fl-rule-input"
+                    value={rule.pattern}
+                    placeholder={t.rule.example}
+                    spellCheck={false}
+                    onChange={(e) => setRule({ ...rule, pattern: e.target.value })}
+                  />
+                </label>
+                <label className="fl-field">
+                  <span className="fl-muted">{t.rule.name}</span>
+                  <input className="fl-input" value={rule.name} placeholder={t.rule.defaultName} onChange={(e) => setRule({ ...rule, name: e.target.value })} />
+                </label>
+                {(rule.source || rule.pattern) && (
+                  <button className="fl-button" onClick={() => setRule({ source: "", pattern: "", name: "" })}>
+                    {t.rule.remove}
+                  </button>
+                )}
+                {ruleReady && !columns.includes(DERIVED) && (
+                  <button className="fl-button" onClick={() => setColumns([...columns, DERIVED])}>
+                    {t.rule.addColumn}
+                  </button>
+                )}
+              </div>
+              <span className="fl-muted">{t.rule.hint}</span>
+              {rule.source && <RulePreview pattern={rule.pattern} values={previewValues} t={t} />}
+            </details>
 
             <div className="fl-actions">
               <button className="fl-button" disabled={!!missing || running} onClick={run}>

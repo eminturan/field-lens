@@ -11,10 +11,13 @@ const FIELDS: Field[] = [
   { referenceName: "System.Description", name: "Description", type: "html" },
   { referenceName: "Custom.TargetDate", name: "Target Date", type: "dateTime" },
   { referenceName: "Custom.Sistem", name: "Sistem", type: "string" },
+  { referenceName: "Custom.Requester", name: "Requester", type: "identity" },
 ];
 const STATES = ["New", "Active", "Resolved", "Closed"];
 const PEOPLE = ["Ayşe Yılmaz", "Mehmet Öztürk", "Can Şahin", undefined];
 const SYSTEMS = ["Core Banking", "Mobil", "İnternet Şube"];
+// Görünen adda kişi adı + birim; türetilmiş kolon kuralını denemek için.
+const REQUESTERS = ["Deniz Arslan ABC Ödeme Hizmetleri", "Selin Koç XY Yazılım Destek", "Burak Tekin ABC Ödeme Hizmetleri", "Ece Yalın XY Altyapı", "Ali Veli"];
 const DAY = 86400000;
 
 /** `npm run dev` için örnek veri: son 120 ve sonraki 30 güne yayılmış 240 kart ve 60 bug (sayfalama denenebilsin). */
@@ -35,6 +38,7 @@ function build(): Row[] {
       "System.Description": `<div>Hata Başlığı: Kayıt ${i}<br>Ekran Adı: Bireysel Kredi Kartı Başvurusu. Modül Adı: Bireysel Kart Pazarlama. Hata Detayı: TLP-30863 kapsamında açılmış bir kayıttır; desteklerinizi talep ederiz. Bilgisayar Adı: NB-BPBB12. Etki: Sadece ben.</div>`,
       "Custom.TargetDate": planned.toISOString(),
       "Custom.Sistem": SYSTEMS[i % SYSTEMS.length],
+      "Custom.Requester": { displayName: REQUESTERS[i % REQUESTERS.length], uniqueName: `user${i % REQUESTERS.length}` },
     };
   });
 }

@@ -14,7 +14,7 @@ import {
 
 import { createRestSource, DataSource } from "../hub/api";
 import { firstOf, pickLang, Strings, STRINGS } from "../hub/i18n";
-import { Preset, View, VIEWS } from "../hub/logic";
+import { compileRule, monthsRange, Preset, presetRange, upcomingRange, View, VIEWS } from "../hub/logic";
 import { mockSource } from "../hub/mock";
 
 /** vss-extension.json içindeki publisher ve extension id'si; widget tam id ile de kaydedilir. */
@@ -32,6 +32,8 @@ export interface WidgetConfig {
   preset: Preset;
   /** Özet için isteğe bağlı kırılım alanı: doluysa halka state yerine bu alanın değerlerine göre bölünür. */
   breakdown: string;
+  /** Kırılım alanının görünen değerine uygulanacak isteğe bağlı kural (regex); boşsa değer olduğu gibi kullanılır. */
+  breakdownRule: string;
   /** Aylık trend için ay sayısı; 0 = özel aralık (from–to). */
   months: number;
   from: string;
@@ -39,7 +41,7 @@ export interface WidgetConfig {
   days: number;
 }
 
-export const DEFAULTS: WidgetConfig = { view: "summary", type: "", dateField: "", states: [], preset: "lastMonth", months: 6, from: "", to: "", breakdown: "", days: 14 };
+export const DEFAULTS: WidgetConfig = { view: "summary", type: "", dateField: "", states: [], preset: "lastMonth", months: 6, from: "", to: "", breakdown: "", breakdownRule: "", days: 14 };
 export const MONTHS = [3, 6, 12];
 export const DAYS = [7, 14, 30, 60];
 
@@ -53,7 +55,26 @@ export const configured = (c: WidgetConfig) =>
   !!c.type &&
   !!c.dateField &&
   c.states.length > 0 &&
-  (!usesCustom(c) || customValid(c));
+  (!usesCustom(c) || customValid(c)) &&
+  (c.view !== "summary" || !c.breakdown || !c.breakdownRule || typeof compileRule(c.breakdownRule) !== "string");
+
+/** Görünümün veri isteği: hangi aralık ve hangi kolonlar. */
+export function plan(cfg: WidgetConfig, now: Date): { from: string; to: string; columns: string[] } {
+  const range = usesCustom(cfg)
+    ? { from: cfg.from, to: cfg.to }
+    : cfg.view === "trend"
+      ? monthsRange(cfg.months, now)
+      : cfg.view === "upcoming"
+        ? upcomingRange(cfg.days, now)
+        : presetRange(cfg.preset as Exclude<Preset, "custom">, now);
+  const columns =
+    cfg.view === "upcoming"
+      ? ["System.Title", "System.State", cfg.dateField]
+      : cfg.view === "summary" && cfg.breakdown
+        ? ["System.State", cfg.dateField, cfg.breakdown]
+        : ["System.State", cfg.dateField];
+  return { ...range, columns };
+}
 
 export interface Env {
   source: DataSource;

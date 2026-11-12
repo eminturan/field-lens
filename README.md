@@ -20,6 +20,16 @@ Open a project → **Boards** → **Field Lens**.
 
 The chosen date field is added to the columns automatically. Selections are saved per user (Extension Data Service, user scope) and restored next time; types or fields that no longer exist are dropped.
 
+### Column derived by a rule
+
+Under **Column derived by a rule**, pick a source field, write a rule (a JavaScript regular expression) and a column name.
+
+- The new column holds the first part of the source field's **displayed** value that matches the rule. For identity fields this is the display name.
+- Values that don't match show `(no match)`, and empty values stay empty.
+- Example: `\b(ABC|XY)\b.*` keeps everything from the word ABC or XY to the end, so "Deniz Arslan ABC Ödeme Hizmetleri" becomes "ABC Ödeme Hizmetleri".
+- After a run, a preview shows the rule applied to up to six real values. An invalid rule shows its error, and the column is left out until the rule is fixed.
+- The column is computed in the browser (the source field is fetched instead), can be searched, filtered and sorted, goes into the CSV, and is saved with your selections.
+
 ### Results
 
 - After **Run**, the filters fold into a one-line report header; **Edit** opens them again. Grey placeholders show while the query runs.
@@ -52,7 +62,7 @@ On a dashboard: **Edit → Add a widget → Field Lens**, then the edit icon for
 
 | View | Shows | Range setting |
 | --- | --- | --- |
-| **Summary** | A donut with the total in the middle, the change against the previous period, and a legend with counts and percentages. It is split by state, or by an optional **breakdown field** (7 largest values plus "Other", empty values as "(empty)") | Relative preset or custom |
+| **Summary** | A donut with the total in the middle, the change against the previous period, and a legend with counts and percentages. It is split by state, or by an optional **breakdown field** (7 largest values plus "Other", empty values as "(empty)"). The breakdown can go through a rule first (same syntax as the derived column), with a live preview in the settings | Relative preset or custom |
 | **Monthly trend** | One stacked bar per calendar month | Last 3 / 6 / 12 months or custom |
 | **Weekly** | One stacked bar per Monday–Sunday week, labelled `13–19.10` | Relative preset or custom |
 | **By date** | One bar for each day that has items, labelled with its date | Relative preset or custom |
