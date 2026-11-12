@@ -39,6 +39,34 @@ Use relative ranges such as "last month" so the dashboard stays current on its o
 
 Open a project → **Boards** → **Field Lens**. The widget is under **Dashboards → Edit → Add a widget**.
 
+## Release notes
+
+**0.2.5**: release notes in English and Turkish.
+
+**0.2.4**: Marketplace page and README in English and Turkish.
+
+**0.2.3**:
+- New **By date** widget view.
+- The Distribution view is removed.
+- Weekly charts use Monday–Sunday weeks labelled with their dates.
+- Crowded charts stay readable.
+
+**0.2.2**: custom from–to range in the widget.
+
+**0.2.0**: dashboard widget with Summary, Monthly trend, Weekly and Upcoming views.
+
+**0.1.10**:
+- Report header.
+- Comparison with the previous period.
+- By-week chart.
+- Compact rows.
+
+**0.1.7**: search, column filters and sorting.
+
+**0.1.6**: state summary cards in board colors.
+
+Full history: [CHANGELOG.md](https://github.com/eminturan/field-lens/blob/main/CHANGELOG.md) · [Türkçe](https://github.com/eminturan/field-lens/blob/main/CHANGELOG.tr.md)
+
 ## Permissions
 
 Read-only: `vso.work`.

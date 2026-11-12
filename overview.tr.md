@@ -39,6 +39,34 @@ Widget kataloğundan **Field Lens**'i ekleyip ayarlarından görünümü seçin:
 
 Bir proje açın → **Boards** → **Field Lens**. Widget: **Dashboards → Edit → Add a widget**.
 
+## Sürüm notları
+
+**0.2.5**: sürüm notları İngilizce ve Türkçe.
+
+**0.2.4**: Marketplace sayfası ve README İngilizce ve Türkçe.
+
+**0.2.3**:
+- Yeni **Tarihe göre** widget görünümü.
+- Dağılım görünümü kaldırıldı.
+- Haftalık grafikler tarih aralığıyla etiketlenen pazartesi–pazar haftalarını kullanıyor.
+- Kalabalık grafikler okunur kalıyor.
+
+**0.2.2**: widget'ta özel başlangıç–bitiş aralığı.
+
+**0.2.0**: Özet, Aylık trend, Haftalık ve Yaklaşanlar görünümleriyle dashboard widget'ı.
+
+**0.1.10**:
+- Rapor başlığı.
+- Önceki dönemle karşılaştırma.
+- Haftalara göre grafik.
+- Sıkı satır görünümü.
+
+**0.1.7**: arama, kolon filtreleri ve sıralama.
+
+**0.1.6**: pano renklerinde state özet kartları.
+
+Tüm geçmiş: [CHANGELOG.tr.md](https://github.com/eminturan/field-lens/blob/main/CHANGELOG.tr.md) · [English](https://github.com/eminturan/field-lens/blob/main/CHANGELOG.md)
+
 ## Yetkiler
 
 Yalnızca okuma: `vso.work`.

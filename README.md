@@ -83,7 +83,7 @@ npm test
 npm run package    # out/turanemin.field-lens-<version>.vsix
 ```
 
-Bump `version` in `package.json`, `package-lock.json` and `vss-extension.json` before every package. To upload: Collection Settings → Extensions → Browse local extensions → Manage extensions → Upload extension.
+Bump `version` in `package.json`, `package-lock.json` and `vss-extension.json` before every package. For each release, add an entry to `CHANGELOG.md` and `CHANGELOG.tr.md`, and to the "Release notes" sections of `overview.md` and `overview.tr.md`. To upload: Collection Settings → Extensions → Browse local extensions → Manage extensions → Upload extension.
 
 Layout:
 
@@ -105,4 +105,4 @@ Layout:
 
 ## License
 
-MIT
+[MIT](LICENSE). Release notes: [CHANGELOG.md](CHANGELOG.md).

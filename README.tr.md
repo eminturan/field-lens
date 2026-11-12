@@ -83,7 +83,7 @@ npm test
 npm run package    # out/turanemin.field-lens-<sürüm>.vsix
 ```
 
-Her paketten önce `package.json`, `package-lock.json` ve `vss-extension.json` içindeki `version` artırılır. Yüklemek için: Collection Settings → Extensions → Browse local extensions → Manage extensions → Upload extension.
+Her paketten önce `package.json`, `package-lock.json` ve `vss-extension.json` içindeki `version` artırılır. Her sürümde `CHANGELOG.md` ile `CHANGELOG.tr.md` dosyalarına ve `overview.md` ile `overview.tr.md` içindeki "Sürüm notları / Release notes" bölümlerine bir giriş eklenir. Yüklemek için: Collection Settings → Extensions → Browse local extensions → Manage extensions → Upload extension.
 
 Klasörler:
 
@@ -105,4 +105,4 @@ Klasörler:
 
 ## Lisans
 
-MIT
+[MIT](LICENSE). Sürüm notları: [CHANGELOG.tr.md](CHANGELOG.tr.md).
