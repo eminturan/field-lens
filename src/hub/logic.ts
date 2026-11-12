@@ -149,6 +149,16 @@ export function pageSlice<T>(rows: T[], page: number, size: number) {
   return { items, page: p, pages, first: items.length ? p * size + 1 : 0, last: p * size + items.length };
 }
 
+/** Satırları state'e göre sayar: verilen sırayla (sıfırlar dahil), listede olmayanlar sona. */
+export function countStates(rows: Row[], states: string[]): { state: string; count: number }[] {
+  const counts = new Map<string, number>(states.map((s) => [s, 0]));
+  for (const r of rows) {
+    const s = String(r["System.State"] ?? "");
+    counts.set(s, (counts.get(s) ?? 0) + 1);
+  }
+  return [...counts].map(([state, count]) => ({ state, count }));
+}
+
 export function chunk<T>(list: T[], size: number): T[][] {
   const out: T[][] = [];
   for (let i = 0; i < list.length; i += size) out.push(list.slice(i, i + size));

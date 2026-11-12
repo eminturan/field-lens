@@ -70,9 +70,13 @@ describe("createRestSource", () => {
     expect(await source.types()).toEqual(["Bug", "Kart"]);
   });
 
-  it("states keep workflow order and encode type", async () => {
-    const { source, calls } = fake(() => json({ value: [{ name: "New" }, { name: "Active" }, { name: "Closed" }] }));
-    expect(await source.states("Ürün Kartı")).toEqual(["New", "Active", "Closed"]);
+  it("states keep workflow order, board colors and encode type", async () => {
+    const { source, calls } = fake(() => json({ value: [{ name: "New", color: "b2b2b2" }, { name: "Active", color: "007acc" }, { name: "Closed", color: "red;x" }] }));
+    expect(await source.states("Ürün Kartı")).toEqual([
+      { name: "New", color: "#b2b2b2" },
+      { name: "Active", color: "#007acc" },
+      { name: "Closed", color: "" },
+    ]);
     expect(calls[0].url).toBe(`https://s/tfs/C/My%20Proj/_apis/wit/workitemtypes/${encodeURIComponent("Ürün Kartı")}/states?api-version=7.0`);
   });
 

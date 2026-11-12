@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildWiql, chunk, csvRows, Field, formatCell, moveItem, pageSlice, presetRange, Query, sanitizeSettings, searchFields, toCsv } from "../src/hub/logic";
+import { buildWiql, chunk, countStates, csvRows, Field, formatCell, moveItem, pageSlice, presetRange, Query, sanitizeSettings, searchFields, toCsv } from "../src/hub/logic";
 
 const q: Query = {
   type: "Kart",
@@ -122,3 +122,15 @@ describe("moveItem", () => {
 });
 
 it("chunk",() => expect(chunk([1, 2, 3, 4, 5], 2)).toEqual([[1, 2], [3, 4], [5]]));
+
+describe("countStates", () => {
+  it("counts in the given order, keeps zeros and appends unknown states", () => {
+    const rows = [{ "System.State": "Closed" }, { "System.State": "Active" }, { "System.State": "Closed" }, { "System.State": "Odd" }];
+    expect(countStates(rows, ["New", "Active", "Closed"])).toEqual([
+      { state: "New", count: 0 },
+      { state: "Active", count: 1 },
+      { state: "Closed", count: 2 },
+      { state: "Odd", count: 1 },
+    ]);
+  });
+});

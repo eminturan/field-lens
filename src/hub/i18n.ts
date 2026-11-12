@@ -51,6 +51,9 @@ export interface Strings {
   runError: (detail: string) => string;
   truncated: string;
   count: (n: number) => string;
+  summary: string;
+  total: string;
+  filterHint: (state: string) => string;
   empty: string;
   need: { type: string; dateField: string; states: string; range: string; columns: string };
 }
@@ -87,6 +90,9 @@ export const STRINGS: Record<Lang, Strings> = {
     runError: (d) => `Sorgu çalıştırılamadı: ${d}`,
     truncated: "Sonuç 20.000 kayıt sınırına ulaştı; liste eksik olabilir. Aralığı daraltın.",
     count: (n) => `${n} kayıt`,
+    summary: "State özeti",
+    total: "Toplam",
+    filterHint: (s) => `Yalnızca ${s} kayıtlarını göster (tablo ve CSV)`,
     empty: "Bu filtrelerle kayıt bulunamadı.",
     need: {
       type: "Work item türü seçin.",
@@ -127,6 +133,9 @@ export const STRINGS: Record<Lang, Strings> = {
     runError: (d) => `Query failed: ${d}`,
     truncated: "The result hit the 20,000 item limit; the list may be incomplete. Narrow the range.",
     count: (n) => `${n} items`,
+    summary: "State summary",
+    total: "Total",
+    filterHint: (s) => `Show only ${s} items (table and CSV)`,
     empty: "No items match these filters.",
     need: {
       type: "Choose a work item type.",

@@ -12,9 +12,15 @@ export interface RunResult {
   truncated: boolean;
 }
 
+/** color: panodaki state rengi ("#rrggbb"), sunucu geçerli renk vermezse "". */
+export interface StateInfo {
+  name: string;
+  color: string;
+}
+
 export interface DataSource {
   types(): Promise<string[]>;
-  states(type: string): Promise<string[]>;
+  states(type: string): Promise<StateInfo[]>;
   fields(): Promise<Field[]>;
   run(q: Query): Promise<RunResult>;
 }
@@ -81,8 +87,8 @@ export function createRestSource(
         .sort((a, b) => a.localeCompare(b, "tr"));
     },
     async states(type) {
-      const r = await call<{ value?: { name: string }[] }>(`${proj}_apis/wit/workitemtypes/${encodeURIComponent(type)}/states?${API}`);
-      return (r.value ?? []).map((s) => s.name);
+      const r = await call<{ value?: { name: string; color?: string }[] }>(`${proj}_apis/wit/workitemtypes/${encodeURIComponent(type)}/states?${API}`);
+      return (r.value ?? []).map((s) => ({ name: s.name, color: /^[0-9a-f]{6}$/i.test(s.color ?? "") ? `#${s.color}` : "" }));
     },
     async fields() {
       const r = await call<{ value?: Field[] }>(`${proj}_apis/wit/fields?${API}`);

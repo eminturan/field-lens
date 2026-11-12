@@ -18,6 +18,7 @@ import { createRestSource, DataSource, RunResult } from "./api";
 import { FieldPicker } from "./fieldPicker";
 import { firstOf, pickLang, Strings, STRINGS } from "./i18n";
 import {
+  countStates,
   csvRows,
   DEFAULT_COLUMNS,
   Field,
@@ -73,6 +74,8 @@ function App({ source, store, mock, t, itemUrl }: Props) {
   const [stateList, setStateList] = React.useState<string[]>([]);
   /** stateList'in ait olduğu tür; farklıysa liste yükleniyor demektir ve sorgu çalıştırılmaz. */
   const [statesType, setStatesType] = React.useState("");
+  /** State adı → panodaki rengi. */
+  const [stateColors, setStateColors] = React.useState<Record<string, string>>({});
 
   const [type, setType] = React.useState("");
   const [dateField, setDateField] = React.useState("");
@@ -86,6 +89,8 @@ function App({ source, store, mock, t, itemUrl }: Props) {
   const [runError, setRunError] = React.useState<string>();
   const [result, setResult] = React.useState<{ query: Query; data: RunResult }>();
   const [page, setPage] = React.useState(0);
+  /** Özet kartına tıklanınca tablo ve CSV yalnızca bu state'i gösterir. */
+  const [stateFilter, setStateFilter] = React.useState<string>();
   const [drag, setDrag] = React.useState<{ from: number; over: number }>();
   /** Klavyeyle taşınan etiket; yeniden çizimden sonra odak onda kalsın. */
   const focusChip = React.useRef<string>();
@@ -129,9 +134,11 @@ function App({ source, store, mock, t, itemUrl }: Props) {
     let live = true;
     source
       .states(type)
-      .then((list) => {
+      .then((info) => {
         if (!live) return;
+        const list = info.map((s) => s.name);
         setStateList(list);
+        setStateColors(Object.fromEntries(info.map((s) => [s.name, s.color])));
         setStatesType(type);
         setStates((prev) => prev.filter((s) => list.includes(s)));
       })
@@ -186,6 +193,7 @@ function App({ source, store, mock, t, itemUrl }: Props) {
       .then((data) => {
         setResult({ query, data });
         setPage(0);
+        setStateFilter(undefined);
       })
       .catch((e) => {
         setResult(undefined);
@@ -196,13 +204,21 @@ function App({ source, store, mock, t, itemUrl }: Props) {
 
   const exportCsv = () => {
     if (!result) return;
-    const { query, data } = result;
+    const { query } = result;
     const cols = query.columns.map((c) => byRef.get(c) ?? { referenceName: c, name: c, type: "string" });
-    const safeType = query.type.replace(/[^\w-]/g, "_");
-    download(`field-lens_${safeType}_${query.from}_${query.to}.csv`, toCsv(csvRows(data.rows, cols), t.csvSeparator));
+    const safe = (v: string) => v.replace(/[^\w-]/g, "_");
+    const name = `field-lens_${safe(query.type)}${stateFilter ? "_" + safe(stateFilter) : ""}_${query.from}_${query.to}.csv`;
+    download(name, toCsv(csvRows(visible, cols), t.csvSeparator));
   };
 
-  const shown = pageSlice(result?.data.rows ?? [], page, PAGE_SIZE);
+  const allRows = result?.data.rows ?? [];
+  const visible = stateFilter ? allRows.filter((r) => r["System.State"] === stateFilter) : allRows;
+  const summary = result ? countStates(allRows, result.query.states) : [];
+  const filterBy = (s: string | undefined) => {
+    setStateFilter(s);
+    setPage(0);
+  };
+  const shown = pageSlice(visible, page, PAGE_SIZE);
   const shownCols = result ? result.query.columns.map((c) => byRef.get(c) ?? { referenceName: c, name: c, type: "string" }) : [];
 
   return (
@@ -220,7 +236,7 @@ function App({ source, store, mock, t, itemUrl }: Props) {
         )}
         {!types && !loadError && <div className="fl-empty">{t.loading}</div>}
         {types && (
-          <>
+          <section className="fl-panel">
             <div className="fl-toolbar">
               <label className="fl-field">
                 <span className="fl-muted">{t.type}</span>
@@ -355,13 +371,41 @@ function App({ source, store, mock, t, itemUrl }: Props) {
               {missing && <span className="fl-muted">{missing}</span>}
               {result && !missing && <span className="fl-muted">{t.count(result.data.rows.length)}</span>}
             </div>
-          </>
+          </section>
         )}
 
         {runError && <MessageCard severity={MessageCardSeverity.Error}>{t.runError(runError)}</MessageCard>}
         {result?.data.truncated && <MessageCard severity={MessageCardSeverity.Warning}>{t.truncated}</MessageCard>}
         {result && result.data.rows.length === 0 && <div className="fl-empty">{t.empty}</div>}
-        {result && result.data.rows.length > 0 && (
+        {result && allRows.length > 0 && (
+          <div className="fl-summary" role="group" aria-label={t.summary}>
+            <button className="fl-card" aria-pressed={!stateFilter} onClick={() => filterBy(undefined)}>
+              <span className="fl-card-num">{allRows.length}</span>
+              <span className="fl-card-label">{t.total}</span>
+            </button>
+            {summary.map(({ state, count }) => (
+              <button
+                key={state}
+                className="fl-card"
+                aria-pressed={stateFilter === state}
+                disabled={count === 0}
+                title={t.filterHint(state)}
+                onClick={() => filterBy(stateFilter === state ? undefined : state)}
+                style={{ "--fl-state": stateColors[state] || undefined } as React.CSSProperties}
+              >
+                <span className="fl-card-num">{count}</span>
+                <span className="fl-card-label">
+                  <span className="fl-dot" />
+                  {state}
+                </span>
+                <span className="fl-card-bar">
+                  <span style={{ width: `${(count / allRows.length) * 100}%` }} />
+                </span>
+              </button>
+            ))}
+          </div>
+        )}
+        {result && allRows.length > 0 && (
           <div className="fl-scroll">
             <table className="fl-table">
               <thead>
@@ -377,11 +421,19 @@ function App({ source, store, mock, t, itemUrl }: Props) {
                 {shown.items.map((r) => (
                   <tr key={String(r["System.Id"])}>
                     {shownCols.map((c) => (
-                      <td key={c.referenceName} className={c.type === "dateTime" || c.referenceName === "System.Id" ? "fl-nowrap" : "fl-cell"}>
+                      <td
+                        key={c.referenceName}
+                        className={c.type === "dateTime" || c.referenceName === "System.Id" || c.referenceName === "System.State" ? "fl-nowrap" : "fl-cell"}
+                      >
                         {c.referenceName === "System.Id" ? (
                           <a className="fl-link" href={itemUrl(Number(r["System.Id"]))} target="_top" rel="noopener noreferrer">
                             {String(r["System.Id"])}
                           </a>
+                        ) : c.referenceName === "System.State" ? (
+                          <span className="fl-badge" style={{ "--fl-state": stateColors[String(r["System.State"])] || undefined } as React.CSSProperties}>
+                            <span className="fl-dot" />
+                            {formatCell(r["System.State"], c.type)}
+                          </span>
                         ) : (
                           <div className="fl-clip">{formatCell(r[c.referenceName], c.type)}</div>
                         )}
@@ -396,7 +448,7 @@ function App({ source, store, mock, t, itemUrl }: Props) {
                 <button className="fl-button" disabled={shown.page === 0} onClick={() => setPage(shown.page - 1)}>
                   {t.prev}
                 </button>
-                <span className="fl-muted">{t.pageInfo(shown.first, shown.last, result.data.rows.length)}</span>
+                <span className="fl-muted">{t.pageInfo(shown.first, shown.last, visible.length)}</span>
                 <button className="fl-button" disabled={shown.page >= shown.pages - 1} onClick={() => setPage(shown.page + 1)}>
                   {t.next}
                 </button>

@@ -48,7 +48,7 @@ export function mockSource(): DataSource {
   const later = <T>(v: T) => new Promise<T>((r) => setTimeout(() => r(v), 200));
   return {
     types: () => later(["Bug", "Kart"]),
-    states: () => later(STATES),
+    states: () => later(STATES.map((name, i) => ({ name, color: ["#b2b2b2", "#007acc", "#ff9d00", "#339933"][i] }))),
     fields: () => later(FIELDS),
     run: (q) =>
       later({

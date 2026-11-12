@@ -102,8 +102,12 @@ section > .fl-button {
 }
 
 /* Tablolar */
+/* Dikey kaydırma da burada olsun ki başlık satırı yapışık kalsın. */
 .fl-scroll {
-  overflow-x: auto;
+  overflow: auto;
+  max-height: calc(100vh - 120px);
+  border: 1px solid var(--component-grid-cell-bottom-border-color, rgba(0, 0, 0, 0.1));
+  border-radius: 4px;
 }
 
 .fl-table {
@@ -126,9 +130,18 @@ section > .fl-button {
 }
 
 .fl-table th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--callout-background-color, #fff);
+  box-shadow: inset 0 -1px 0 var(--component-grid-cell-bottom-border-color, rgba(0, 0, 0, 0.15));
   font-weight: 600;
   font-size: 12px;
   color: var(--text-secondary-color, rgba(0, 0, 0, 0.55));
+}
+
+.fl-table tbody tr:nth-child(even) {
+  background: var(--palette-black-alpha-2, rgba(0, 0, 0, 0.02));
 }
 
 .fl-table tbody tr:hover {
@@ -315,4 +328,134 @@ section > .fl-button {
 .fl-pager {
   justify-content: center;
   padding-top: 12px;
+}
+
+/* Filtre paneli */
+.fl-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 16px;
+  border: 1px solid var(--component-grid-cell-bottom-border-color, rgba(0, 0, 0, 0.1));
+  border-radius: 4px;
+  background: var(--callout-background-color, #fff);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+}
+
+.fl-panel .fl-actions {
+  padding-top: 12px;
+  border-top: 1px solid var(--component-grid-cell-bottom-border-color, rgba(0, 0, 0, 0.08));
+}
+
+/* Ana eylem: Çalıştır */
+.fl-actions .fl-button:first-child:not(:disabled) {
+  background: var(--communication-background, #0078d4);
+  border-color: transparent;
+  color: #fff;
+  font-weight: 600;
+}
+
+.fl-actions .fl-button:first-child:hover:not(:disabled) {
+  filter: brightness(0.92);
+}
+
+/* State özeti; --fl-state kartın/rozetin panodaki rengi */
+.fl-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.fl-card {
+  --fl-state: var(--text-secondary-color, #8a8a8a);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  min-width: 120px;
+  padding: 10px 14px 12px;
+  border: 1px solid var(--component-grid-cell-bottom-border-color, rgba(0, 0, 0, 0.12));
+  border-top: 3px solid var(--fl-state);
+  border-radius: 4px;
+  background: var(--callout-background-color, #fff);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+  transition: box-shadow 0.15s, transform 0.15s;
+}
+
+.fl-card:hover:not(:disabled) {
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+  transform: translateY(-1px);
+}
+
+.fl-card[aria-pressed="true"] {
+  outline: 2px solid var(--communication-foreground, #0078d4);
+  outline-offset: -1px;
+}
+
+.fl-card:focus-visible {
+  outline: 2px solid var(--communication-foreground, #0078d4);
+  outline-offset: 2px;
+}
+
+.fl-card:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.fl-card-num {
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+
+.fl-card-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text-secondary-color, rgba(0, 0, 0, 0.6));
+}
+
+.fl-card-bar {
+  align-self: stretch;
+  height: 4px;
+  margin-top: 4px;
+  border-radius: 2px;
+  background: var(--palette-black-alpha-6, rgba(0, 0, 0, 0.06));
+  overflow: hidden;
+}
+
+.fl-card-bar > span {
+  display: block;
+  height: 100%;
+  background: var(--fl-state);
+}
+
+.fl-dot {
+  width: 8px;
+  height: 8px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--fl-state);
+}
+
+.fl-badge {
+  --fl-state: var(--text-secondary-color, #8a8a8a);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fl-card {
+    transition: none;
+  }
+  .fl-card:hover:not(:disabled) {
+    transform: none;
+  }
 }
