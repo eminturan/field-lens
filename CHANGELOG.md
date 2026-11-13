@@ -2,6 +2,10 @@
 
 [Türkçe](CHANGELOG.tr.md)
 
+## 0.2.21
+
+- Report page: field labels are darker and semi-bold, so they stand apart from hints. **Reset settings** is quieter (muted text with a ↻ icon) but keeps its frame and the click-twice confirmation.
+
 ## 0.2.20
 
 - Report page: the settings form is split into four sections: **Scope** (projects, type, assigned to), **Time** (date field and range), **Filter** (states, extra conditions) and **View** (columns, rule). On a wide screen Scope and Time sit side by side.

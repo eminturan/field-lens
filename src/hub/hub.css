@@ -647,6 +647,18 @@ section > .fl-button {
 /* Sıfırla, eylem satırının sağ ucunda; yanlışlıkla tıklanmasın diye Çalıştır'dan uzak. */
 .fl-reset {
   margin-left: auto;
+  color: var(--text-secondary-color, rgba(0, 0, 0, 0.55));
+}
+
+.fl-reset:hover:not(:disabled) {
+  color: inherit;
+}
+
+/* Alan etiketleri: ipucu yazılarından ayrılsın diye koyu ve yarı kalın */
+.fl-field > .fl-muted:first-child,
+.fl-field > legend.fl-muted {
+  color: var(--text-primary-color, rgba(0, 0, 0, 0.75));
+  font-weight: 600;
 }
 
 /* Kayıtlı sorgu çubuğu */

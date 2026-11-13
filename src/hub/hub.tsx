@@ -786,6 +786,7 @@ function App({ source, store, queries, initialQueryId, linkFor, mock, t, itemUrl
                 onClick={resetAll}
                 onBlur={() => setConfirmReset(false)}
               >
+                <span aria-hidden="true">↻ </span>
                 {confirmReset ? t.resetConfirm : t.reset}
               </button>
             </div>

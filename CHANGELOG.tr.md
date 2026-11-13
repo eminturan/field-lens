@@ -2,6 +2,10 @@
 
 [English](CHANGELOG.md)
 
+## 0.2.21
+
+- Rapor sayfası: alan etiketleri daha koyu ve yarı kalın, ipucu yazılarından ayrılıyor. **Ayarları sıfırla** daha sakin (soluk yazı ve ↻ simgesi), çerçevesi ve iki tıkla onayı aynı.
+
 ## 0.2.20
 
 - Rapor sayfası: ayar formu dört bölüme ayrıldı: **Kapsam** (projeler, tür, atanan), **Zaman** (tarih alanı ve aralık), **Filtre** (state'ler, ek koşullar) ve **Görünüm** (kolonlar, kural). Geniş ekranda Kapsam ve Zaman yan yana.
