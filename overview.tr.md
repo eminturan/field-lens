@@ -46,67 +46,34 @@ Bir proje açın → **Boards** → **Field Lens**. Widget: **Dashboards → Edi
 
 ## Sürüm notları
 
-**0.2.24**: önceki dönem için renksiz oklar, düzenli widget ayarları.
-
-**0.2.23**: kolon filtreleri düğmeyle açılıyor, satır vurgusu daha belirgin.
-
-**0.2.22**: Çalıştır'a basınca eksik alan yerinde işaretleniyor.
-
-**0.2.21**: daha belirgin alan etiketleri ve daha sakin sıfırla butonu.
-
-**0.2.20**: rapor formu Kapsam, Zaman, Filtre ve Görünüm bölümlerine ayrıldı.
-
-**0.2.19**: widget'ın kendi ayarlarında projeler, atanan ve ek koşullar.
-
-**0.2.18**: ek alan koşulları, gruplama ve tabloyu kopyalama.
-
-**0.2.17**: kayıtlı sorguya bağlı widget'lar kaydedilebiliyor.
-
-**0.2.16**: aramalar I ve ı dahil büyük/küçük harften bağımsız eşleşiyor.
-
-**0.2.15**: projeler arası sorgu (tümü ya da seçili olanlar).
-
-**0.2.14**: atanan filtresi, sorgu bağlantıları ve kayıtlı sorguyu kullanan widget'lar.
-
-**0.2.13**: kişisel ya da projeyle paylaşılan kayıtlı sorgular.
-
-**0.2.12**: Ayarları sıfırla düğmesi rapor sayfasındaki tüm ayarları tek seferde temizliyor.
-
-**0.2.11**: tarayıcıyı dondurabilecek kurallar kabul edilmiyor.
-
-**0.2.10**: örnek veri ve belge örnekleri uydurma adlar kullanıyor.
-
-**0.2.9**: grafik tarihleri sığmadığında çapraz yazılıyor, hiçbir tarih atlanmıyor.
-
-**0.2.8**: kırılım alanlı Özet, state'lere bölünmüş yatay çubuklar olarak çiziliyor.
-
-**0.2.7**: rapor sayfasında kuralla (regex) türetilen kolon, aynı kuralın widget kırılımında kullanımı ve canlı önizleme.
-
-**0.2.6**: widget Özet görünümü halka grafik oldu ve isteğe bağlı kırılım alanı eklendi. Haftalara göre grafik rapor sayfasından kaldırıldı.
-
-**0.2.5**: sürüm notları İngilizce ve Türkçe.
-
-**0.2.4**: Marketplace sayfası ve README İngilizce ve Türkçe.
-
-**0.2.3**:
-- Yeni **Tarihe göre** widget görünümü.
-- Dağılım görünümü kaldırıldı.
-- Haftalık grafikler tarih aralığıyla etiketlenen pazartesi–pazar haftalarını kullanıyor.
-- Kalabalık grafikler okunur kalıyor.
-
-**0.2.2**: widget'ta özel başlangıç–bitiş aralığı.
-
-**0.2.0**: Özet, Aylık trend, Haftalık ve Yaklaşanlar görünümleriyle dashboard widget'ı.
-
-**0.1.10**:
-- Rapor başlığı.
-- Önceki dönemle karşılaştırma.
-- Haftalara göre grafik.
-- Sıkı satır görünümü.
-
-**0.1.7**: arama, kolon filtreleri ve sıralama.
-
-**0.1.6**: pano renklerinde state özet kartları.
+- **0.2.25**: sürüm notları sıkı liste halinde.
+- **0.2.24**: önceki dönem için renksiz oklar, düzenli widget ayarları.
+- **0.2.23**: kolon filtreleri düğmeyle açılıyor, satır vurgusu daha belirgin.
+- **0.2.22**: Çalıştır'a basınca eksik alan yerinde işaretleniyor.
+- **0.2.21**: daha belirgin alan etiketleri ve daha sakin sıfırla butonu.
+- **0.2.20**: rapor formu Kapsam, Zaman, Filtre ve Görünüm bölümlerine ayrıldı.
+- **0.2.19**: widget'ın kendi ayarlarında projeler, atanan ve ek koşullar.
+- **0.2.18**: ek alan koşulları, gruplama ve tabloyu kopyalama.
+- **0.2.17**: kayıtlı sorguya bağlı widget'lar kaydedilebiliyor.
+- **0.2.16**: aramalar I ve ı dahil büyük/küçük harften bağımsız eşleşiyor.
+- **0.2.15**: projeler arası sorgu (tümü ya da seçili olanlar).
+- **0.2.14**: atanan filtresi, sorgu bağlantıları ve kayıtlı sorguyu kullanan widget'lar.
+- **0.2.13**: kişisel ya da projeyle paylaşılan kayıtlı sorgular.
+- **0.2.12**: Ayarları sıfırla düğmesi rapor sayfasındaki tüm ayarları tek seferde temizliyor.
+- **0.2.11**: tarayıcıyı dondurabilecek kurallar kabul edilmiyor.
+- **0.2.10**: örnek veri ve belge örnekleri uydurma adlar kullanıyor.
+- **0.2.9**: grafik tarihleri sığmadığında çapraz yazılıyor, hiçbir tarih atlanmıyor.
+- **0.2.8**: kırılım alanlı Özet, state'lere bölünmüş yatay çubuklar olarak çiziliyor.
+- **0.2.7**: rapor sayfasında kuralla (regex) türetilen kolon, aynı kuralın widget kırılımında kullanımı ve canlı önizleme.
+- **0.2.6**: widget Özet görünümü halka grafik oldu ve isteğe bağlı kırılım alanı eklendi. Haftalara göre grafik rapor sayfasından kaldırıldı.
+- **0.2.5**: sürüm notları İngilizce ve Türkçe.
+- **0.2.4**: Marketplace sayfası ve README İngilizce ve Türkçe.
+- **0.2.3**: - Yeni **Tarihe göre** widget görünümü. - Dağılım görünümü kaldırıldı. - Haftalık grafikler tarih aralığıyla etiketlenen pazartesi–pazar haftalarını kullanıyor. - Kalabalık grafikler okunur kalıyor.
+- **0.2.2**: widget'ta özel başlangıç–bitiş aralığı.
+- **0.2.0**: Özet, Aylık trend, Haftalık ve Yaklaşanlar görünümleriyle dashboard widget'ı.
+- **0.1.10**: - Rapor başlığı. - Önceki dönemle karşılaştırma. - Haftalara göre grafik. - Sıkı satır görünümü.
+- **0.1.7**: arama, kolon filtreleri ve sıralama.
+- **0.1.6**: pano renklerinde state özet kartları.
 
 Tüm geçmiş: [CHANGELOG.tr.md](https://github.com/eminturan/field-lens/blob/main/CHANGELOG.tr.md) · [English](https://github.com/eminturan/field-lens/blob/main/CHANGELOG.md)
 

@@ -46,67 +46,34 @@ Open a project → **Boards** → **Field Lens**. The widget is under **Dashboar
 
 ## Release notes
 
-**0.2.24**: neutral previous-period arrows, tidier widget settings.
-
-**0.2.23**: column filters behind a toggle, clearer row highlight.
-
-**0.2.22**: a missing field is marked in place when you press Run.
-
-**0.2.21**: clearer field labels and a quieter reset button.
-
-**0.2.20**: report form split into Scope, Time, Filter and View sections.
-
-**0.2.19**: projects, assigned to and extra conditions in the widget's own settings.
-
-**0.2.18**: extra field conditions, group by, and copy table.
-
-**0.2.17**: widgets linked to a saved query can be saved.
-
-**0.2.16**: searches match regardless of case, including I and ı.
-
-**0.2.15**: query across projects (all or chosen).
-
-**0.2.14**: an assigned-to filter, query links, and widgets that use a saved query.
-
-**0.2.13**: saved queries, personal or shared with the project.
-
-**0.2.12**: a Reset settings button clears all report-page settings at once.
-
-**0.2.11**: rules refuse patterns that could freeze the browser.
-
-**0.2.10**: the sample data and documentation examples use made-up names.
-
-**0.2.9**: chart dates are written at an angle when they don't fit, so no date is skipped.
-
-**0.2.8**: a Summary with a breakdown field is drawn as state-stacked horizontal bars.
-
-**0.2.7**: columns derived by a rule (regex) on the report page, and the same rule for the widget's breakdown, with a live preview.
-
-**0.2.6**: the widget Summary view is a donut chart and has an optional breakdown field. The by-week chart is removed from the report page.
-
-**0.2.5**: release notes in English and Turkish.
-
-**0.2.4**: Marketplace page and README in English and Turkish.
-
-**0.2.3**:
-- New **By date** widget view.
-- The Distribution view is removed.
-- Weekly charts use Monday–Sunday weeks labelled with their dates.
-- Crowded charts stay readable.
-
-**0.2.2**: custom from–to range in the widget.
-
-**0.2.0**: dashboard widget with Summary, Monthly trend, Weekly and Upcoming views.
-
-**0.1.10**:
-- Report header.
-- Comparison with the previous period.
-- By-week chart.
-- Compact rows.
-
-**0.1.7**: search, column filters and sorting.
-
-**0.1.6**: state summary cards in board colors.
+- **0.2.25**: release notes as a compact list.
+- **0.2.24**: neutral previous-period arrows, tidier widget settings.
+- **0.2.23**: column filters behind a toggle, clearer row highlight.
+- **0.2.22**: a missing field is marked in place when you press Run.
+- **0.2.21**: clearer field labels and a quieter reset button.
+- **0.2.20**: report form split into Scope, Time, Filter and View sections.
+- **0.2.19**: projects, assigned to and extra conditions in the widget's own settings.
+- **0.2.18**: extra field conditions, group by, and copy table.
+- **0.2.17**: widgets linked to a saved query can be saved.
+- **0.2.16**: searches match regardless of case, including I and ı.
+- **0.2.15**: query across projects (all or chosen).
+- **0.2.14**: an assigned-to filter, query links, and widgets that use a saved query.
+- **0.2.13**: saved queries, personal or shared with the project.
+- **0.2.12**: a Reset settings button clears all report-page settings at once.
+- **0.2.11**: rules refuse patterns that could freeze the browser.
+- **0.2.10**: the sample data and documentation examples use made-up names.
+- **0.2.9**: chart dates are written at an angle when they don't fit, so no date is skipped.
+- **0.2.8**: a Summary with a breakdown field is drawn as state-stacked horizontal bars.
+- **0.2.7**: columns derived by a rule (regex) on the report page, and the same rule for the widget's breakdown, with a live preview.
+- **0.2.6**: the widget Summary view is a donut chart and has an optional breakdown field. The by-week chart is removed from the report page.
+- **0.2.5**: release notes in English and Turkish.
+- **0.2.4**: Marketplace page and README in English and Turkish.
+- **0.2.3**: - New **By date** widget view. - The Distribution view is removed. - Weekly charts use Monday–Sunday weeks labelled with their dates. - Crowded charts stay readable.
+- **0.2.2**: custom from–to range in the widget.
+- **0.2.0**: dashboard widget with Summary, Monthly trend, Weekly and Upcoming views.
+- **0.1.10**: - Report header. - Comparison with the previous period. - By-week chart. - Compact rows.
+- **0.1.7**: search, column filters and sorting.
+- **0.1.6**: state summary cards in board colors.
 
 Full history: [CHANGELOG.md](https://github.com/eminturan/field-lens/blob/main/CHANGELOG.md) · [Türkçe](https://github.com/eminturan/field-lens/blob/main/CHANGELOG.tr.md)
 

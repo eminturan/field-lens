@@ -2,6 +2,10 @@
 
 [English](CHANGELOG.md)
 
+## 0.2.25
+
+- Extension sayfası: sürüm notları aralıklı paragraflar yerine sıkı bir liste.
+
 ## 0.2.24
 
 - Rapor sayfası ve widget: önceki döneme göre değişim yeşil/kırmızı yerine okla gösteriliyor (↑ %20, ↓ %93, =). Düşüş her zaman kötü değil, örneğin bug sayısında. Toplam kartının alt satırı bir boy büyük.

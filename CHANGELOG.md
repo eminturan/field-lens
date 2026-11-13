@@ -2,6 +2,10 @@
 
 [Türkçe](CHANGELOG.tr.md)
 
+## 0.2.25
+
+- Extension page: release notes are a compact list instead of spaced-out paragraphs.
+
 ## 0.2.24
 
 - Report page and widget: the change against the previous period is shown with an arrow (↑ %20, ↓ %93, =) instead of green and red. A drop is not always bad, for example in a bug count. The line under Total is a size larger.
