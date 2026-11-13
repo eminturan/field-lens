@@ -585,16 +585,14 @@ section > .fl-button {
 }
 
 .fl-card-sub {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--text-secondary-color, rgba(0, 0, 0, 0.55));
 }
 
-.fl-up {
-  color: var(--status-success-foreground, #107c10);
-}
-
-.fl-down {
-  color: var(--status-error-foreground, #a4262c);
+/* Değişim renksiz: azalış her zaman kötü değildir (ör. bug sayısı) */
+.fl-delta {
+  color: var(--text-primary-color, rgba(0, 0, 0, 0.75));
+  font-weight: 600;
 }
 
 /* Rahat / Sıkı */

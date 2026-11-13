@@ -2,6 +2,11 @@
 
 [Türkçe](CHANGELOG.tr.md)
 
+## 0.2.24
+
+- Report page and widget: the change against the previous period is shown with an arrow (↑ %20, ↓ %93, =) instead of green and red. A drop is not always bad, for example in a bug count. The line under Total is a size larger.
+- Widget settings: Extra conditions has its label on top like the other fields, and field labels are bold.
+
 ## 0.2.23
 
 - Report page: the per-column filter row is hidden until you press **Column filters**. The button shows how many column filters are active; they keep applying when the row is closed.

@@ -46,6 +46,8 @@ Bir proje açın → **Boards** → **Field Lens**. Widget: **Dashboards → Edi
 
 ## Sürüm notları
 
+**0.2.24**: önceki dönem için renksiz oklar, düzenli widget ayarları.
+
 **0.2.23**: kolon filtreleri düğmeyle açılıyor, satır vurgusu daha belirgin.
 
 **0.2.22**: Çalıştır'a basınca eksik alan yerinde işaretleniyor.

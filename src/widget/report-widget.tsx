@@ -19,6 +19,7 @@ import {
   Row,
   View,
   weekBuckets,
+  deltaText,
 } from "../hub/logic";
 import { configured, DEFAULTS, Env, Frame, inHost, parseSettings, plan, startWidget, useEnv, usesCustom, WidgetConfig } from "./shared";
 
@@ -189,13 +190,8 @@ function Summary(props: { rows: Row[]; prev?: number; states: string[]; colors: 
   const delta = prev !== undefined && (
     <div className="flw-delta">
       {breakdown && <span className="flw-total">{total}</span>}
+      {prev > 0 && <span className="fl-delta">{deltaText(total, prev)} · </span>}
       {t.prevPeriod(prev)}
-      {prev > 0 && (
-        <span className={total >= prev ? "fl-up" : "fl-down"}>
-          {" · "}
-          {total >= prev ? "+" : "−"}%{Math.round((Math.abs(total - prev) / prev) * 100)}
-        </span>
-      )}
     </div>
   );
 

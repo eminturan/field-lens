@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { applyRule, buildWiql, chunk, compileRule, crossCount, DERIVED, deriveRows, dayBuckets, monthBuckets, monthsRange, upcomingRange, countStates, previousRange, weekBuckets, csvRows, filterRows, sortRows, Field, formatCell, moveItem, pageSlice, presetRange, Query, sanitizeSettings, searchFields, toCsv } from "../src/hub/logic";
+import { applyRule, buildWiql, chunk, compileRule, crossCount, DERIVED, deriveRows, dayBuckets, monthBuckets, monthsRange, upcomingRange, countStates, deltaText, previousRange, weekBuckets, csvRows, filterRows, sortRows, Field, formatCell, moveItem, pageSlice, presetRange, Query, sanitizeSettings, searchFields, toCsv } from "../src/hub/logic";
 
 const q: Query = {
   type: "Kart",
@@ -347,5 +347,16 @@ describe("crossCount", () => {
       { value: "Aaa", total: 1, counts: { Kapalı: 1 } },
       { value: "ABC Kart", total: 1, counts: { Kapalı: 1 } },
     ]);
+  });
+});
+
+describe("deltaText", () => {
+  it("shows direction with an arrow and the percentage without sign colors", () => {
+    expect(deltaText(1, 14)).toBe("↓ %93");
+    expect(deltaText(20, 10)).toBe("↑ %100");
+    expect(deltaText(15, 15)).toBe("=");
+  });
+  it("is empty when there is nothing to compare against", () => {
+    expect(deltaText(5, 0)).toBe("");
   });
 });

@@ -2,7 +2,7 @@
   "manifestVersion": 1,
   "id": "field-lens",
   "publisher": "turanemin",
-  "version": "0.2.23",
+  "version": "0.2.24",
   "name": "Field Lens",
   "description": "Monthly reports by any date field: list, summarise and export work items of one type whose chosen Date/Time field falls in a range, plus a dashboard widget.",
   "public": true,

@@ -86,12 +86,8 @@ body {
   background: var(--fl-state, #8a8a8a);
 }
 
-.fl-up {
-  color: var(--status-success-foreground, #107c10);
-}
-
-.fl-down {
-  color: var(--status-error-foreground, #a4262c);
+.fl-delta {
+  font-weight: 600;
 }
 
 .flw-scroll {
@@ -410,4 +406,20 @@ body {
 }
 .flc .fl-muted {
   font-size: inherit;
+}
+
+/* Ek koşullar da diğer alanlar gibi: etiket üstte, satırlar alt alta */
+.flc .fl-field {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  font-size: 13px;
+}
+
+/* Alan etiketleri ipucu yazılarından ayrılsın */
+.flc-field > span:first-child,
+.flc .fl-field > .fl-muted:first-child,
+.flc-states legend {
+  font-weight: 600;
 }

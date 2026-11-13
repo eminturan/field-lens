@@ -2,6 +2,11 @@
 
 [English](CHANGELOG.md)
 
+## 0.2.24
+
+- Rapor sayfası ve widget: önceki döneme göre değişim yeşil/kırmızı yerine okla gösteriliyor (↑ %20, ↓ %93, =). Düşüş her zaman kötü değil, örneğin bug sayısında. Toplam kartının alt satırı bir boy büyük.
+- Widget ayarları: Ek koşullar etiketi de diğer alanlar gibi üstte, alan etiketleri kalın.
+
 ## 0.2.23
 
 - Rapor sayfası: kolon filtre satırı **Kolon filtreleri** düğmesine basılana kadar gizli. Düğme kaç kolon filtresinin etkin olduğunu gösteriyor; satır kapatılınca da filtreler uygulanmaya devam ediyor.

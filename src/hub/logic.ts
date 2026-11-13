@@ -314,6 +314,13 @@ const localDay = (v: unknown) => {
 };
 
 /** Karşılaştırma dönemi: tam takvim ayıysa bir önceki ay, değilse hemen önceki aynı uzunlukta aralık. */
+/** Önceki döneme göre değişim, renksiz: "↓ %93", "↑ %100", "="; önceki dönem 0 ise boş. */
+export function deltaText(now: number, prev: number): string {
+  if (prev <= 0) return "";
+  if (now === prev) return "=";
+  return `${now > prev ? "↑" : "↓"} %${Math.round((Math.abs(now - prev) / prev) * 100)}`;
+}
+
 export function previousRange(from: string, to: string): { from: string; to: string } {
   const f = parseDay(from);
   const monthEnd = toDateInput(new Date(f.getFullYear(), f.getMonth() + 1, 0));

@@ -38,6 +38,7 @@ import {
   PRESETS,
   presetRange,
   previousRange,
+  deltaText,
   Query,
   compileRule,
   DERIVED,
@@ -838,13 +839,8 @@ function App({ source, store, queries, initialQueryId, linkFor, mock, t, itemUrl
               <span className="fl-card-label">{t.total}</span>
               {prevCount !== undefined && !textFiltered && (
                 <span className="fl-card-sub">
+                  {prevCount > 0 && <span className="fl-delta">{deltaText(allRows.length, prevCount)} · </span>}
                   {t.prevPeriod(prevCount)}
-                  {prevCount > 0 && (
-                    <span className={allRows.length >= prevCount ? "fl-up" : "fl-down"}>
-                      {" · "}
-                      {allRows.length >= prevCount ? "+" : "−"}%{Math.round((Math.abs(allRows.length - prevCount) / prevCount) * 100)}
-                    </span>
-                  )}
                 </span>
               )}
             </button>
