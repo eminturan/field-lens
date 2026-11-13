@@ -353,6 +353,11 @@ section > .fl-button {
   border-radius: 4px;
 }
 
+/* Alan altındaki uyarı yandaki kutuları aşağı itmesin */
+.fl-sec .fl-toolbar {
+  align-items: flex-start;
+}
+
 .fl-sec > label.fl-field {
   align-self: flex-start;
   min-width: 200px;
@@ -697,6 +702,16 @@ section > .fl-button {
 .fl-qerror {
   color: var(--status-error-foreground, #a4262c);
   font-size: 12px;
+}
+
+/* Çalıştır'a eksikle basılınca işaretlenen alan */
+.fl-invalid .fl-input {
+  border-color: var(--status-error-foreground, #a4262c);
+  box-shadow: 0 0 0 1px var(--status-error-foreground, #a4262c);
+}
+
+.fl-need {
+  margin-top: 2px;
 }
 
 .fl-assignee {

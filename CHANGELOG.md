@@ -2,6 +2,10 @@
 
 [Türkçe](CHANGELOG.tr.md)
 
+## 0.2.22
+
+- Report page: **Run** is always clickable. Pressing it with something missing outlines that field in red, shows the message right under it and moves focus there; the mark clears once the field is filled. Before, Run was greyed out and the message sat next to the buttons.
+
 ## 0.2.21
 
 - Report page: field labels are darker and semi-bold, so they stand apart from hints. **Reset settings** is quieter (muted text with a ↻ icon) but keeps its frame and the click-twice confirmation.

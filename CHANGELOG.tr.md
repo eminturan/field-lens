@@ -2,6 +2,10 @@
 
 [English](CHANGELOG.md)
 
+## 0.2.22
+
+- Rapor sayfası: **Çalıştır** her zaman tıklanabilir. Eksik bir alanla basılınca o alan kırmızı çerçeveyle işaretleniyor, uyarı hemen altında yazıyor ve imleç oraya gidiyor; alan doldurulunca işaret kalkıyor. Önceden Çalıştır pasifti ve uyarı butonların yanında duruyordu.
+
 ## 0.2.21
 
 - Rapor sayfası: alan etiketleri daha koyu ve yarı kalın, ipucu yazılarından ayrılıyor. **Ayarları sıfırla** daha sakin (soluk yazı ve ↻ simgesi), çerçevesi ve iki tıkla onayı aynı.

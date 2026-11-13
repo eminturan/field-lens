@@ -352,23 +352,38 @@ function App({ source, store, queries, initialQueryId, linkFor, mock, t, itemUrl
   const toggleState = (s: string) =>
     setStates((prev) => (prev.includes(s) ? prev.filter((x) => x !== s) : stateList.filter((x) => x === s || prev.includes(x))));
 
-  const missing = Array.isArray(projects) && projects.length === 0
-    ? t.need.projects
+  type Need = keyof typeof t.need | "loading";
+  const need: Need | undefined = Array.isArray(projects) && projects.length === 0
+    ? "projects"
     : conditions.some((c) => !c.field || checkCondition(c))
-      ? t.need.conditions
+      ? "conditions"
     : !type
-    ? t.need.type
+    ? "type"
     : statesType !== type
-      ? t.loading
+      ? "loading"
     : !dateField
-      ? t.need.dateField
+      ? "dateField"
       : states.length === 0
-        ? t.need.states
+        ? "states"
         : !from || !to || from > to
-          ? t.need.range
+          ? "range"
           : columns.length === 0
-            ? t.need.columns
+            ? "columns"
             : undefined;
+  const missing = need && (need === "loading" ? t.loading : t.need[need]);
+  /** Çalıştır'a eksikle basılınca işaretlenen alan; o alan tamamlanınca işaret kendiliğinden kalkar. */
+  const [flagged, setFlagged] = React.useState<Need>();
+  const flagShown = flagged && flagged === need ? flagged : undefined;
+  const invalid = (k: Need) => (flagShown === k ? " fl-invalid" : "");
+  const needNote = (k: Need) =>
+    flagShown === k && k !== "loading" ? (
+      <span className="fl-qerror fl-need" role="alert">
+        ⚠ {t.need[k]}
+      </span>
+    ) : null;
+  React.useEffect(() => {
+    if (flagShown) document.querySelector<HTMLElement>(".fl-invalid input, .fl-invalid select, .fl-invalid button")?.focus();
+  }, [flagShown]);
 
   /** İlk tık onay ister, ikincisi sıfırlar (iframe'de window.confirm engellenebilir). */
   const [confirmReset, setConfirmReset] = React.useState(false);
@@ -546,7 +561,7 @@ function App({ source, store, queries, initialQueryId, linkFor, mock, t, itemUrl
             <div className="fl-sec-row">
               <fieldset className="fl-sec">
                 <legend>{t.sections.scope}</legend>
-                <div className="fl-field">
+                <div className={"fl-field" + invalid("projects")}>
                   <span className="fl-muted">{t.projects}</span>
                   <span className="fl-segment fl-assignee" role="group" aria-label={t.projects}>
                     <button aria-pressed={projects === undefined} onClick={() => chooseProjects(undefined)}>
@@ -580,18 +595,20 @@ function App({ source, store, queries, initialQueryId, linkFor, mock, t, itemUrl
                       </div>
                     </div>
                   )}
+                  {needNote("projects")}
                 </div>
-                  <label className="fl-field">
-                    <span className="fl-muted">{t.type}</span>
-                    <select className="fl-input" value={type} onChange={(e) => setType(e.target.value)}>
-                      <option value="">{t.choose}</option>
-                      {types.map((x) => (
-                        <option key={x} value={x}>
-                          {x}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
+                <label className={"fl-field" + invalid("type")}>
+                  <span className="fl-muted">{t.type}</span>
+                  <select className="fl-input" value={type} onChange={(e) => setType(e.target.value)}>
+                    <option value="">{t.choose}</option>
+                    {types.map((x) => (
+                      <option key={x} value={x}>
+                        {x}
+                      </option>
+                    ))}
+                  </select>
+                  {needNote("type")}
+                </label>
                 <div className="fl-field">
                   <span className="fl-muted">{t.assignee}</span>
                   <span className="fl-segment fl-assignee" role="group" aria-label={t.assignee}>
@@ -606,7 +623,7 @@ function App({ source, store, queries, initialQueryId, linkFor, mock, t, itemUrl
               <fieldset className="fl-sec">
                 <legend>{t.sections.time}</legend>
                 <div className="fl-toolbar">
-                  <div className="fl-field">
+                  <div className={"fl-field" + invalid("dateField")}>
                     <span className="fl-muted">{t.dateField}</span>
                     <FieldPicker
                       id="fl-date-list"
@@ -617,6 +634,7 @@ function App({ source, store, queries, initialQueryId, linkFor, mock, t, itemUrl
                       empty={t.noMatch}
                       onPick={chooseDateField}
                     />
+                    {needNote("dateField")}
                   </div>
                   <label className="fl-field">
                     <span className="fl-muted">{t.range}</span>
@@ -628,7 +646,7 @@ function App({ source, store, queries, initialQueryId, linkFor, mock, t, itemUrl
                       ))}
                     </select>
                   </label>
-                  <label className="fl-field">
+                  <label className={"fl-field" + invalid("range")}>
                     <span className="fl-muted">{t.from}</span>
                     <input
                       className="fl-input"
@@ -638,7 +656,7 @@ function App({ source, store, queries, initialQueryId, linkFor, mock, t, itemUrl
                       onChange={(e) => setFrom(e.target.value)}
                     />
                   </label>
-                  <label className="fl-field">
+                  <label className={"fl-field" + invalid("range")}>
                     <span className="fl-muted">{t.to}</span>
                     <input
                       className="fl-input"
@@ -649,12 +667,13 @@ function App({ source, store, queries, initialQueryId, linkFor, mock, t, itemUrl
                     />
                   </label>
                 </div>
+                {needNote("range")}
               </fieldset>
             </div>
 
             <fieldset className="fl-sec">
               <legend>{t.sections.filter}</legend>
-              <fieldset className="fl-field" style={{ border: 0, padding: 0, margin: 0 }}>
+              <fieldset className={"fl-field" + invalid("states")} style={{ border: 0, padding: 0, margin: 0 }}>
                 <legend className="fl-muted">{t.states}</legend>
                 <div className="fl-group">
                   {stateList.map((s) => (
@@ -665,14 +684,18 @@ function App({ source, store, queries, initialQueryId, linkFor, mock, t, itemUrl
                   ))}
                   {!type && <span className="fl-muted">{t.need.type}</span>}
                 </div>
-            </fieldset>
+                {needNote("states")}
+              </fieldset>
 
-            <ConditionsEditor value={conditions} onChange={setConditions} fields={fields} t={t.cond} searchField={t.w.searchField} noMatch={t.noMatch} />
+              <div className={invalid("conditions").trim() || undefined}>
+                <ConditionsEditor value={conditions} onChange={setConditions} fields={fields} t={t.cond} searchField={t.w.searchField} noMatch={t.noMatch} />
+                {needNote("conditions")}
+              </div>
             </fieldset>
 
             <fieldset className="fl-sec">
               <legend>{t.sections.view}</legend>
-              <div className="fl-field">
+              <div className={"fl-field" + invalid("columns")}>
                 <span className="fl-muted">{t.columns}</span>
                 <div className="fl-group">
                   {columnFields.map((f, i) => (
@@ -725,6 +748,7 @@ function App({ source, store, queries, initialQueryId, linkFor, mock, t, itemUrl
                     onPick={(ref) => setColumns([...columns, ref])}
                   />
                 </div>
+                {needNote("columns")}
               </div>
 
               <details className="fl-rule" open={!!rule.source || !!rule.pattern}>
@@ -773,11 +797,11 @@ function App({ source, store, queries, initialQueryId, linkFor, mock, t, itemUrl
             </fieldset>
 
             <div className="fl-actions">
-              <button className="fl-button" disabled={!!missing || running} onClick={run}>
+              <button className="fl-button" disabled={running} onClick={() => (need ? need !== "loading" && setFlagged(need) : run())}>
                 {running ? t.running : t.run}
               </button>
               {csvButton}
-              {missing && <span className="fl-muted">{missing}</span>}
+              {need === "loading" && <span className="fl-muted">{t.loading}</span>}
               {result && !missing && <span className="fl-muted">{t.count(result.data.rows.length)}</span>}
               <button
                 className="fl-button fl-reset"

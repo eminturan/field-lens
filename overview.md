@@ -46,6 +46,8 @@ Open a project → **Boards** → **Field Lens**. The widget is under **Dashboar
 
 ## Release notes
 
+**0.2.22**: a missing field is marked in place when you press Run.
+
 **0.2.21**: clearer field labels and a quieter reset button.
 
 **0.2.20**: report form split into Scope, Time, Filter and View sections.
