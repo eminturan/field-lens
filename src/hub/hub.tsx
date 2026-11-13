@@ -543,221 +543,234 @@ function App({ source, store, queries, initialQueryId, linkFor, mock, t, itemUrl
         )}
         {types && !(result && collapsed && !running) && (
           <section className="fl-panel">
-            <div className="fl-field">
-              <span className="fl-muted">{t.projects}</span>
-              <span className="fl-segment fl-assignee" role="group" aria-label={t.projects}>
-                <button aria-pressed={projects === undefined} onClick={() => chooseProjects(undefined)}>
-                  {t.projectModes.this}
-                </button>
-                <button aria-pressed={projects === "all"} onClick={() => chooseProjects("all")}>
-                  {t.projectModes.all}
-                </button>
-                <button aria-pressed={Array.isArray(projects)} disabled={!projectNames.length} onClick={() => !Array.isArray(projects) && chooseProjects([])}>
-                  {t.projectModes.some}
-                </button>
-              </span>
-              {projects === "all" && <span className="fl-muted">{t.allProjectsHint}</span>}
-              {Array.isArray(projects) && (
-                <div className="fl-projects">
-                  <input
-                    className="fl-input"
-                    placeholder={t.searchProject}
-                    value={projectSearch}
-                    onChange={(e) => setProjectSearch(e.target.value)}
-                  />
-                  <div className="fl-project-list">
-                    {projectNames
-                      .filter((n) => fold(n).includes(fold(projectSearch.trim())))
-                      .map((n) => (
-                        <label key={n} className="fl-check">
-                          <input type="checkbox" checked={projects.includes(n)} onChange={() => toggleProject(n)} />
-                          {n}
-                        </label>
-                      ))}
-                  </div>
-                </div>
-              )}
-            </div>
-            <div className="fl-toolbar">
-              <label className="fl-field">
-                <span className="fl-muted">{t.type}</span>
-                <select className="fl-input" value={type} onChange={(e) => setType(e.target.value)}>
-                  <option value="">{t.choose}</option>
-                  {types.map((x) => (
-                    <option key={x} value={x}>
-                      {x}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <div className="fl-field">
-                <span className="fl-muted">{t.dateField}</span>
-                <FieldPicker
-                  id="fl-date-list"
-                  single
-                  fields={dateFields}
-                  selected={byRef.get(dateField)}
-                  placeholder={t.searchDateField}
-                  empty={t.noMatch}
-                  onPick={chooseDateField}
-                />
-              </div>
-              <label className="fl-field">
-                <span className="fl-muted">{t.range}</span>
-                <select className="fl-input" value={preset} onChange={(e) => choosePreset(e.target.value as Preset)}>
-                  {PRESETS.map((p) => (
-                    <option key={p} value={p}>
-                      {t.presets[p]}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label className="fl-field">
-                <span className="fl-muted">{t.from}</span>
-                <input
-                  className="fl-input"
-                  type="date"
-                  value={from}
-                  disabled={preset !== "custom"}
-                  onChange={(e) => setFrom(e.target.value)}
-                />
-              </label>
-              <label className="fl-field">
-                <span className="fl-muted">{t.to}</span>
-                <input
-                  className="fl-input"
-                  type="date"
-                  value={to}
-                  disabled={preset !== "custom"}
-                  onChange={(e) => setTo(e.target.value)}
-                />
-              </label>
-            </div>
-
-            <fieldset className="fl-field" style={{ border: 0, padding: 0, margin: 0 }}>
-              <legend className="fl-muted">{t.states}</legend>
-              <div className="fl-group">
-                {stateList.map((s) => (
-                  <label key={s} className="fl-check">
-                    <input type="checkbox" checked={states.includes(s)} onChange={() => toggleState(s)} />
-                    {s}
-                  </label>
-                ))}
-                {!type && <span className="fl-muted">{t.need.type}</span>}
-              </div>
-            </fieldset>
-
-            <div className="fl-field">
-              <span className="fl-muted">{t.assignee}</span>
-              <span className="fl-segment fl-assignee" role="group" aria-label={t.assignee}>
-                {([undefined, "me", "none"] as const).map((a) => (
-                  <button key={a ?? "all"} aria-pressed={assignee === a} onClick={() => setAssignee(a)}>
-                    {t.assignees[a ?? "all"]}
-                  </button>
-                ))}
-              </span>
-            </div>
-
-            <ConditionsEditor value={conditions} onChange={setConditions} fields={fields} t={t.cond} searchField={t.w.searchField} noMatch={t.noMatch} />
-
-            <div className="fl-field">
-              <span className="fl-muted">{t.columns}</span>
-              <div className="fl-group">
-                {columnFields.map((f, i) => (
-                  <span
-                    key={f.referenceName}
-                    data-ref={f.referenceName}
-                    className={
-                      "fl-chip" +
-                      (drag && drag.over === i && drag.from !== i ? (drag.from > i ? " fl-drop-before" : " fl-drop-after") : "") +
-                      (drag?.from === i ? " fl-dragging" : "")
-                    }
-                    title={`${f.referenceName} — ${t.moveHint}`}
-                    tabIndex={0}
-                    aria-keyshortcuts="Alt+ArrowLeft Alt+ArrowRight"
-                    draggable
-                    onDragStart={(e) => {
-                      e.dataTransfer.effectAllowed = "move";
-                      e.dataTransfer.setData("text/plain", f.referenceName); // Firefox veri olmadan sürüklemez
-                      setDrag({ from: i, over: i });
-                    }}
-                    onDragOver={(e) => {
-                      if (!drag) return;
-                      e.preventDefault();
-                      if (drag.over !== i) setDrag({ ...drag, over: i });
-                    }}
-                    onDrop={(e) => {
-                      e.preventDefault();
-                      if (drag) setColumns(moveItem(columns, drag.from, i));
-                      setDrag(undefined);
-                    }}
-                    onDragEnd={() => setDrag(undefined)}
-                    onKeyDown={(e) => {
-                      if (!e.altKey || (e.key !== "ArrowLeft" && e.key !== "ArrowRight")) return;
-                      e.preventDefault();
-                      setColumns(moveItem(columns, i, i + (e.key === "ArrowLeft" ? -1 : 1)));
-                      focusChip.current = f.referenceName;
-                    }}
-                  >
-                    {f.name}
-                    <button aria-label={t.remove(f.name)} onClick={() => setColumns(columns.filter((c) => c !== f.referenceName))}>
-                      ×
+            <div className="fl-sec-row">
+              <fieldset className="fl-sec">
+                <legend>{t.sections.scope}</legend>
+                <div className="fl-field">
+                  <span className="fl-muted">{t.projects}</span>
+                  <span className="fl-segment fl-assignee" role="group" aria-label={t.projects}>
+                    <button aria-pressed={projects === undefined} onClick={() => chooseProjects(undefined)}>
+                      {t.projectModes.this}
+                    </button>
+                    <button aria-pressed={projects === "all"} onClick={() => chooseProjects("all")}>
+                      {t.projectModes.all}
+                    </button>
+                    <button aria-pressed={Array.isArray(projects)} disabled={!projectNames.length} onClick={() => !Array.isArray(projects) && chooseProjects([])}>
+                      {t.projectModes.some}
                     </button>
                   </span>
-                ))}
-                <FieldPicker
-                  id="fl-column-list"
-                  fields={addable}
-                  placeholder={t.addColumn}
-                  empty={t.noMatch}
-                  onPick={(ref) => setColumns([...columns, ref])}
-                />
-              </div>
+                  {projects === "all" && <span className="fl-muted">{t.allProjectsHint}</span>}
+                  {Array.isArray(projects) && (
+                    <div className="fl-projects">
+                      <input
+                        className="fl-input"
+                        placeholder={t.searchProject}
+                        value={projectSearch}
+                        onChange={(e) => setProjectSearch(e.target.value)}
+                      />
+                      <div className="fl-project-list">
+                        {projectNames
+                          .filter((n) => fold(n).includes(fold(projectSearch.trim())))
+                          .map((n) => (
+                            <label key={n} className="fl-check">
+                              <input type="checkbox" checked={projects.includes(n)} onChange={() => toggleProject(n)} />
+                              {n}
+                            </label>
+                          ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+                  <label className="fl-field">
+                    <span className="fl-muted">{t.type}</span>
+                    <select className="fl-input" value={type} onChange={(e) => setType(e.target.value)}>
+                      <option value="">{t.choose}</option>
+                      {types.map((x) => (
+                        <option key={x} value={x}>
+                          {x}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                <div className="fl-field">
+                  <span className="fl-muted">{t.assignee}</span>
+                  <span className="fl-segment fl-assignee" role="group" aria-label={t.assignee}>
+                    {([undefined, "me", "none"] as const).map((a) => (
+                      <button key={a ?? "all"} aria-pressed={assignee === a} onClick={() => setAssignee(a)}>
+                        {t.assignees[a ?? "all"]}
+                      </button>
+                    ))}
+                  </span>
+                </div>
+              </fieldset>
+              <fieldset className="fl-sec">
+                <legend>{t.sections.time}</legend>
+                <div className="fl-toolbar">
+                  <div className="fl-field">
+                    <span className="fl-muted">{t.dateField}</span>
+                    <FieldPicker
+                      id="fl-date-list"
+                      single
+                      fields={dateFields}
+                      selected={byRef.get(dateField)}
+                      placeholder={t.searchDateField}
+                      empty={t.noMatch}
+                      onPick={chooseDateField}
+                    />
+                  </div>
+                  <label className="fl-field">
+                    <span className="fl-muted">{t.range}</span>
+                    <select className="fl-input" value={preset} onChange={(e) => choosePreset(e.target.value as Preset)}>
+                      {PRESETS.map((p) => (
+                        <option key={p} value={p}>
+                          {t.presets[p]}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <label className="fl-field">
+                    <span className="fl-muted">{t.from}</span>
+                    <input
+                      className="fl-input"
+                      type="date"
+                      value={from}
+                      disabled={preset !== "custom"}
+                      onChange={(e) => setFrom(e.target.value)}
+                    />
+                  </label>
+                  <label className="fl-field">
+                    <span className="fl-muted">{t.to}</span>
+                    <input
+                      className="fl-input"
+                      type="date"
+                      value={to}
+                      disabled={preset !== "custom"}
+                      onChange={(e) => setTo(e.target.value)}
+                    />
+                  </label>
+                </div>
+              </fieldset>
             </div>
 
-            <details className="fl-rule" open={!!rule.source || !!rule.pattern}>
-              <summary>{t.rule.title}</summary>
-              <div className="fl-toolbar">
-                <div className="fl-field">
-                  <span className="fl-muted">{t.rule.source}</span>
+            <fieldset className="fl-sec">
+              <legend>{t.sections.filter}</legend>
+              <fieldset className="fl-field" style={{ border: 0, padding: 0, margin: 0 }}>
+                <legend className="fl-muted">{t.states}</legend>
+                <div className="fl-group">
+                  {stateList.map((s) => (
+                    <label key={s} className="fl-check">
+                      <input type="checkbox" checked={states.includes(s)} onChange={() => toggleState(s)} />
+                      {s}
+                    </label>
+                  ))}
+                  {!type && <span className="fl-muted">{t.need.type}</span>}
+                </div>
+            </fieldset>
+
+            <ConditionsEditor value={conditions} onChange={setConditions} fields={fields} t={t.cond} searchField={t.w.searchField} noMatch={t.noMatch} />
+            </fieldset>
+
+            <fieldset className="fl-sec">
+              <legend>{t.sections.view}</legend>
+              <div className="fl-field">
+                <span className="fl-muted">{t.columns}</span>
+                <div className="fl-group">
+                  {columnFields.map((f, i) => (
+                    <span
+                      key={f.referenceName}
+                      data-ref={f.referenceName}
+                      className={
+                        "fl-chip" +
+                        (drag && drag.over === i && drag.from !== i ? (drag.from > i ? " fl-drop-before" : " fl-drop-after") : "") +
+                        (drag?.from === i ? " fl-dragging" : "")
+                      }
+                      title={`${f.referenceName} — ${t.moveHint}`}
+                      tabIndex={0}
+                      aria-keyshortcuts="Alt+ArrowLeft Alt+ArrowRight"
+                      draggable
+                      onDragStart={(e) => {
+                        e.dataTransfer.effectAllowed = "move";
+                        e.dataTransfer.setData("text/plain", f.referenceName); // Firefox veri olmadan sürüklemez
+                        setDrag({ from: i, over: i });
+                      }}
+                      onDragOver={(e) => {
+                        if (!drag) return;
+                        e.preventDefault();
+                        if (drag.over !== i) setDrag({ ...drag, over: i });
+                      }}
+                      onDrop={(e) => {
+                        e.preventDefault();
+                        if (drag) setColumns(moveItem(columns, drag.from, i));
+                        setDrag(undefined);
+                      }}
+                      onDragEnd={() => setDrag(undefined)}
+                      onKeyDown={(e) => {
+                        if (!e.altKey || (e.key !== "ArrowLeft" && e.key !== "ArrowRight")) return;
+                        e.preventDefault();
+                        setColumns(moveItem(columns, i, i + (e.key === "ArrowLeft" ? -1 : 1)));
+                        focusChip.current = f.referenceName;
+                      }}
+                    >
+                      {f.name}
+                      <button aria-label={t.remove(f.name)} onClick={() => setColumns(columns.filter((c) => c !== f.referenceName))}>
+                        ×
+                      </button>
+                    </span>
+                  ))}
                   <FieldPicker
-                    id="fl-rule-source"
-                    single
-                    fields={fields}
-                    selected={byRef.get(rule.source)}
-                    placeholder={t.w.searchField}
+                    id="fl-column-list"
+                    fields={addable}
+                    placeholder={t.addColumn}
                     empty={t.noMatch}
-                    onPick={(ref) => setRule({ ...rule, source: ref, name: rule.name || t.rule.defaultName })}
+                    onPick={(ref) => setColumns([...columns, ref])}
                   />
                 </div>
-                <label className="fl-field">
-                  <span className="fl-muted">{t.rule.pattern}</span>
-                  <input
-                    className="fl-input fl-mono fl-rule-input"
-                    value={rule.pattern}
-                    placeholder={t.rule.example}
-                    spellCheck={false}
-                    onChange={(e) => setRule({ ...rule, pattern: e.target.value })}
-                  />
-                </label>
-                <label className="fl-field">
-                  <span className="fl-muted">{t.rule.name}</span>
-                  <input className="fl-input" value={rule.name} placeholder={t.rule.defaultName} onChange={(e) => setRule({ ...rule, name: e.target.value })} />
-                </label>
-                {(rule.source || rule.pattern) && (
-                  <button className="fl-button" onClick={() => setRule({ source: "", pattern: "", name: "" })}>
-                    {t.rule.remove}
-                  </button>
-                )}
-                {ruleReady && !columns.includes(DERIVED) && (
-                  <button className="fl-button" onClick={() => setColumns([...columns, DERIVED])}>
-                    {t.rule.addColumn}
-                  </button>
-                )}
               </div>
-              <span className="fl-muted">{t.rule.hint}</span>
-              {rule.source && <RulePreview pattern={rule.pattern} values={previewValues} t={t} />}
-            </details>
+
+              <details className="fl-rule" open={!!rule.source || !!rule.pattern}>
+                <summary>{t.rule.title}</summary>
+                <div className="fl-toolbar">
+                  <div className="fl-field">
+                    <span className="fl-muted">{t.rule.source}</span>
+                    <FieldPicker
+                      id="fl-rule-source"
+                      single
+                      fields={fields}
+                      selected={byRef.get(rule.source)}
+                      placeholder={t.w.searchField}
+                      empty={t.noMatch}
+                      onPick={(ref) => setRule({ ...rule, source: ref, name: rule.name || t.rule.defaultName })}
+                    />
+                  </div>
+                  <label className="fl-field">
+                    <span className="fl-muted">{t.rule.pattern}</span>
+                    <input
+                      className="fl-input fl-mono fl-rule-input"
+                      value={rule.pattern}
+                      placeholder={t.rule.example}
+                      spellCheck={false}
+                      onChange={(e) => setRule({ ...rule, pattern: e.target.value })}
+                    />
+                  </label>
+                  <label className="fl-field">
+                    <span className="fl-muted">{t.rule.name}</span>
+                    <input className="fl-input" value={rule.name} placeholder={t.rule.defaultName} onChange={(e) => setRule({ ...rule, name: e.target.value })} />
+                  </label>
+                  {(rule.source || rule.pattern) && (
+                    <button className="fl-button" onClick={() => setRule({ source: "", pattern: "", name: "" })}>
+                      {t.rule.remove}
+                    </button>
+                  )}
+                  {ruleReady && !columns.includes(DERIVED) && (
+                    <button className="fl-button" onClick={() => setColumns([...columns, DERIVED])}>
+                      {t.rule.addColumn}
+                    </button>
+                  )}
+                </div>
+                <span className="fl-muted">{t.rule.hint}</span>
+                {rule.source && <RulePreview pattern={rule.pattern} values={previewValues} t={t} />}
+              </details>
+            </fieldset>
 
             <div className="fl-actions">
               <button className="fl-button" disabled={!!missing || running} onClick={run}>

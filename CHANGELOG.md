@@ -2,6 +2,10 @@
 
 [Türkçe](CHANGELOG.tr.md)
 
+## 0.2.20
+
+- Report page: the settings form is split into four sections: **Scope** (projects, type, assigned to), **Time** (date field and range), **Filter** (states, extra conditions) and **View** (columns, rule). On a wide screen Scope and Time sit side by side.
+
 ## 0.2.19
 
 - Widget: its own settings now include **Projects** (this, all or chosen), **Assigned to** and **Extra conditions**, as on the report page. Before, a widget could only get them from a saved query. Saving checks that a project is chosen and every condition is complete.

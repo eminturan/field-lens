@@ -2,6 +2,10 @@
 
 [English](CHANGELOG.md)
 
+## 0.2.20
+
+- Rapor sayfası: ayar formu dört bölüme ayrıldı: **Kapsam** (projeler, tür, atanan), **Zaman** (tarih alanı ve aralık), **Filtre** (state'ler, ek koşullar) ve **Görünüm** (kolonlar, kural). Geniş ekranda Kapsam ve Zaman yan yana.
+
 ## 0.2.19
 
 - Widget: kendi ayarlarında artık rapor sayfasındaki gibi **Projeler** (bu, tümü ya da seçili), **Atanan** ve **Ek koşullar** var. Önceden bunları yalnızca kayıtlı sorgudan alabiliyordu. Kaydet, bir proje seçildiğini ve her koşulun tamamlandığını kontrol ediyor.

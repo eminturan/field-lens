@@ -46,6 +46,8 @@ Bir proje açın → **Boards** → **Field Lens**. Widget: **Dashboards → Edi
 
 ## Sürüm notları
 
+**0.2.20**: rapor formu Kapsam, Zaman, Filtre ve Görünüm bölümlerine ayrıldı.
+
 **0.2.19**: widget'ın kendi ayarlarında projeler, atanan ve ek koşullar.
 
 **0.2.18**: ek alan koşulları, gruplama ve tabloyu kopyalama.

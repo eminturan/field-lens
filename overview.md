@@ -46,6 +46,8 @@ Open a project → **Boards** → **Field Lens**. The widget is under **Dashboar
 
 ## Release notes
 
+**0.2.20**: report form split into Scope, Time, Filter and View sections.
+
 **0.2.19**: projects, assigned to and extra conditions in the widget's own settings.
 
 **0.2.18**: extra field conditions, group by, and copy table.

@@ -335,6 +335,36 @@ section > .fl-button {
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
 }
 
+/* Form bölümleri: Kapsam ve Zaman geniş ekranda yan yana */
+.fl-sec-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 380px), 1fr));
+  gap: 14px;
+}
+
+.fl-sec {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+  margin: 0;
+  padding: 12px 14px 14px;
+  border: 1px solid var(--component-grid-cell-bottom-border-color, rgba(0, 0, 0, 0.1));
+  border-radius: 4px;
+}
+
+.fl-sec > label.fl-field {
+  align-self: flex-start;
+  min-width: 200px;
+}
+
+.fl-sec > legend {
+  padding: 0 6px;
+  margin-left: -6px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
 .fl-panel .fl-actions {
   padding-top: 12px;
   border-top: 1px solid var(--component-grid-cell-bottom-border-color, rgba(0, 0, 0, 0.08));

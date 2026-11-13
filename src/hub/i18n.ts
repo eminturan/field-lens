@@ -142,6 +142,7 @@ export interface Strings {
   assignee: string;
   assignees: Record<"all" | Assignee, string>;
   columns: string;
+  sections: { scope: string; time: string; filter: string; view: string };
   addColumn: string;
   noMatch: string;
   searchDateField: string;
@@ -300,6 +301,7 @@ export const STRINGS: Record<Lang, Strings> = {
     assignee: "Atanan",
     assignees: { all: "Herkes", me: "Bana atananlar", none: "Atanmamış" },
     columns: "Kolonlar",
+    sections: { scope: "Kapsam", time: "Zaman", filter: "Filtre", view: "Görünüm" },
     addColumn: "Kolon ara ve ekle…",
     noMatch: "Eşleşen alan yok",
     searchDateField: "Tarih alanı ara…",
@@ -465,6 +467,7 @@ export const STRINGS: Record<Lang, Strings> = {
     assignee: "Assigned to",
     assignees: { all: "Anyone", me: "Assigned to me", none: "Unassigned" },
     columns: "Columns",
+    sections: { scope: "Scope", time: "Time", filter: "Filter", view: "View" },
     addColumn: "Search and add column…",
     noMatch: "No matching field",
     searchDateField: "Search date field…",
