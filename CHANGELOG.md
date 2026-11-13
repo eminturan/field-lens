@@ -2,6 +2,11 @@
 
 [Türkçe](CHANGELOG.tr.md)
 
+## 0.2.23
+
+- Report page: the per-column filter row is hidden until you press **Column filters**. The button shows how many column filters are active; they keep applying when the row is closed.
+- Report page: the row under the pointer is highlighted in light blue, and alternate rows are a little more distinct.
+
 ## 0.2.22
 
 - Report page: **Run** is always clickable. Pressing it with something missing outlines that field in red, shows the message right under it and moves focus there; the mark clears once the field is filled. Before, Run was greyed out and the message sat next to the buttons.

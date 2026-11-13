@@ -2,6 +2,11 @@
 
 [English](CHANGELOG.md)
 
+## 0.2.23
+
+- Rapor sayfası: kolon filtre satırı **Kolon filtreleri** düğmesine basılana kadar gizli. Düğme kaç kolon filtresinin etkin olduğunu gösteriyor; satır kapatılınca da filtreler uygulanmaya devam ediyor.
+- Rapor sayfası: üzerine gelinen satır açık maviyle vurgulanıyor, ikide bir gelen satırlar biraz daha belirgin.
+
 ## 0.2.22
 
 - Rapor sayfası: **Çalıştır** her zaman tıklanabilir. Eksik bir alanla basılınca o alan kırmızı çerçeveyle işaretleniyor, uyarı hemen altında yazıyor ve imleç oraya gidiyor; alan doldurulunca işaret kalkıyor. Önceden Çalıştır pasifti ve uyarı butonların yanında duruyordu.

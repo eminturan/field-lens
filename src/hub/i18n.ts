@@ -167,6 +167,7 @@ export interface Strings {
   search: string;
   filterCol: (name: string) => string;
   filterPlaceholder: string;
+  colFilters: string;
   clearFilters: string;
   shownOf: (shown: number, total: number) => string;
   noFiltered: string;
@@ -326,6 +327,7 @@ export const STRINGS: Record<Lang, Strings> = {
     search: "Sonuçlarda ara…",
     filterCol: (n) => `${n} kolonunda filtrele`,
     filterPlaceholder: "Filtrele",
+    colFilters: "Kolon filtreleri",
     clearFilters: "Filtreleri temizle",
     shownOf: (s, n) => `${s} / ${n} kayıt gösteriliyor`,
     noFiltered: "Filtrelere uyan kayıt yok.",
@@ -492,6 +494,7 @@ export const STRINGS: Record<Lang, Strings> = {
     search: "Search results…",
     filterCol: (n) => `Filter ${n}`,
     filterPlaceholder: "Filter",
+    colFilters: "Column filters",
     clearFilters: "Clear filters",
     shownOf: (s, n) => `Showing ${s} of ${n}`,
     noFiltered: "No items match the filters.",

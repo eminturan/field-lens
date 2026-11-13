@@ -178,6 +178,7 @@ function App({ source, store, queries, initialQueryId, linkFor, mock, t, itemUrl
   /** Sonuçlar içinde arama: tüm kolonlarda ve kolon bazında; sıralama tablo başlığından. */
   const [search, setSearch] = React.useState("");
   const [colFilters, setColFilters] = React.useState<Record<string, string>>({});
+  const [showColFilters, setShowColFilters] = React.useState(false);
   const [sort, setSort] = React.useState<{ ref: string; dir: "asc" | "desc" }>();
   /** Sonuç gelince filtre paneli tek satırlık rapor başlığına iner. */
   const [collapsed, setCollapsed] = React.useState(false);
@@ -472,6 +473,7 @@ function App({ source, store, queries, initialQueryId, linkFor, mock, t, itemUrl
     return col ? sortRows(rows, col, sort.dir) : rows;
   }, [matched, stateFilter, sort, shownCols]);
   const summary = result ? countStates(matched, result.query.states) : [];
+  const colFilterCount = Object.values(colFilters).filter((v) => v.trim()).length;
   const filtering = !!search.trim() || Object.values(colFilters).some((v) => v.trim()) || !!stateFilter;
   const filterBy = (s: string | undefined) => {
     setStateFilter(s);
@@ -881,6 +883,11 @@ function App({ source, store, queries, initialQueryId, linkFor, mock, t, itemUrl
                 setPage(0);
               }}
             />
+            {/* Kapalıyken de filtreler uygulanır; sayaç bunu gösterir. */}
+            <button className="fl-button" aria-pressed={showColFilters} onClick={() => setShowColFilters(!showColFilters)}>
+              {t.colFilters}
+              {colFilterCount > 0 && <span className="fl-count">{colFilterCount}</span>}
+            </button>
             <span className="fl-segment" role="group" aria-label={t.density}>
               <button aria-pressed={!dense} onClick={() => chooseDense(false)}>
                 {t.comfortable}
@@ -948,14 +955,16 @@ function App({ source, store, queries, initialQueryId, linkFor, mock, t, itemUrl
                             {dir === "asc" ? "▲" : dir === "desc" ? "▼" : "↕"}
                           </span>
                         </button>
-                        <input
-                          className="fl-col-filter"
-                          type="search"
-                          aria-label={t.filterCol(c.name)}
-                          placeholder={t.filterPlaceholder}
-                          value={colFilters[c.referenceName] ?? ""}
-                          onChange={(e) => setColFilter(c.referenceName, e.target.value)}
-                        />
+                        {showColFilters && (
+                          <input
+                            className="fl-col-filter"
+                            type="search"
+                            aria-label={t.filterCol(c.name)}
+                            placeholder={t.filterPlaceholder}
+                            value={colFilters[c.referenceName] ?? ""}
+                            onChange={(e) => setColFilter(c.referenceName, e.target.value)}
+                          />
+                        )}
                       </th>
                     );
                   })}

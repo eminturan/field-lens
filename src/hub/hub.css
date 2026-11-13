@@ -142,11 +142,30 @@ section > .fl-button {
 }
 
 .fl-table tbody tr:nth-child(even) {
-  background: var(--palette-black-alpha-2, rgba(0, 0, 0, 0.02));
+  background: var(--palette-black-alpha-4, rgba(0, 0, 0, 0.03));
 }
 
+/* Uzun listede satır takibi için belirgin, temaya uyan mavi */
 .fl-table tbody tr:hover {
-  background: var(--component-grid-row-hover-color, rgba(0, 0, 0, 0.04));
+  background: rgba(var(--palette-primary, 0, 120, 212), 0.1);
+}
+
+.fl-button[aria-pressed="true"] {
+  border-color: var(--communication-background, #0078d4);
+  color: var(--communication-foreground, #0078d4);
+}
+
+.fl-count {
+  display: inline-block;
+  min-width: 16px;
+  margin-left: 6px;
+  padding: 0 5px;
+  border-radius: 8px;
+  background: var(--communication-background, #0078d4);
+  color: #fff;
+  font-size: 11px;
+  line-height: 16px;
+  text-align: center;
 }
 
 .fl-table .fl-num {
