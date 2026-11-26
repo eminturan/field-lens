@@ -2,6 +2,11 @@
 
 [Türkçe](CHANGELOG.tr.md)
 
+## 0.2.32
+
+- Clicking a work item ID on the report page or in the Upcoming widget opens it in the Azure DevOps work item dialog over the page; closing it leaves the report as it was. Ctrl/⌘/Shift-click or middle-click still opens a new tab. If the dialog is not available, the item opens in a new tab.
+- Results toolbar: search, Filters (was Column filters) and Group by on the left; density as two icon buttons and Copy table on the right. When results are filtered, a thin blue strip shows "Showing 5 of 15" with Clear filters.
+
 ## 0.2.31
 
 - Widget look matches the report page: gradient logo next to the title, "Open report" as a pill (just ↗ on 1-column widgets), and the criteria as small pills.

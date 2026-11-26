@@ -20,6 +20,7 @@ import {
   View,
   weekBuckets,
   deltaText,
+  plainClick,
 } from "../hub/logic";
 import { configured, DEFAULTS, Env, Frame, inHost, parseSettings, plan, startWidget, useEnv, usesCustom, WidgetConfig } from "./shared";
 
@@ -271,7 +272,17 @@ function Upcoming({ rows, dateField, colors, env }: { rows: Row[]; dateField: Fi
               <tr key={id}>
                 <td className="flw-when">{formatCell(r[dateField.referenceName], dateField.type)}</td>
                 <td>
-                  <a className="fl-link" href={env.itemUrl(id, r["System.TeamProject"] ? String(r["System.TeamProject"]) : undefined)} target="_blank" rel="noopener noreferrer">
+                  <a
+                    className="fl-link"
+                    href={env.itemUrl(id, r["System.TeamProject"] ? String(r["System.TeamProject"]) : undefined)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={(e) => {
+                      if (!env.openItem || !plainClick(e)) return;
+                      e.preventDefault();
+                      env.openItem(id, r["System.TeamProject"] ? String(r["System.TeamProject"]) : undefined);
+                    }}
+                  >
                     {id}
                   </a>
                 </td>

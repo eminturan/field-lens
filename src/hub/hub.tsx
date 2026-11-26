@@ -22,6 +22,7 @@ import { copyText, Docs, localDocs, QueryBar, QueryStore, queryStore } from "./q
 import { ConditionsEditor } from "./conditions";
 import { Icon, IconName } from "./icons";
 import { Help } from "./help";
+import { dialogOpener } from "./openItem";
 import { GroupSummary } from "./groupSummary";
 import { firstOf, pickLang, Strings, STRINGS } from "./i18n";
 import {
@@ -41,6 +42,7 @@ import {
   previousRange,
   deltaText,
   initials,
+  plainClick,
   Query,
   compileRule,
   DERIVED,
@@ -80,6 +82,8 @@ interface Props {
   t: Strings;
   /** project: kaydın projesi (proje-arası sorguda); yoksa hub'ın projesi. */
   itemUrl: (id: number, project?: string) => string;
+  /** Kaydı Azure DevOps penceresinde açar; yoksa (örnek veri) bağlantı kullanılır. */
+  openItem?: (id: number, project?: string) => void;
 }
 
 const message = (e: unknown) => (e instanceof Error ? e.message : String(e));
@@ -138,7 +142,7 @@ const readDense = () => {
 };
 
 
-function App({ source, store, queries, initialQueryId, linkFor, mock, t, itemUrl }: Props) {
+function App({ source, store, queries, initialQueryId, linkFor, mock, t, itemUrl, openItem }: Props) {
   const [reload, setReload] = React.useState(0);
   const [loadError, setLoadError] = React.useState<string>();
   const [types, setTypes] = React.useState<string[]>();
@@ -940,6 +944,7 @@ function App({ source, store, queries, initialQueryId, linkFor, mock, t, itemUrl
         {!running && result && allRows.length > 0 && (
           <div className="fl-results">
           <div className="fl-actions fl-results-bar">
+            {/* Sol: bulma ve süzme */}
             <input
               className="fl-input fl-search"
               type="search"
@@ -957,19 +962,8 @@ function App({ source, store, queries, initialQueryId, linkFor, mock, t, itemUrl
               {t.colFilters}
               {colFilterCount > 0 && <span className="fl-count">{colFilterCount}</span>}
             </button>
-            <span className="fl-segment" role="group" aria-label={t.density}>
-              <button aria-pressed={!dense} onClick={() => chooseDense(false)}>
-                {t.comfortable}
-              </button>
-              <button aria-pressed={dense} onClick={() => chooseDense(true)}>
-                {t.compact}
-              </button>
-            </span>
-            <button className="fl-button" title={t.copyTableTip} disabled={visible.length === 0} onClick={copyTable}>
-              <Icon name="copy" size={14} />
-              {t.copyTable}
-            </button>
-            <label className="fl-qpick">
+            <label className="fl-qpick fl-groupby">
+              <Icon name="group" size={14} />
               <span className="fl-muted">{t.group.label}</span>
               <select className="fl-input" value={shownCols.some((c) => c.referenceName === groupBy) ? groupBy : ""} onChange={(e) => setGroupBy(e.target.value)}>
                 <option value="">{t.group.none}</option>
@@ -982,22 +976,36 @@ function App({ source, store, queries, initialQueryId, linkFor, mock, t, itemUrl
                   ))}
               </select>
             </label>
+            <span className="fl-qspacer" />
+            {/* Sağ: görünüm ve dışa aktarma */}
             {copyNote && (
               <span className="fl-muted" aria-live="polite">
                 {copyNote}
               </span>
             )}
-            {filtering && (
-              <>
-                <span className="fl-muted" aria-live="polite">
-                  {t.shownOf(visible.length, allRows.length)}
-                </span>
-                <button className="fl-button" onClick={clearFilters}>
-                  {t.clearFilters}
-                </button>
-              </>
-            )}
+            <span className="fl-segment fl-density" role="group" aria-label={t.density}>
+              <button aria-pressed={!dense} aria-label={t.comfortable} title={t.comfortable} onClick={() => chooseDense(false)}>
+                <Icon name="rowsLoose" size={14} />
+              </button>
+              <button aria-pressed={dense} aria-label={t.compact} title={t.compact} onClick={() => chooseDense(true)}>
+                <Icon name="rowsTight" size={14} />
+              </button>
+            </span>
+            <span className="fl-vsep" aria-hidden="true" />
+            <button className="fl-button" title={t.copyTableTip} disabled={visible.length === 0} onClick={copyTable}>
+              <Icon name="copy" size={14} />
+              {t.copyTable}
+            </button>
           </div>
+          {filtering && (
+            <div className="fl-filterbar" aria-live="polite">
+              <Icon name="filter" size={14} />
+              {t.shownOf(visible.length, allRows.length)}
+              <button className="fl-linkbtn" onClick={clearFilters}>
+                {t.clearFilters}
+              </button>
+            </div>
+          )}
         {byRef.get(groupBy) && shownCols.some((c) => c.referenceName === groupBy) && (
           <GroupSummary
             rows={visible}
@@ -1054,7 +1062,17 @@ function App({ source, store, queries, initialQueryId, linkFor, mock, t, itemUrl
                         className={c.type === "dateTime" || c.referenceName === "System.Id" || c.referenceName === "System.State" ? "fl-nowrap" : "fl-cell"}
                       >
                         {c.referenceName === "System.Id" ? (
-                          <a className="fl-link" href={itemUrl(Number(r["System.Id"]), r["System.TeamProject"] ? String(r["System.TeamProject"]) : undefined)} target="_top" rel="noopener noreferrer">
+                          <a
+                            className="fl-link"
+                            href={itemUrl(Number(r["System.Id"]), r["System.TeamProject"] ? String(r["System.TeamProject"]) : undefined)}
+                            target="_top"
+                            rel="noopener noreferrer"
+                            onClick={(e) => {
+                              if (!openItem || !plainClick(e)) return;
+                              e.preventDefault();
+                              openItem(Number(r["System.Id"]), r["System.TeamProject"] ? String(r["System.TeamProject"]) : undefined);
+                            }}
+                          >
                             {String(r["System.Id"])}
                           </a>
                         ) : c.referenceName === "System.State" ? (
@@ -1168,6 +1186,7 @@ async function start() {
       set: async (shared, doc) => (await manager).setDocument(coll(shared), doc, scope(shared)),
       del: async (shared, id) => (await manager).deleteDocument(coll(shared), id, scope(shared)),
     };
+    const itemUrl = (id: number, p?: string) => `${base}${encodeURIComponent(p ?? project)}/_workitems/edit/${id}`;
     const me = SDK.getUser();
     const params = await (await SDK.getService<IHostNavigationService>(CommonServiceIds.HostNavigationService)).getQueryParams().catch(() => ({}) as Record<string, string>);
     render(
@@ -1178,7 +1197,8 @@ async function start() {
         initialQueryId: params.query || undefined,
         linkFor: (id) => `${base}${encodeURIComponent(project)}/_apps/hub/turanemin.field-lens.hub?query=${encodeURIComponent(id)}`,
         mock: false,
-        itemUrl: (id, p) => `${base}${encodeURIComponent(p ?? project)}/_workitems/edit/${id}`,
+        itemUrl,
+        openItem: dialogOpener(itemUrl),
       },
       culture,
     );

@@ -1218,3 +1218,51 @@ section > .fl-button {
   background: var(--fl-tint);
   box-shadow: 0 0 0 2px var(--communication-foreground, #0078d4);
 }
+
+/* Sonuç araç satırı: solda bulma/süzme, sağda görünüm ve dışa aktarma */
+.fl-results-bar {
+  gap: 8px;
+}
+
+.fl-groupby {
+  gap: 6px;
+}
+
+.fl-groupby > .fl-icon {
+  color: var(--text-secondary-color, rgba(0, 0, 0, 0.55));
+}
+
+.fl-density button {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 8px;
+}
+
+.fl-vsep {
+  width: 1px;
+  height: 22px;
+  background: var(--fl-line);
+}
+
+/* Süzme varken: kaç kaydın göründüğü ve temizleme */
+.fl-filterbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border-bottom: 1px solid var(--fl-line);
+  background: var(--fl-tint);
+  color: var(--communication-foreground, #0078d4);
+  font-size: 12px;
+}
+
+.fl-linkbtn {
+  margin-left: auto;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}

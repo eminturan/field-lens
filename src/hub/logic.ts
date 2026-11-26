@@ -166,6 +166,11 @@ export function presetRange(preset: Exclude<Preset, "custom">, now: Date): { fro
 
 const ENTITIES: Record<string, string> = { amp: "&", lt: "<", gt: ">", quot: '"', "#39": "'", nbsp: " " };
 
+/** Sade sol tık mı? Ctrl/⌘/Shift/Alt ya da orta tuş "yeni sekmede aç" demektir, tarayıcıya bırakılır. */
+export function plainClick(e: { button: number; ctrlKey: boolean; metaKey: boolean; shiftKey: boolean; altKey: boolean }): boolean {
+  return e.button === 0 && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey;
+}
+
 /** Kişi adının baş harfleri (ilk ve son kelime), "Ad Soyad <e-posta>" biçiminde e-posta atılır. */
 export function initials(name: string): string {
   const words = name.replace(/<[^>]*>/g, "").trim().split(/\s+/).filter(Boolean);

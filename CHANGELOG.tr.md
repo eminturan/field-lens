@@ -2,6 +2,11 @@
 
 [English](CHANGELOG.md)
 
+## 0.2.32
+
+- Rapor sayfasında ya da Yaklaşanlar widget'ında iş öğesi ID'sine tıklamak kaydı sayfanın üzerinde Azure DevOps iş öğesi penceresinde açıyor; kapatınca rapor olduğu gibi kalıyor. Ctrl/⌘/Shift ile ya da orta tuşla tıklamak yine yeni sekmede açıyor. Pencere açılamazsa kayıt yeni sekmede açılıyor.
+- Sonuç araç satırı: solda arama, Filtreler (eski adıyla Kolon filtreleri) ve Grupla; sağda iki simgeli yoğunluk düğmesi ve Tabloyu kopyala. Sonuçlar süzülünce ince mavi bir şerit "15'ten 5'i gösteriliyor" ve Filtreleri temizle'yi gösteriyor.
+
 ## 0.2.31
 
 - Widget görünüşü rapor sayfasıyla aynı: başlığın yanında renk geçişli logo, "Raporu aç" hap şeklinde (tek sütunluk widget'ta yalnızca ↗), ölçütler küçük haplar.

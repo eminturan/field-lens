@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { applyRule, buildWiql, chunk, compileRule, crossCount, DERIVED, deriveRows, dayBuckets, monthBuckets, monthsRange, upcomingRange, countStates, deltaText, initials, previousRange, weekBuckets, csvRows, filterRows, sortRows, Field, formatCell, moveItem, pageSlice, presetRange, Query, sanitizeSettings, searchFields, toCsv } from "../src/hub/logic";
+import { applyRule, buildWiql, chunk, compileRule, crossCount, DERIVED, deriveRows, dayBuckets, monthBuckets, monthsRange, upcomingRange, countStates, deltaText, initials, plainClick, previousRange, weekBuckets, csvRows, filterRows, sortRows, Field, formatCell, moveItem, pageSlice, presetRange, Query, sanitizeSettings, searchFields, toCsv } from "../src/hub/logic";
 
 const q: Query = {
   type: "Kart",
@@ -370,5 +370,18 @@ describe("initials", () => {
   it("ignores an e-mail part and empty names", () => {
     expect(initials("Selin Koç <selin@example.com>")).toBe("SK");
     expect(initials("  ")).toBe("");
+  });
+});
+
+describe("plainClick", () => {
+  const click = { button: 0, ctrlKey: false, metaKey: false, shiftKey: false, altKey: false };
+  it("is true only for a plain left click", () => {
+    expect(plainClick(click)).toBe(true);
+  });
+  it("leaves new-tab clicks to the browser", () => {
+    expect(plainClick({ ...click, ctrlKey: true })).toBe(false);
+    expect(plainClick({ ...click, metaKey: true })).toBe(false);
+    expect(plainClick({ ...click, shiftKey: true })).toBe(false);
+    expect(plainClick({ ...click, button: 1 })).toBe(false);
   });
 });

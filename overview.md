@@ -46,6 +46,7 @@ Open a project → **Boards** → **Field Lens**. The widget is under **Dashboar
 
 ## Release notes
 
+- **0.2.32**: work items open in the Azure DevOps dialog; tidier results toolbar.
 - **0.2.31**: widget and its settings in the new look.
 - **0.2.30**: report page logo matches the new icon.
 - **0.2.29**: a more colorful extension icon.

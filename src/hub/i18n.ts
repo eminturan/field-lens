@@ -329,7 +329,7 @@ export const STRINGS: Record<Lang, Strings> = {
     search: "Sonuçlarda ara…",
     filterCol: (n) => `${n} kolonunda filtrele`,
     filterPlaceholder: "Filtrele",
-    colFilters: "Kolon filtreleri",
+    colFilters: "Filtreler",
     enterHint: "ile çalıştır",
     help: {
       label: "Açıklama",
@@ -506,7 +506,7 @@ export const STRINGS: Record<Lang, Strings> = {
     search: "Search results…",
     filterCol: (n) => `Filter ${n}`,
     filterPlaceholder: "Filter",
-    colFilters: "Column filters",
+    colFilters: "Filters",
     enterHint: "to run",
     help: {
       label: "Help",
