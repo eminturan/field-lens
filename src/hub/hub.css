@@ -821,3 +821,168 @@ section > .fl-button {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
+
+/* ---- Görsel cila: başlık, simgeler, bölüm kartları, sonuç kartı ---- */
+.fl-icon {
+  flex: none;
+}
+
+.fl-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 4px;
+}
+
+.fl-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 20px 32px 8px;
+}
+
+.fl-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: rgba(var(--palette-primary, 0, 120, 212), 0.12);
+  color: var(--communication-foreground, #0078d4);
+}
+
+.fl-head-title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.fl-head-sub {
+  margin: 2px 0 0;
+  font-size: 13px;
+  color: var(--text-secondary-color, rgba(0, 0, 0, 0.55));
+}
+
+.fl-qlabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.fl-sec {
+  border-radius: 8px;
+  background: var(--palette-black-alpha-2, rgba(0, 0, 0, 0.02));
+}
+
+/* float: başlık çerçeve çizgisinin üstünde değil, kartın içinde dursun */
+.fl-sec > legend.fl-sec-head {
+  float: left;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  font-size: 14px;
+}
+
+.fl-sec-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 7px;
+  color: var(--fl-sec-color);
+  background: color-mix(in srgb, var(--fl-sec-color) 14%, transparent);
+}
+
+.fl-sec-target {
+  --fl-sec-color: #8764b8;
+}
+.fl-sec-calendar {
+  --fl-sec-color: #008272;
+}
+.fl-sec-filter {
+  --fl-sec-color: #ca5010;
+}
+.fl-sec-columns {
+  --fl-sec-color: #0078d4;
+}
+
+.fl-sec-sum {
+  margin-left: auto;
+  overflow: hidden;
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--text-secondary-color, rgba(0, 0, 0, 0.55));
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.fl-panel .fl-actions .fl-button:first-child {
+  padding: 0 16px;
+}
+
+.fl-card {
+  border-radius: 8px;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+
+.fl-card[aria-pressed="true"] {
+  background: rgba(var(--palette-primary, 0, 120, 212), 0.08);
+}
+
+/* Sonuç kartı: araç satırı, gruplu özet ve tablo tek çerçevede */
+.fl-results {
+  overflow: hidden;
+  border: 1px solid var(--component-grid-cell-bottom-border-color, rgba(0, 0, 0, 0.1));
+  border-radius: 8px;
+  background: var(--callout-background-color, #fff);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+}
+
+.fl-results-bar {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--component-grid-cell-bottom-border-color, rgba(0, 0, 0, 0.1));
+}
+
+.fl-results .fl-grp-list {
+  border: 0;
+  border-bottom: 1px solid var(--component-grid-cell-bottom-border-color, rgba(0, 0, 0, 0.1));
+  border-radius: 0;
+}
+
+.fl-results .fl-scroll {
+  border: 0;
+  border-radius: 0;
+}
+
+.fl-results .fl-pager {
+  padding-bottom: 12px;
+}
+
+.fl-table .fl-badge {
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--fl-state) 14%, transparent);
+  font-size: 12px;
+}
+
+.fl-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  margin-right: 6px;
+  border-radius: 50%;
+  vertical-align: middle;
+  background: rgba(135, 100, 184, 0.16);
+  color: #8764b8;
+  font-size: 10px;
+  font-weight: 600;
+}

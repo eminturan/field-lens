@@ -2,6 +2,13 @@
 
 [Türkçe](CHANGELOG.tr.md)
 
+## 0.2.26
+
+- Report page look: a header with the Field Lens icon; icons on the main buttons (Run, Save as, Copy link, Column filters, Copy table, Reset).
+- Form sections are light cards with a colored icon and a one-line summary of what is chosen (for example "This project · Bug · Anyone").
+- Results: the toolbar, group summary and table sit in one card. States are shown as colored pills, and Assigned To shows the person's initials. The selected summary card is tinted.
+- Icons are inline SVG, so nothing is loaded from outside the server.
+
 ## 0.2.25
 
 - Extension page: release notes are a compact list instead of spaced-out paragraphs.

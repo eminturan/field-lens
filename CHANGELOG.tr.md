@@ -2,6 +2,13 @@
 
 [English](CHANGELOG.md)
 
+## 0.2.26
+
+- Rapor sayfası görünüşü: Field Lens simgeli başlık; ana butonlarda simgeler (Çalıştır, Farklı kaydet, Bağlantıyı kopyala, Kolon filtreleri, Tabloyu kopyala, Sıfırla).
+- Form bölümleri renkli simgeli açık kartlar; başlıkta seçilenlerin tek satırlık özeti var (örneğin "Bu proje · Bug · Herkes").
+- Sonuçlar: araç satırı, gruplu özet ve tablo tek kartta. State'ler renkli hap içinde, Atanan kolonunda kişinin baş harfleri görünüyor. Seçili özet kartının zemini renkli.
+- Simgeler satır içi SVG; sunucu dışından hiçbir şey yüklenmiyor.
+
 ## 0.2.25
 
 - Extension sayfası: sürüm notları aralıklı paragraflar yerine sıkı bir liste.

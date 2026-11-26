@@ -166,6 +166,14 @@ export function presetRange(preset: Exclude<Preset, "custom">, now: Date): { fro
 
 const ENTITIES: Record<string, string> = { amp: "&", lt: "<", gt: ">", quot: '"', "#39": "'", nbsp: " " };
 
+/** Kişi adının baş harfleri (ilk ve son kelime), "Ad Soyad <e-posta>" biçiminde e-posta atılır. */
+export function initials(name: string): string {
+  const words = name.replace(/<[^>]*>/g, "").trim().split(/\s+/).filter(Boolean);
+  if (!words.length) return "";
+  const pick = words.length > 1 ? [words[0], words[words.length - 1]] : [words[0]];
+  return pick.map((w) => w[0].toLocaleUpperCase("tr")).join("");
+}
+
 export function formatCell(value: unknown, fieldType: string | undefined): string {
   if (value === null || value === undefined) return "";
   if (typeof value === "object" && "displayName" in value) return String((value as { displayName: unknown }).displayName ?? "");

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { applyRule, buildWiql, chunk, compileRule, crossCount, DERIVED, deriveRows, dayBuckets, monthBuckets, monthsRange, upcomingRange, countStates, deltaText, previousRange, weekBuckets, csvRows, filterRows, sortRows, Field, formatCell, moveItem, pageSlice, presetRange, Query, sanitizeSettings, searchFields, toCsv } from "../src/hub/logic";
+import { applyRule, buildWiql, chunk, compileRule, crossCount, DERIVED, deriveRows, dayBuckets, monthBuckets, monthsRange, upcomingRange, countStates, deltaText, initials, previousRange, weekBuckets, csvRows, filterRows, sortRows, Field, formatCell, moveItem, pageSlice, presetRange, Query, sanitizeSettings, searchFields, toCsv } from "../src/hub/logic";
 
 const q: Query = {
   type: "Kart",
@@ -358,5 +358,17 @@ describe("deltaText", () => {
   });
   it("is empty when there is nothing to compare against", () => {
     expect(deltaText(5, 0)).toBe("");
+  });
+});
+
+describe("initials", () => {
+  it("takes the first letters of the first and last word, Turkish upper case", () => {
+    expect(initials("Ayşe Yılmaz")).toBe("AY");
+    expect(initials("ilker  Deniz Öz")).toBe("İÖ");
+    expect(initials("Burak")).toBe("B");
+  });
+  it("ignores an e-mail part and empty names", () => {
+    expect(initials("Selin Koç <selin@example.com>")).toBe("SK");
+    expect(initials("  ")).toBe("");
   });
 });

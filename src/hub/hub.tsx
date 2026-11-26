@@ -11,7 +11,6 @@ import {
   ILocationService,
   IProjectPageService,
 } from "azure-devops-extension-api/Common/CommonServices";
-import { Header, TitleSize } from "azure-devops-ui/Header";
 import { MessageCard, MessageCardSeverity } from "azure-devops-ui/MessageCard";
 import { Page } from "azure-devops-ui/Page";
 
@@ -21,6 +20,7 @@ import { FieldPicker } from "./fieldPicker";
 import { RulePreview } from "./rulePreview";
 import { copyText, Docs, localDocs, QueryBar, QueryStore, queryStore } from "./queryBar";
 import { ConditionsEditor } from "./conditions";
+import { Icon, IconName } from "./icons";
 import { GroupSummary } from "./groupSummary";
 import { firstOf, pickLang, Strings, STRINGS } from "./i18n";
 import {
@@ -39,6 +39,7 @@ import {
   presetRange,
   previousRange,
   deltaText,
+  initials,
   Query,
   compileRule,
   DERIVED,
@@ -377,6 +378,16 @@ function App({ source, store, queries, initialQueryId, linkFor, mock, t, itemUrl
   const [flagged, setFlagged] = React.useState<Need>();
   const flagShown = flagged && flagged === need ? flagged : undefined;
   const invalid = (k: Need) => (flagShown === k ? " fl-invalid" : "");
+  const secHead = (icon: IconName, title: string, summary: string) => (
+    <legend className="fl-sec-head">
+      <span className={`fl-sec-icon fl-sec-${icon}`}>
+        <Icon name={icon} size={14} />
+      </span>
+      {title}
+      {summary && <span className="fl-sec-sum">{summary}</span>}
+    </legend>
+  );
+  const join = (parts: (string | false | undefined)[]) => parts.filter(Boolean).join(" · ");
   const needNote = (k: Need) =>
     flagShown === k && k !== "loading" ? (
       <span className="fl-qerror fl-need" role="alert">
@@ -523,7 +534,15 @@ function App({ source, store, queries, initialQueryId, linkFor, mock, t, itemUrl
 
   return (
     <Page className="fl-page">
-      <Header title={t.title} titleSize={TitleSize.Large} description={t.subtitle} />
+      <header className="fl-head">
+        <span className="fl-logo">
+          <Icon name="lens" size={20} />
+        </span>
+        <div>
+          <h1 className="fl-head-title">{t.title}</h1>
+          <p className="fl-head-sub">{t.subtitle}</p>
+        </div>
+      </header>
       <div className="fl-content">
         {mock && <MessageCard severity={MessageCardSeverity.Info}>{t.mock}</MessageCard>}
         {loadError && (
@@ -563,7 +582,15 @@ function App({ source, store, queries, initialQueryId, linkFor, mock, t, itemUrl
           <section className="fl-panel">
             <div className="fl-sec-row">
               <fieldset className="fl-sec">
-                <legend>{t.sections.scope}</legend>
+                {secHead(
+                  "target",
+                  t.sections.scope,
+                  join([
+                    projects === undefined ? t.projectModes.this : projects === "all" ? t.projectModes.all : `${t.projectModes.some} (${projects.length})`,
+                    type,
+                    t.assignees[assignee ?? "all"],
+                  ]),
+                )}
                 <div className={"fl-field" + invalid("projects")}>
                   <span className="fl-muted">{t.projects}</span>
                   <span className="fl-segment fl-assignee" role="group" aria-label={t.projects}>
@@ -624,7 +651,7 @@ function App({ source, store, queries, initialQueryId, linkFor, mock, t, itemUrl
                 </div>
               </fieldset>
               <fieldset className="fl-sec">
-                <legend>{t.sections.time}</legend>
+                {secHead("calendar", t.sections.time, join([byRef.get(dateField)?.name, t.presets[preset]]))}
                 <div className="fl-toolbar">
                   <div className={"fl-field" + invalid("dateField")}>
                     <span className="fl-muted">{t.dateField}</span>
@@ -675,7 +702,7 @@ function App({ source, store, queries, initialQueryId, linkFor, mock, t, itemUrl
             </div>
 
             <fieldset className="fl-sec">
-              <legend>{t.sections.filter}</legend>
+              {secHead("filter", t.sections.filter, join([`${t.states}: ${states.length}`, conditions.length > 0 && `${t.cond.title}: ${conditions.length}`]))}
               <fieldset className={"fl-field" + invalid("states")} style={{ border: 0, padding: 0, margin: 0 }}>
                 <legend className="fl-muted">{t.states}</legend>
                 <div className="fl-group">
@@ -697,7 +724,7 @@ function App({ source, store, queries, initialQueryId, linkFor, mock, t, itemUrl
             </fieldset>
 
             <fieldset className="fl-sec">
-              <legend>{t.sections.view}</legend>
+              {secHead("columns", t.sections.view, `${t.columns}: ${columns.length}`)}
               <div className={"fl-field" + invalid("columns")}>
                 <span className="fl-muted">{t.columns}</span>
                 <div className="fl-group">
@@ -801,6 +828,7 @@ function App({ source, store, queries, initialQueryId, linkFor, mock, t, itemUrl
 
             <div className="fl-actions">
               <button className="fl-button" disabled={running} onClick={() => (need ? need !== "loading" && setFlagged(need) : run())}>
+                <Icon name="play" size={14} />
                 {running ? t.running : t.run}
               </button>
               {csvButton}
@@ -813,7 +841,7 @@ function App({ source, store, queries, initialQueryId, linkFor, mock, t, itemUrl
                 onClick={resetAll}
                 onBlur={() => setConfirmReset(false)}
               >
-                <span aria-hidden="true">↻ </span>
+                <Icon name="refresh" size={14} />
                 {confirmReset ? t.resetConfirm : t.reset}
               </button>
             </div>
@@ -867,7 +895,8 @@ function App({ source, store, queries, initialQueryId, linkFor, mock, t, itemUrl
           </div>
         )}
         {!running && result && allRows.length > 0 && (
-          <div className="fl-actions">
+          <div className="fl-results">
+          <div className="fl-actions fl-results-bar">
             <input
               className="fl-input fl-search"
               type="search"
@@ -881,6 +910,7 @@ function App({ source, store, queries, initialQueryId, linkFor, mock, t, itemUrl
             />
             {/* Kapalıyken de filtreler uygulanır; sayaç bunu gösterir. */}
             <button className="fl-button" aria-pressed={showColFilters} onClick={() => setShowColFilters(!showColFilters)}>
+              <Icon name="filter" size={14} />
               {t.colFilters}
               {colFilterCount > 0 && <span className="fl-count">{colFilterCount}</span>}
             </button>
@@ -893,6 +923,7 @@ function App({ source, store, queries, initialQueryId, linkFor, mock, t, itemUrl
               </button>
             </span>
             <button className="fl-button" title={t.copyTableTip} disabled={visible.length === 0} onClick={copyTable}>
+              <Icon name="copy" size={14} />
               {t.copyTable}
             </button>
             <label className="fl-qpick">
@@ -924,8 +955,7 @@ function App({ source, store, queries, initialQueryId, linkFor, mock, t, itemUrl
               </>
             )}
           </div>
-        )}
-        {!running && result && allRows.length > 0 && byRef.get(groupBy) && shownCols.some((c) => c.referenceName === groupBy) && (
+        {byRef.get(groupBy) && shownCols.some((c) => c.referenceName === groupBy) && (
           <GroupSummary
             rows={visible}
             col={byRef.get(groupBy)!}
@@ -936,7 +966,6 @@ function App({ source, store, queries, initialQueryId, linkFor, mock, t, itemUrl
             onPick={(v) => setColFilter(groupBy, v)}
           />
         )}
-        {!running && result && allRows.length > 0 && (
           <div className="fl-scroll">
             <table className={dense ? "fl-table fl-dense" : "fl-table"}>
               <thead>
@@ -990,6 +1019,13 @@ function App({ source, store, queries, initialQueryId, linkFor, mock, t, itemUrl
                             <span className="fl-dot" />
                             {formatCell(r["System.State"], c.type)}
                           </span>
+                        ) : c.referenceName === "System.AssignedTo" && formatCell(r[c.referenceName], c.type) ? (
+                          <div className="fl-clip">
+                            <span className="fl-avatar" aria-hidden="true">
+                              {initials(formatCell(r[c.referenceName], c.type))}
+                            </span>
+                            {formatCell(r[c.referenceName], c.type)}
+                          </div>
                         ) : (
                           <div className="fl-clip">{formatCell(r[c.referenceName], c.type)}</div>
                         )}
@@ -1010,6 +1046,7 @@ function App({ source, store, queries, initialQueryId, linkFor, mock, t, itemUrl
                 </button>
               </div>
             )}
+          </div>
           </div>
         )}
       </div>

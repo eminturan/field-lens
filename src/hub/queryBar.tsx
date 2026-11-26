@@ -1,5 +1,6 @@
 import * as React from "react";
 import { QueryStrings } from "./i18n";
+import { Icon } from "./icons";
 import { canEdit, nameError, parseQueries, SavedQuery, Settings, settingsKey } from "./logic";
 
 /** Belge deposu: shared=false kullanıcının kendi listesi, true proje genelindeki liste. */
@@ -194,7 +195,10 @@ export function QueryBar({ store, t, current, selectedId, onSelect, initialId, l
     <section className="fl-panel fl-queries">
       <div className="fl-actions">
         <label className="fl-qpick">
-          <span className="fl-muted">{t.label}</span>
+          <span className="fl-muted fl-qlabel">
+            <Icon name="bookmark" />
+            {t.label}
+          </span>
           <select
             className="fl-input"
             value={selected ? selected.id : ""}
@@ -239,10 +243,12 @@ export function QueryBar({ store, t, current, selectedId, onSelect, initialId, l
         )}
         {selected && (
           <button className="fl-button" disabled={busy} title={t.linkTip} onClick={copyLink}>
+            <Icon name="link" />
             {t.copyLink}
           </button>
         )}
         <button className="fl-button" disabled={busy} onClick={() => open({ kind: "new", name: "", share: false })}>
+          <Icon name="save" />
           {t.saveAs}
         </button>
         {editable && (
