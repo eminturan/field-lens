@@ -22,6 +22,7 @@ import { firstOf, pickLang, Strings, STRINGS } from "../hub/i18n";
 import { parseQueries, SavedQuery } from "../hub/logic";
 import { localDocs } from "../hub/queryBar";
 import { mockSource } from "../hub/mock";
+import { Icon } from "../hub/icons";
 
 /** vss-extension.json içindeki publisher ve extension id'si; widget tam id ile de kaydedilir. */
 const EXTENSION = "turanemin.field-lens";
@@ -184,22 +185,29 @@ export function startConfig(
 }
 
 /** Widget çerçevesi: başlık, alt başlık, "Raporu aç" ve içerik ya da durum mesajı. */
-export function Frame(props: { title: string; sub?: string; link?: { href: string; label: string }; message?: string; error?: boolean; children?: React.ReactNode }) {
+/** meta: görünüm, tür, aralık gibi ölçütler; küçük haplar halinde gösterilir. */
+export function Frame(props: { title: string; meta?: string[]; link?: { href: string; label: string }; message?: string; error?: boolean; children?: React.ReactNode }) {
   return (
     <div className="flw">
       <div className="flw-head">
+        <span className="flw-logo">
+          <Icon name="lens" size={13} />
+        </span>
         <div className="flw-title" title={props.title}>
           {props.title}
         </div>
         {props.link && (
-          <a className="flw-link" href={props.link.href} target="_top">
-            {props.link.label}
+          <a className="flw-link" href={props.link.href} target="_top" title={props.link.label} aria-label={props.link.label}>
+            <span className="flw-link-text">{props.link.label}</span>
+            <Icon name="open" size={12} />
           </a>
         )}
       </div>
-      {props.sub && (
-        <div className="flw-sub" title={props.sub}>
-          {props.sub}
+      {props.meta && props.meta.length > 0 && (
+        <div className="flw-meta" title={props.meta.join(" · ")}>
+          {props.meta.map((m) => (
+            <span key={m}>{m}</span>
+          ))}
         </div>
       )}
       {props.message ? <div className={`flw-msg${props.error ? " flw-error" : ""}`}>{props.message}</div> : props.children}

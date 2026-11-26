@@ -2,6 +2,13 @@
 
 [English](CHANGELOG.md)
 
+## 0.2.31
+
+- Widget görünüşü rapor sayfasıyla aynı: başlığın yanında renk geçişli logo, "Raporu aç" hap şeklinde (tek sütunluk widget'ta yalnızca ↗), ölçütler küçük haplar.
+- Özet: ortasında toplam ve kısa açıklama olan daha ince halka; sayılar listede, yüzdeler ve önceki dönem farkı hap.
+- Çubuk grafikler: üstü yuvarlak çubuklar ve kesik çizgili kılavuz çizgisi. Yaklaşanlar: state'ler renkli hap.
+- Widget ayarları Görünüm, Kapsam, Zaman ve Filtre kartlarına ayrıldı. Görünüm, Projeler ve Atanan yumuşak seçim düğmeleri, state'ler renkli haplar; uzun açıklamalar ⓘ ipuçlarına taşındı.
+
 ## 0.2.30
 
 - Rapor sayfası: başlığın yanındaki küçük logo extension simgesiyle aynı mor-mavi-camgöbeği renklerde.

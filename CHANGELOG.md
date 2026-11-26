@@ -2,6 +2,13 @@
 
 [Türkçe](CHANGELOG.tr.md)
 
+## 0.2.31
+
+- Widget look matches the report page: gradient logo next to the title, "Open report" as a pill (just ↗ on 1-column widgets), and the criteria as small pills.
+- Summary: a thinner donut with the total and a caption in the middle; numbers stay in the list, percentages and the previous-period change are pills.
+- Bar charts: rounded bar tops and a dashed guide line. Upcoming: states as colored pills.
+- Widget settings are grouped into View, Scope, Time and Filter cards. View, Projects and Assigned to are soft choice buttons, states are colored pills, and the long hints moved into ⓘ tooltips.
+
 ## 0.2.30
 
 - Report page: the small logo next to the title uses the same purple-blue-teal colors as the extension icon.

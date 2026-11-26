@@ -103,7 +103,7 @@ function Report({ settings }: { settings?: WidgetSettings }) {
   // Özel aralık yıl değiştirebilir; o yüzden yılıyla yazılır.
   const day = custom ? fullDay : shortDay;
   const viewName = cfg.view === "summary" && cfg.breakdown ? `${t.w.views.summary}: ${field(cfg.breakdown).name}` : t.w.views[cfg.view];
-  const sub = [
+  const crit = [
     viewName,
     linked ? linked.name : cfg.type,
     field(cfg.dateField).name,
@@ -111,13 +111,14 @@ function Report({ settings }: { settings?: WidgetSettings }) {
     ...(cfg.assignee ? [t.assignees[cfg.assignee]] : []),
     ...(cfg.projects ? [t.scope(cfg.projects)] : []),
     ...(cfg.conditions ? [t.cond.count(cfg.conditions.length)] : []),
-  ].join(" · ");
+  ];
+  const sub = crit.join(" · ");
   // Bağlı sorguda "Raporu aç" raporu o sorguyla açıp çalıştırır.
   const link = { href: linked ? `${env.hubUrl}?query=${encodeURIComponent(linked.id)}` : env.hubUrl, label: t.w.openReport };
-  if (error) return <Frame title={title} sub={sub} link={link} message={t.loadError(error)} error />;
-  if (!meta || data?.key !== key) return <Frame title={title} sub={sub} link={link} message={t.loading} />;
+  if (error) return <Frame title={title} meta={crit} link={link} message={t.loadError(error)} error />;
+  if (!meta || data?.key !== key) return <Frame title={title} meta={crit} link={link} message={t.loading} />;
   const rows = data.result.rows;
-  if (rows.length === 0) return <Frame title={title} sub={sub} link={link} message={cfg.view === "upcoming" ? t.w.noUpcoming : t.w.noData} />;
+  if (rows.length === 0) return <Frame title={title} meta={crit} link={link} message={cfg.view === "upcoming" ? t.w.noUpcoming : t.w.noData} />;
 
   const body = (() => {
     switch (cfg.view) {
@@ -158,7 +159,7 @@ function Report({ settings }: { settings?: WidgetSettings }) {
     }
   })();
   return (
-    <Frame title={title} sub={sub} link={link}>
+    <Frame title={title} meta={crit} link={link}>
       {body}
       {data.result.truncated && <div className="flw-sub flw-error">{t.w.truncated}</div>}
     </Frame>
@@ -233,9 +234,8 @@ function Summary(props: { rows: Row[]; prev?: number; states: string[]; colors: 
     .filter((x) => x.value > 0);
   return (
     <div className="flw-summary">
-      {delta}
       <div className="flw-donut">
-        <Donut slices={slices} label={slices.map((x) => `${x.label} ${x.value}`).join(", ")} />
+        <Donut slices={slices} label={slices.map((x) => `${x.label} ${x.value}`).join(", ")} caption={t.total.toLocaleLowerCase(t.locale)} />
         <div className="flw-rows">
           {slices.map((x) => (
             <div key={x.label} className="flw-row" style={dot(x.color)} title={`${x.label}: ${x.value}`}>
@@ -245,6 +245,12 @@ function Summary(props: { rows: Row[]; prev?: number; states: string[]; colors: 
               <span className="flw-pct">%{Math.round((x.value / total) * 100)}</span>
             </div>
           ))}
+          {prev !== undefined && (
+            <span className="flw-deltapill">
+              {prev > 0 && <span className="fl-delta">{deltaText(total, prev)} · </span>}
+              {t.prevPeriod(prev)}
+            </span>
+          )}
         </div>
       </div>
     </div>
@@ -272,9 +278,11 @@ function Upcoming({ rows, dateField, colors, env }: { rows: Row[]; dateField: Fi
                 <td className="flw-name" title={String(r["System.Title"] ?? "")}>
                   {String(r["System.Title"] ?? "")}
                 </td>
-                <td className="flw-state" style={dot(colors[state])}>
-                  <span className="fl-dot" />
-                  {state}
+                <td style={dot(colors[state])}>
+                  <span className="flw-state">
+                    <span className="fl-dot" />
+                    {state}
+                  </span>
                 </td>
               </tr>
             );

@@ -4,6 +4,11 @@
   max-height: 220px;
 }
 
+.fl-grid {
+  stroke: var(--component-grid-cell-bottom-border-color, rgba(0, 0, 0, 0.12));
+  stroke-dasharray: 4 4;
+}
+
 .fl-axis {
   stroke: var(--component-grid-cell-bottom-border-color, rgba(0, 0, 0, 0.2));
 }
@@ -25,13 +30,9 @@
   aspect-ratio: 1;
 }
 
-.fl-donut-num {
-  font-size: 12px;
-  font-weight: 600;
-  fill: #fff;
-  paint-order: stroke;
-  stroke: rgba(0, 0, 0, 0.35);
-  stroke-width: 2px;
+.fl-donut-caption {
+  font-size: 15px;
+  fill: var(--text-secondary-color, rgba(0, 0, 0, 0.55));
 }
 
 .fl-donut-total {

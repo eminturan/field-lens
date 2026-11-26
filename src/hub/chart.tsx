@@ -25,7 +25,7 @@ export function StackChart({ bars, states, colors, label, height = 150 }: { bars
   const top = 18;
   const max = Math.max(1, ...bars.map((b) => b.total));
   const slot = W / Math.max(1, bars.length);
-  const bar = Math.min(48, slot * 0.7);
+  const bar = Math.min(44, slot * 0.62);
   // Etiketler üst üste binmesin: en uzun etiketin genişliği 11px yazıda karakter başına ~6.5 birim.
   const longest = Math.max(1, ...bars.map((b) => b.label.length));
   const flat = longest * 6.5 + 6 <= slot;
@@ -41,14 +41,22 @@ export function StackChart({ bars, states, colors, label, height = 150 }: { bars
   // Kenardaki etiketler kesilmesin.
   const labelX = (x: number, text: string) => Math.min(Math.max(x, (text.length * 6.5) / 2), W - (text.length * 6.5) / 2);
   const scale = (n: number) => (n / max) * (H - top - bottom);
+  // Her çubuğun yalnızca üst köşeleri yuvarlak: yığın, alt kenarı eksenin altına taşan yuvarlak bir dikdörtgenle kırpılır.
+  const clip = React.useMemo(() => `flc${Math.random().toString(36).slice(2, 8)}`, []);
+  const mid = H - bottom - (H - top - bottom) / 2;
   return (
     <svg className="fl-chart" viewBox={`${-pad} 0 ${W + pad} ${H}`} role="img" aria-label={label}>
+      <line x1={0} x2={W} y1={mid} y2={mid} className="fl-grid" />
       <line x1={0} x2={W} y1={H - bottom} y2={H - bottom} className="fl-axis" />
       {bars.map((b, i) => {
         const x = i * slot + (slot - bar) / 2;
         let y = H - bottom;
+        const h = scale(b.total);
         return (
-          <g key={b.start}>
+          <g key={b.start} clipPath={`url(#${clip}${i})`}>
+            <clipPath id={`${clip}${i}`}>
+              <rect x={x} y={H - bottom - h} width={bar} height={h + 6} rx={Math.min(5, bar / 4)} />
+            </clipPath>
             <title>{b.tip}</title>
             {states.map((s) => {
               const h = scale(b.counts[s] ?? 0);
@@ -56,6 +64,14 @@ export function StackChart({ bars, states, colors, label, height = 150 }: { bars
               y -= h;
               return <rect key={s} x={x} y={y} width={bar} height={h} fill={colors[s] || "#8a8a8a"} />;
             })}
+          </g>
+        );
+      })}
+      {bars.map((b, i) => {
+        const x = i * slot + (slot - bar) / 2;
+        const y = H - bottom - scale(b.total);
+        return (
+          <g key={b.start}>
             {showNums && b.total > 0 && (
               <text x={x + bar / 2} y={y - 4} textAnchor="middle" className="fl-chart-num">
                 {b.total}
@@ -97,10 +113,10 @@ function arc(r: number, ri: number, a0: number, a1: number) {
   return `M ${p(r, a0)} A ${r} ${r} 0 ${large} 1 ${p(r, a1)} L ${p(ri, a1)} A ${ri} ${ri} 0 ${large} 0 ${p(ri, a0)} Z`;
 }
 
-/** Ortasında toplam yazan halka grafik; yeterince büyük dilimlerde sayı yazar. */
-export function Donut({ slices, label }: { slices: Slice[]; label: string }) {
+/** Ortasında toplam ve altında kısa açıklama yazan ince halka grafik; sayılar yandaki listede. */
+export function Donut({ slices, label, caption }: { slices: Slice[]; label: string; caption?: string }) {
   const R = 100;
-  const RI = 58;
+  const RI = 76;
   const total = slices.reduce((n, s) => n + s.value, 0);
   let a = 0;
   return (
@@ -110,23 +126,21 @@ export function Donut({ slices, label }: { slices: Slice[]; label: string }) {
         const sweep = Math.min((s.value / total) * Math.PI * 2, Math.PI * 2 - 0.0001);
         const a0 = a;
         a += (s.value / total) * Math.PI * 2;
-        const mid = a0 + sweep / 2;
-        const rm = (R + RI) / 2;
         return (
           <g key={s.label}>
             <title>{`${s.label}: ${s.value}`}</title>
-            <path d={arc(R, RI, a0, a0 + sweep)} fill={s.color} stroke="var(--background-color, #fff)" strokeWidth={1} />
-            {sweep > 0.4 && (
-              <text x={rm * Math.sin(mid)} y={-rm * Math.cos(mid) + 4} textAnchor="middle" className="fl-donut-num">
-                {s.value}
-              </text>
-            )}
+            <path d={arc(R, RI, a0, a0 + sweep)} fill={s.color} stroke="var(--background-color, #fff)" strokeWidth={3} strokeLinejoin="round" />
           </g>
         );
       })}
-      <text x={0} y={14} textAnchor="middle" className="fl-donut-total">
+      <text x={0} y={caption ? 8 : 14} textAnchor="middle" className="fl-donut-total">
         {total}
       </text>
+      {caption && (
+        <text x={0} y={34} textAnchor="middle" className="fl-donut-caption">
+          {caption}
+        </text>
+      )}
     </svg>
   );
 }

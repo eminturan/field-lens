@@ -4,6 +4,8 @@ import { FieldPicker } from "../hub/fieldPicker";
 import { applyQuery, Assignee, fold, Projects, Field, formatCell, monthsRange, Preset, PRESETS, presetRange, SavedQuery, VIEWS } from "../hub/logic";
 import { RulePreview } from "../hub/rulePreview";
 import { ConditionsEditor } from "../hub/conditions";
+import { Help } from "../hub/help";
+import { Icon, IconName } from "../hub/icons";
 import { customValid, DAYS, DEFAULTS, Env, inHost, MONTHS, plan, startConfig, usesCustom, WidgetConfig } from "./shared";
 
 /** Özel aralığa geçerken boş tarihler o an görünen aralıkla doldurulur. */
@@ -19,6 +21,7 @@ function Form({ value, onChange, env }: { value: WidgetConfig; onChange: (v: Wid
   const [types, setTypes] = React.useState<string[]>([]);
   const [fields, setFields] = React.useState<Field[]>([]);
   const [stateList, setStateList] = React.useState<string[]>();
+  const [stateColors, setStateColors] = React.useState<Record<string, string>>({});
   const [error, setError] = React.useState<string>();
   const set = (patch: Partial<WidgetConfig>) => onChange(withDates({ ...value, ...patch }));
   const [shared, setShared] = React.useState<SavedQuery[]>();
@@ -66,6 +69,7 @@ function Form({ value, onChange, env }: { value: WidgetConfig; onChange: (v: Wid
       if (!live) return;
       const names = info.map((s) => s.name);
       setStateList(names);
+      setStateColors(Object.fromEntries(info.map((s) => [s.name, s.color])));
       const kept = value.states.filter((s) => names.includes(s));
       if (kept.length !== value.states.length) set({ states: kept });
     }, (e) => live && setError(String(e?.message ?? e)));
@@ -100,32 +104,53 @@ function Form({ value, onChange, env }: { value: WidgetConfig; onChange: (v: Wid
   const toggle = (s: string) =>
     set({ states: value.states.includes(s) ? value.states.filter((x) => x !== s) : (stateList ?? []).filter((x) => x === s || value.states.includes(x)) });
 
+  const sec = (icon: IconName, color: string, title: string, children: React.ReactNode) => (
+    <fieldset className="flc-sec">
+      <legend className="flc-sec-head">
+        <span className="flc-sec-icon" style={{ "--flc-c": color } as React.CSSProperties}>
+          <Icon name={icon} size={13} />
+        </span>
+        {title}
+      </legend>
+      {children}
+    </fieldset>
+  );
+  const own = !value.queryId;
+  const showTime = own || value.view === "trend" || value.view === "upcoming" || (usesCustom(value) && !(value.queryId && ranged));
+
   return (
     <div className="flc">
       {error && <div className="flw-error">{t.loadError(error)}</div>}
-      <label className="flc-field">
-        <span>{t.w.cfgView}</span>
-        <select value={value.view} onChange={(e) => set({ view: e.target.value as WidgetConfig["view"] })}>
-          {VIEWS.map((v) => (
-            <option key={v} value={v}>
-              {t.w.views[v]}
-            </option>
-          ))}
-        </select>
-      </label>
-      <label className="flc-field">
-        <span>{t.w.cfgSource}</span>
-        <select value={value.queryId} onChange={(e) => set({ queryId: e.target.value })}>
-          <option value="">{t.w.ownSettings}</option>
-          {value.queryId && !linked && shared && <option value={value.queryId}>{t.w.queryMissing}</option>}
-          {(shared ?? []).map((q) => (
-            <option key={q.id} value={q.id}>
-              {q.ownerName ? `${q.name} — ${q.ownerName}` : q.name}
-            </option>
-          ))}
-        </select>
-        <span className="flc-hint">{shared && shared.length === 0 ? t.w.noShared : t.w.sourceHint}</span>
-      </label>
+      {sec(
+        "layout",
+        "#0078d4",
+        t.sections.view,
+        <>
+          <div className="flc-field">
+            <span className="fl-segment" role="group" aria-label={t.w.cfgView}>
+              {VIEWS.map((v) => (
+                <button key={v} type="button" aria-pressed={value.view === v} onClick={() => set({ view: v })}>
+                  {t.w.views[v]}
+                </button>
+              ))}
+            </span>
+          </div>
+          <label className="flc-field">
+            <span className="flc-label">
+              {t.w.cfgSource}
+              <Help text={t.w.sourceHint} label={t.help.label} />
+            </span>
+            <select value={value.queryId} onChange={(e) => set({ queryId: e.target.value })}>
+              <option value="">{t.w.ownSettings}</option>
+              {value.queryId && !linked && shared && <option value={value.queryId}>{t.w.queryMissing}</option>}
+              {(shared ?? []).map((q) => (
+                <option key={q.id} value={q.id}>
+                  {q.ownerName ? `${q.name} — ${q.ownerName}` : q.name}
+                </option>
+              ))}
+            </select>
+            {shared && shared.length === 0 && <span className="flc-hint">{t.w.noShared}</span>}
+          </label>
       {linked && (
         <div className="flc-field">
           <span>{t.w.fromQuery}</span>
@@ -142,16 +167,72 @@ function Form({ value, onChange, env }: { value: WidgetConfig; onChange: (v: Wid
           </span>
         </div>
       )}
-      {!value.queryId && (<>
-      <label className="flc-field">
-        <span>{t.projects}</span>
-        <select value={scope} onChange={(e) => chooseScope(e.target.value)}>
-          <option value="this">{t.projectModes.this}</option>
-          <option value="all">{t.projectModes.all}</option>
-          {projectNames.length > 0 && <option value="some">{t.projectModes.some}</option>}
-        </select>
-        {scope === "all" && <span className="flc-hint">{t.allProjectsHint}</span>}
-      </label>
+      {value.view === "summary" && (
+        <div className="flc-field">
+          <span className="flc-label">
+            {t.w.cfgBreakdown}
+            <Help text={t.w.breakdownHint} label={t.help.label} />
+          </span>
+          <div className="flc-inline">
+            <FieldPicker
+              id="flc-breakdown"
+              single
+              fields={fields.filter((f) => f.referenceName !== value.dateField)}
+              selected={byRef.get(value.breakdown)}
+              placeholder={t.w.searchField}
+              empty={t.noMatch}
+              onPick={(ref) => set({ breakdown: ref })}
+            />
+            {value.breakdown && (
+              <button className="flc-clear" onClick={() => set({ breakdown: "" })}>
+                {t.w.clear}
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+      {value.view === "summary" && value.breakdown && (
+        <div className="flc-field">
+          <span>{t.w.cfgRule}</span>
+          <input
+            className="fl-input fl-mono"
+            value={value.breakdownRule}
+            placeholder={t.rule.example}
+            spellCheck={false}
+            onChange={(e) => set({ breakdownRule: e.target.value })}
+          />
+          <span className="flc-hint">{t.w.ruleHint}</span>
+          <RulePreview pattern={value.breakdownRule} values={samples?.key === sampleKey ? samples.values : undefined} t={t} pending={t.loading} />
+        </div>
+      )}
+        </>,
+      )}
+      {own &&
+        sec(
+          "target",
+          "#8764b8",
+          t.sections.scope,
+          <>
+            <div className="flc-field">
+              <span className="flc-label">
+                {t.projects}
+                <Help text={t.help.projects} label={t.help.label} />
+              </span>
+              <span className="fl-segment" role="group" aria-label={t.projects}>
+                <button type="button" aria-pressed={scope === "this"} onClick={() => chooseScope("this")}>
+                  {t.projectModes.this}
+                </button>
+                <button type="button" aria-pressed={scope === "all"} onClick={() => chooseScope("all")}>
+                  {t.projectModes.all}
+                </button>
+                {projectNames.length > 0 && (
+                  <button type="button" aria-pressed={scope === "some"} onClick={() => scope !== "some" && chooseScope("some")}>
+                    {t.projectModes.some}
+                  </button>
+                )}
+              </span>
+              {scope === "all" && <span className="flc-hint">{t.allProjectsHint}</span>}
+            </div>
       {Array.isArray(value.projects) && (
         <div className="flc-field">
           <input className="fl-input" placeholder={t.searchProject} value={projectSearch} onChange={(e) => setProjectSearch(e.target.value)} />
@@ -179,8 +260,33 @@ function Form({ value, onChange, env }: { value: WidgetConfig; onChange: (v: Wid
           ))}
         </select>
       </label>
+            <div className="flc-field">
+              <span className="flc-label">
+                {t.assignee}
+                <Help text={t.help.assignee} label={t.help.label} />
+              </span>
+              <span className="fl-segment" role="group" aria-label={t.assignee}>
+                {([undefined, "me", "none"] as const).map((a) => (
+                  <button key={a ?? "all"} type="button" aria-pressed={value.assignee === a} onClick={() => set({ assignee: a as Assignee | undefined })}>
+                    {t.assignees[a ?? "all"]}
+                  </button>
+                ))}
+              </span>
+            </div>
+          </>,
+        )}
+      {showTime &&
+        sec(
+          "calendar",
+          "#008272",
+          t.sections.time,
+          <>
+      {own && (<>
       <div className="flc-field">
-        <span>{t.dateField}</span>
+        <span className="flc-label">
+          {t.dateField}
+          <Help text={t.help.dateField} label={t.help.label} />
+        </span>
         <FieldPicker
           id="flc-date"
           single
@@ -242,67 +348,38 @@ function Form({ value, onChange, env }: { value: WidgetConfig; onChange: (v: Wid
           </select>
         </label>
       )}
-      {value.view === "summary" && (
-        <div className="flc-field">
-          <span>{t.w.cfgBreakdown}</span>
-          <div className="flc-inline">
-            <FieldPicker
-              id="flc-breakdown"
-              single
-              fields={fields.filter((f) => f.referenceName !== value.dateField)}
-              selected={byRef.get(value.breakdown)}
-              placeholder={t.w.searchField}
-              empty={t.noMatch}
-              onPick={(ref) => set({ breakdown: ref })}
-            />
-            {value.breakdown && (
-              <button className="flc-clear" onClick={() => set({ breakdown: "" })}>
-                {t.w.clear}
-              </button>
-            )}
-          </div>
-          <span className="flc-hint">{t.w.breakdownHint}</span>
-        </div>
-      )}
-      {value.view === "summary" && value.breakdown && (
-        <div className="flc-field">
-          <span>{t.w.cfgRule}</span>
-          <input
-            className="fl-input fl-mono"
-            value={value.breakdownRule}
-            placeholder={t.rule.example}
-            spellCheck={false}
-            onChange={(e) => set({ breakdownRule: e.target.value })}
-          />
-          <span className="flc-hint">{t.w.ruleHint}</span>
-          <RulePreview pattern={value.breakdownRule} values={samples?.key === sampleKey ? samples.values : undefined} t={t} pending={t.loading} />
-        </div>
-      )}
-      {!value.queryId && <fieldset className="flc-states">
-        <legend>{t.states}</legend>
-        {!value.type ? (
-          <span className="flc-hint">{t.need.type}</span>
-        ) : !stateList ? (
-          <span className="flc-hint">{t.loading}</span>
-        ) : (
-          stateList.map((s) => (
-            <label key={s} className="flc-check">
-              <input type="checkbox" checked={value.states.includes(s)} onChange={() => toggle(s)} />
-              {s}
-            </label>
-          ))
+          </>,
         )}
-      </fieldset>}
-      {!value.queryId && (
-        <label className="flc-field">
-          <span>{t.assignee}</span>
-          <select value={value.assignee ?? ""} onChange={(e) => set({ assignee: (e.target.value || undefined) as Assignee | undefined })}>
-            <option value="">{t.assignees.all}</option>
-            <option value="me">{t.assignees.me}</option>
-            <option value="none">{t.assignees.none}</option>
-          </select>
-        </label>
-      )}
+      {own &&
+        sec(
+          "filter",
+          "#ca5010",
+          t.sections.filter,
+          <>
+            <div className="flc-field">
+              <span>{t.states}</span>
+              {!value.type ? (
+                <span className="flc-hint">{t.need.type}</span>
+              ) : !stateList ? (
+                <span className="flc-hint">{t.loading}</span>
+              ) : (
+                <div className="flc-chips">
+                  {stateList.map((s) => (
+                    <button
+                      key={s}
+                      type="button"
+                      className="fl-state-chip"
+                      aria-pressed={value.states.includes(s)}
+                      onClick={() => toggle(s)}
+                      style={{ "--fl-state": stateColors[s] || undefined } as React.CSSProperties}
+                    >
+                      <span className="fl-dot" />
+                      {s}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
       {!value.queryId && (
         <ConditionsEditor
           value={value.conditions ?? []}
@@ -311,8 +388,11 @@ function Form({ value, onChange, env }: { value: WidgetConfig; onChange: (v: Wid
           t={t.cond}
           searchField={t.w.searchField}
           noMatch={t.noMatch}
+          help={<Help text={t.help.conditions} label={t.help.label} />}
         />
       )}
+          </>,
+        )}
     </div>
   );
 }

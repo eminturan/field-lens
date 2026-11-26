@@ -423,3 +423,278 @@ body {
 .flc-states legend {
   font-weight: 600;
 }
+
+/* ---- Rapor sayfasıyla aynı görünüş ---- */
+:root {
+  --fl-line: var(--component-grid-cell-bottom-border-color, rgba(0, 0, 0, 0.12));
+  --fl-surface: var(--callout-background-color, #fff);
+  --fl-track: var(--palette-black-alpha-4, rgba(0, 0, 0, 0.05));
+  --fl-secondary: var(--text-secondary-color, rgba(0, 0, 0, 0.55));
+}
+
+.fl-icon {
+  flex: none;
+}
+
+.flw {
+  gap: 6px;
+  padding: 10px 14px;
+}
+
+.flw-head {
+  align-items: center;
+}
+
+.flw-logo {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  background: linear-gradient(135deg, #7c4dff, #0078d4 50%, #00b7c3);
+  color: #fff;
+}
+
+.flw-title {
+  font-size: 15px;
+}
+
+.flw-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(var(--palette-primary, 0, 120, 212), 0.1);
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.flw-link:hover {
+  text-decoration: none;
+  background: rgba(var(--palette-primary, 0, 120, 212), 0.18);
+}
+
+/* Ölçüt hapları tek satır; sığmayan kesilir, tamamı ipucunda */
+.flw-meta {
+  display: flex;
+  gap: 4px;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.flw-meta > span {
+  flex: none;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: var(--fl-track);
+  font-size: 11px;
+  color: var(--fl-secondary);
+}
+
+.flw-row {
+  grid-template-columns: 8px minmax(0, 1fr) auto auto;
+}
+
+.flw-pct {
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--fl-track);
+  font-size: 11px;
+}
+
+.flw-deltapill,
+.flw-delta {
+  align-self: flex-start;
+  margin-top: 4px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--fl-track);
+  font-size: 11px;
+  color: var(--fl-secondary);
+}
+
+.flw-delta:has(.flw-total) {
+  padding: 0;
+  background: none;
+}
+
+.flw-legend .fl-dot {
+  border-radius: 2px;
+}
+
+.flw-state {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  max-width: 100%;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--fl-state, #8a8a8a) 14%, transparent);
+  box-sizing: border-box;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.flw-table tr:hover td {
+  background: rgba(var(--palette-primary, 0, 120, 212), 0.06);
+}
+
+.flw-fill {
+  border-radius: 4px;
+}
+
+/* Tek sütunluk widget: halka üstte, liste altta */
+@media (max-width: 240px) {
+  .flw-donut {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .flw-donut .fl-donut {
+    align-self: center;
+    max-width: 100%;
+    height: auto;
+    min-height: 0;
+    flex: 1;
+  }
+  .flw-link {
+    padding: 4px;
+  }
+  .flw-link-text {
+    display: none;
+  }
+}
+
+/* ---- Ayar paneli: renkli simgeli bölüm kartları ---- */
+.flc {
+  gap: 12px;
+}
+
+.flc-sec {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+  margin: 0;
+  padding: 10px 12px 12px;
+  border: 1px solid var(--fl-line);
+  border-radius: 10px;
+  background: var(--fl-surface);
+}
+
+.flc-sec > legend.flc-sec-head {
+  float: left;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.flc-sec-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  color: var(--flc-c);
+  background: color-mix(in srgb, var(--flc-c) 14%, transparent);
+}
+
+.flc-field select,
+.flc .fl-input,
+.flc-field input[type="date"],
+.flc-clear,
+.flc .fl-button {
+  border-radius: 6px;
+}
+
+.flc-label,
+.flc .fl-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.fl-help {
+  display: inline-flex;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--fl-secondary);
+  cursor: help;
+}
+
+.fl-help:hover,
+.fl-help:focus-visible {
+  color: var(--communication-foreground, #0078d4);
+}
+
+/* Seçim düğmeleri: gri şerit, seçili seçenek beyaz kutu */
+.fl-segment {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-self: flex-start;
+  gap: 2px;
+  padding: 3px;
+  border-radius: 8px;
+  background: var(--fl-track);
+}
+
+.fl-segment button {
+  height: 26px;
+  padding: 0 9px;
+  border: 0;
+  border-radius: 6px;
+  background: none;
+  color: var(--fl-secondary);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.fl-segment button[aria-pressed="true"] {
+  background: var(--fl-surface);
+  color: inherit;
+  font-weight: 600;
+  box-shadow: 0 0 0 1px var(--fl-line), 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+.fl-segment button:focus-visible,
+.fl-state-chip:focus-visible {
+  outline: 2px solid var(--communication-foreground, #0078d4);
+  outline-offset: 1px;
+}
+
+.flc-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.fl-state-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 26px;
+  padding: 0 10px;
+  border: 1px solid var(--fl-line);
+  border-radius: 999px;
+  background: var(--fl-surface);
+  color: inherit;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.fl-state-chip[aria-pressed="true"] {
+  border-color: var(--fl-state, #8a8a8a);
+  background: color-mix(in srgb, var(--fl-state, #8a8a8a) 16%, transparent);
+  font-weight: 600;
+}
