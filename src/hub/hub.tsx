@@ -21,6 +21,7 @@ import { RulePreview } from "./rulePreview";
 import { copyText, Docs, localDocs, QueryBar, QueryStore, queryStore } from "./queryBar";
 import { ConditionsEditor } from "./conditions";
 import { Icon, IconName } from "./icons";
+import { Help } from "./help";
 import { GroupSummary } from "./groupSummary";
 import { firstOf, pickLang, Strings, STRINGS } from "./i18n";
 import {
@@ -376,6 +377,7 @@ function App({ source, store, queries, initialQueryId, linkFor, mock, t, itemUrl
   const missing = need && (need === "loading" ? t.loading : t.need[need]);
   /** Çalıştır'a eksikle basılınca işaretlenen alan; o alan tamamlanınca işaret kendiliğinden kalkar. */
   const [flagged, setFlagged] = React.useState<Need>();
+  const tryRun = () => (need ? need !== "loading" && setFlagged(need) : run());
   const flagShown = flagged && flagged === need ? flagged : undefined;
   const invalid = (k: Need) => (flagShown === k ? " fl-invalid" : "");
   const secHead = (icon: IconName, title: string, summary: string) => (
@@ -579,7 +581,17 @@ function App({ source, store, queries, initialQueryId, linkFor, mock, t, itemUrl
           </section>
         )}
         {types && !(result && collapsed && !running) && (
-          <section className="fl-panel">
+          <section
+            className="fl-panel"
+            onKeyDown={(e) => {
+              // Seçim listeli kutularda Enter seçim yapar; düz metin/tarih kutularında raporu çalıştırır.
+              const el = e.target as HTMLElement;
+              if (e.key === "Enter" && el.tagName === "INPUT" && !el.closest(".fl-picker") && !running) {
+                e.preventDefault();
+                tryRun();
+              }
+            }}
+          >
             <div className="fl-sec-row">
               <fieldset className="fl-sec">
                 {secHead(
@@ -592,7 +604,10 @@ function App({ source, store, queries, initialQueryId, linkFor, mock, t, itemUrl
                   ]),
                 )}
                 <div className={"fl-field" + invalid("projects")}>
-                  <span className="fl-muted">{t.projects}</span>
+                  <span className="fl-muted fl-label">
+                    {t.projects}
+                    <Help text={t.help.projects} label={t.help.label} />
+                  </span>
                   <span className="fl-segment fl-assignee" role="group" aria-label={t.projects}>
                     <button aria-pressed={projects === undefined} onClick={() => chooseProjects(undefined)}>
                       {t.projectModes.this}
@@ -640,7 +655,10 @@ function App({ source, store, queries, initialQueryId, linkFor, mock, t, itemUrl
                   {needNote("type")}
                 </label>
                 <div className="fl-field">
-                  <span className="fl-muted">{t.assignee}</span>
+                  <span className="fl-muted fl-label">
+                    {t.assignee}
+                    <Help text={t.help.assignee} label={t.help.label} />
+                  </span>
                   <span className="fl-segment fl-assignee" role="group" aria-label={t.assignee}>
                     {([undefined, "me", "none"] as const).map((a) => (
                       <button key={a ?? "all"} aria-pressed={assignee === a} onClick={() => setAssignee(a)}>
@@ -654,7 +672,10 @@ function App({ source, store, queries, initialQueryId, linkFor, mock, t, itemUrl
                 {secHead("calendar", t.sections.time, join([byRef.get(dateField)?.name, t.presets[preset]]))}
                 <div className="fl-toolbar">
                   <div className={"fl-field" + invalid("dateField")}>
-                    <span className="fl-muted">{t.dateField}</span>
+                    <span className="fl-muted fl-label">
+                    {t.dateField}
+                    <Help text={t.help.dateField} label={t.help.label} />
+                  </span>
                     <FieldPicker
                       id="fl-date-list"
                       single
@@ -666,16 +687,19 @@ function App({ source, store, queries, initialQueryId, linkFor, mock, t, itemUrl
                     />
                     {needNote("dateField")}
                   </div>
-                  <label className="fl-field">
-                    <span className="fl-muted">{t.range}</span>
-                    <select className="fl-input" value={preset} onChange={(e) => choosePreset(e.target.value as Preset)}>
+                  <div className="fl-field fl-range">
+                    <span className="fl-muted fl-label">
+                    {t.range}
+                    <Help text={t.help.range} label={t.help.label} />
+                  </span>
+                    <span className="fl-segment" role="group" aria-label={t.range}>
                       {PRESETS.map((p) => (
-                        <option key={p} value={p}>
+                        <button key={p} type="button" aria-pressed={preset === p} onClick={() => choosePreset(p)}>
                           {t.presets[p]}
-                        </option>
+                        </button>
                       ))}
-                    </select>
-                  </label>
+                    </span>
+                  </div>
                   <label className={"fl-field" + invalid("range")}>
                     <span className="fl-muted">{t.from}</span>
                     <input
@@ -707,10 +731,17 @@ function App({ source, store, queries, initialQueryId, linkFor, mock, t, itemUrl
                 <legend className="fl-muted">{t.states}</legend>
                 <div className="fl-group">
                   {stateList.map((s) => (
-                    <label key={s} className="fl-check">
-                      <input type="checkbox" checked={states.includes(s)} onChange={() => toggleState(s)} />
+                    <button
+                      key={s}
+                      type="button"
+                      className="fl-state-chip"
+                      aria-pressed={states.includes(s)}
+                      onClick={() => toggleState(s)}
+                      style={{ "--fl-state": stateColors[s] || undefined } as React.CSSProperties}
+                    >
+                      <span className="fl-dot" />
                       {s}
-                    </label>
+                    </button>
                   ))}
                   {!type && <span className="fl-muted">{t.need.type}</span>}
                 </div>
@@ -718,7 +749,7 @@ function App({ source, store, queries, initialQueryId, linkFor, mock, t, itemUrl
               </fieldset>
 
               <div className={invalid("conditions").trim() || undefined}>
-                <ConditionsEditor value={conditions} onChange={setConditions} fields={fields} t={t.cond} searchField={t.w.searchField} noMatch={t.noMatch} />
+                <ConditionsEditor value={conditions} onChange={setConditions} fields={fields} t={t.cond} searchField={t.w.searchField} noMatch={t.noMatch} help={<Help text={t.help.conditions} label={t.help.label} />} />
                 {needNote("conditions")}
               </div>
             </fieldset>
@@ -726,7 +757,10 @@ function App({ source, store, queries, initialQueryId, linkFor, mock, t, itemUrl
             <fieldset className="fl-sec">
               {secHead("columns", t.sections.view, `${t.columns}: ${columns.length}`)}
               <div className={"fl-field" + invalid("columns")}>
-                <span className="fl-muted">{t.columns}</span>
+                <span className="fl-muted fl-label">
+                    {t.columns}
+                    <Help text={t.help.columns} label={t.help.label} />
+                  </span>
                 <div className="fl-group">
                   {columnFields.map((f, i) => (
                     <span
@@ -827,12 +861,12 @@ function App({ source, store, queries, initialQueryId, linkFor, mock, t, itemUrl
             </fieldset>
 
             <div className="fl-actions">
-              <button className="fl-button" disabled={running} onClick={() => (need ? need !== "loading" && setFlagged(need) : run())}>
+              <button className="fl-button" disabled={running} onClick={tryRun}>
                 <Icon name="play" size={14} />
                 {running ? t.running : t.run}
               </button>
               {csvButton}
-              {need === "loading" && <span className="fl-muted">{t.loading}</span>}
+              {need === "loading" ? <span className="fl-muted">{t.loading}</span> : <span className="fl-muted fl-enter">{t.enterHint}</span>}
               {result && !missing && <span className="fl-muted">{t.count(result.data.rows.length)}</span>}
               <button
                 className="fl-button fl-reset"

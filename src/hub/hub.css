@@ -986,3 +986,75 @@ section > .fl-button {
   font-size: 10px;
   font-weight: 600;
 }
+
+/* ⓘ açıklama simgesi */
+.fl-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.fl-help {
+  display: inline-flex;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--text-secondary-color, rgba(0, 0, 0, 0.55));
+  cursor: help;
+}
+
+.fl-help:hover,
+.fl-help:focus-visible {
+  color: var(--communication-foreground, #0078d4);
+}
+
+.fl-help:focus-visible {
+  outline: 2px solid var(--communication-foreground, #0078d4);
+  outline-offset: 1px;
+}
+
+/* Hızlı aralık düğmeleri tek satırda, gerekirse alta kayar */
+.fl-range {
+  flex-basis: 100%;
+}
+
+.fl-range .fl-segment {
+  flex-wrap: wrap;
+}
+
+/* State seçimi: pano renginde noktalı, tıklanabilir etiketler */
+.fl-state-chip {
+  --fl-state: var(--text-secondary-color, #8a8a8a);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 12px;
+  border: 1px solid var(--component-grid-cell-bottom-border-color, rgba(0, 0, 0, 0.2));
+  border-radius: 999px;
+  background: var(--callout-background-color, #fff);
+  color: inherit;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.fl-state-chip:hover {
+  border-color: var(--fl-state);
+}
+
+.fl-state-chip[aria-pressed="true"] {
+  border-color: var(--fl-state);
+  background: color-mix(in srgb, var(--fl-state) 16%, transparent);
+  font-weight: 600;
+}
+
+.fl-state-chip:focus-visible {
+  outline: 2px solid var(--communication-foreground, #0078d4);
+  outline-offset: 2px;
+}
+
+.fl-enter {
+  font-size: 12px;
+}

@@ -46,6 +46,7 @@ Bir proje açın → **Boards** → **Field Lens**. Widget: **Dashboards → Edi
 
 ## Sürüm notları
 
+- **0.2.27**: alan açıklamaları (ⓘ), aralık düğmeleri, state hapları, Enter ile çalıştırma.
 - **0.2.26**: cilalı rapor sayfası: başlık, simgeler, özetli bölüm kartları, sonuç kartı, state hapları.
 - **0.2.25**: sürüm notları sıkı liste halinde.
 - **0.2.24**: önceki dönem için renksiz oklar, düzenli widget ayarları.

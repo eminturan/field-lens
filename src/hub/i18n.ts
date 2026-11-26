@@ -168,6 +168,8 @@ export interface Strings {
   filterCol: (name: string) => string;
   filterPlaceholder: string;
   colFilters: string;
+  enterHint: string;
+  help: { label: string; projects: string; dateField: string; range: string; assignee: string; conditions: string; columns: string };
   clearFilters: string;
   shownOf: (shown: number, total: number) => string;
   noFiltered: string;
@@ -328,6 +330,16 @@ export const STRINGS: Record<Lang, Strings> = {
     filterCol: (n) => `${n} kolonunda filtrele`,
     filterPlaceholder: "Filtrele",
     colFilters: "Kolon filtreleri",
+    enterHint: "Enter ile çalıştır",
+    help: {
+      label: "Açıklama",
+      projects: "Bu proje: yalnızca bu proje. Tüm projeler: erişimin olan her proje. Birden çok projede tabloya Proje kolonu eklenir.",
+      dateField: "Rapor bu tarihe göre süzülür. Created Date açılış, Closed Date kapanış tarihidir; özel tarih alanları da seçilebilir.",
+      range: "Özet kartındaki önceki dönem, aynı uzunluktaki bir önceki aralıktır (örneğin son 30 gün için ondan önceki 30 gün).",
+      assignee: "Bana atananlar, raporu kim açarsa ona atanmış kayıtları gösterir; paylaşılan sorguda herkes kendi kayıtlarını görür.",
+      conditions: "Koşulların hepsi birlikte sağlanmalıdır (VE). Örnek: Tags içerir Mobil, Area Path altında Ekip\\Ödeme.",
+      columns: "Sürükleyerek ya da Alt+← / Alt+→ ile sıralanır.",
+    },
     clearFilters: "Filtreleri temizle",
     shownOf: (s, n) => `${s} / ${n} kayıt gösteriliyor`,
     noFiltered: "Filtrelere uyan kayıt yok.",
@@ -495,6 +507,16 @@ export const STRINGS: Record<Lang, Strings> = {
     filterCol: (n) => `Filter ${n}`,
     filterPlaceholder: "Filter",
     colFilters: "Column filters",
+    enterHint: "Press Enter to run",
+    help: {
+      label: "Help",
+      projects: "This project: only this project. All projects: every project you can access. With several projects a Project column is added.",
+      dateField: "The report filters on this date. Created Date is when an item was opened, Closed Date when it was closed; custom date fields work too.",
+      range: "The previous period on the Total card is the range of the same length just before (for the last 30 days, the 30 days before that).",
+      assignee: "Assigned to me shows items assigned to whoever opens the report; with a shared query everyone sees their own.",
+      conditions: "All conditions must hold (AND). Example: Tags contains Mobile, Area Path under Team\\Payments.",
+      columns: "Reorder by dragging, or with Alt+← / Alt+→.",
+    },
     clearFilters: "Clear filters",
     shownOf: (s, n) => `Showing ${s} of ${n}`,
     noFiltered: "No items match the filters.",

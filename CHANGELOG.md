@@ -2,6 +2,13 @@
 
 [Türkçe](CHANGELOG.tr.md)
 
+## 0.2.27
+
+- Report page: an ⓘ next to Projects, Date field, Range, Assigned to, Extra conditions and Columns explains the field. It uses the Azure DevOps tooltip and also opens with the keyboard.
+- Range is a row of buttons (Last 15/30/90 days, This month, Last month, Custom) instead of a drop-down.
+- States are picked with pills in the board's state colors instead of check boxes.
+- Pressing Enter in a text or date box runs the report; in field search boxes Enter still picks the field.
+
 ## 0.2.26
 
 - Report page look: a header with the Field Lens icon; icons on the main buttons (Run, Save as, Copy link, Column filters, Copy table, Reset).

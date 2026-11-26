@@ -2,6 +2,13 @@
 
 [English](CHANGELOG.md)
 
+## 0.2.27
+
+- Rapor sayfası: Projeler, Tarih alanı, Aralık, Atanan, Ek koşullar ve Kolonlar etiketinin yanındaki ⓘ alanı açıklıyor. Azure DevOps ipucunu kullanıyor, klavyeyle de açılıyor.
+- Aralık açılır liste yerine düğme satırı (Son 15/30/90 gün, Bu ay, Geçen ay, Özel).
+- State'ler onay kutusu yerine pano renginde haplarla seçiliyor.
+- Metin ya da tarih kutusunda Enter raporu çalıştırıyor; alan arama kutularında Enter yine alanı seçiyor.
+
 ## 0.2.26
 
 - Rapor sayfası görünüşü: Field Lens simgeli başlık; ana butonlarda simgeler (Çalıştır, Farklı kaydet, Bağlantıyı kopyala, Kolon filtreleri, Tabloyu kopyala, Sıfırla).

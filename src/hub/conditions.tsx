@@ -10,6 +10,8 @@ interface Props {
   t: ConditionStrings;
   searchField: string;
   noMatch: string;
+  /** Başlığın yanında gösterilecek açıklama (ör. ⓘ). */
+  help?: React.ReactNode;
 }
 
 /** Alan türüne göre değer kutusu: tarih, sayı, evet/hayır ya da metin. */
@@ -26,7 +28,7 @@ function ValueInput({ c, set, t }: { c: Condition; set: (v: string) => void; t: 
 }
 
 /** Ek alan koşulları: her satır alan, koşul türü ve değer; hepsi VE ile bağlanır. */
-export function ConditionsEditor({ value, onChange, fields, t, searchField, noMatch }: Props) {
+export function ConditionsEditor({ value, onChange, fields, t, searchField, noMatch, help }: Props) {
   const byRef = new Map(fields.map((f) => [f.referenceName, f]));
   const update = (i: number, patch: Partial<Condition>) => onChange(value.map((c, j) => (j === i ? { ...c, ...patch } : c)));
   const pick = (i: number, ref: string) => {
@@ -36,7 +38,10 @@ export function ConditionsEditor({ value, onChange, fields, t, searchField, noMa
 
   return (
     <div className="fl-field">
-      <span className="fl-muted">{t.title}</span>
+      <span className="fl-muted fl-label">
+        {t.title}
+        {help}
+      </span>
       {value.map((c, i) => (
         <div key={i} className="fl-cond">
           <FieldPicker id={`fl-cond-${i}`} single fields={fields} selected={byRef.get(c.field)} placeholder={searchField} empty={noMatch} onPick={(ref) => pick(i, ref)} />

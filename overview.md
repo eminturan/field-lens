@@ -46,6 +46,7 @@ Open a project → **Boards** → **Field Lens**. The widget is under **Dashboar
 
 ## Release notes
 
+- **0.2.27**: field help (ⓘ), range buttons, state pills, Enter to run.
 - **0.2.26**: polished report page: header, icons, section cards with summaries, results card, state pills.
 - **0.2.25**: release notes as a compact list.
 - **0.2.24**: neutral previous-period arrows, tidier widget settings.
