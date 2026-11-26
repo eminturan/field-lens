@@ -2,6 +2,10 @@
 
 [English](CHANGELOG.md)
 
+## 0.2.30
+
+- Rapor sayfası: başlığın yanındaki küçük logo extension simgesiyle aynı mor-mavi-camgöbeği renklerde.
+
 ## 0.2.29
 
 - Yeni, daha renkli extension simgesi: mor-mavi-camgöbeği zemin üzerinde küçük bir çubuk grafiğe bakan büyüteç.

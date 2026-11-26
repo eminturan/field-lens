@@ -46,6 +46,7 @@ Open a project → **Boards** → **Field Lens**. The widget is under **Dashboar
 
 ## Release notes
 
+- **0.2.30**: report page logo matches the new icon.
 - **0.2.29**: a more colorful extension icon.
 - **0.2.28**: lighter, more consistent look: flat form cards, soft choice buttons, sticky Run bar, report header card.
 - **0.2.27**: field help (ⓘ), range buttons, state pills, Enter to run.

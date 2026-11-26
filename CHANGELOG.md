@@ -2,6 +2,10 @@
 
 [Türkçe](CHANGELOG.tr.md)
 
+## 0.2.30
+
+- Report page: the small logo next to the title uses the same purple-blue-teal colors as the extension icon.
+
 ## 0.2.29
 
 - New, more colorful extension icon: a magnifier over a small bar chart on a purple-blue-teal background.
