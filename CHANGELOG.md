@@ -2,6 +2,10 @@
 
 [Türkçe](CHANGELOG.tr.md)
 
+## 0.2.29
+
+- New, more colorful extension icon: a magnifier over a small bar chart on a purple-blue-teal background.
+
 ## 0.2.28
 
 - Report page look: no frame around the form; the four sections are white cards on the page. Choice buttons (Projects, Assigned to, Range, density) are a soft track where the chosen option is a raised white box. Inputs and buttons share rounded corners.

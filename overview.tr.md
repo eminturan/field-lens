@@ -46,6 +46,7 @@ Bir proje açın → **Boards** → **Field Lens**. Widget: **Dashboards → Edi
 
 ## Sürüm notları
 
+- **0.2.29**: daha renkli extension simgesi.
 - **0.2.28**: daha hafif ve tutarlı görünüş: düz form kartları, yumuşak seçim düğmeleri, sabit Çalıştır çubuğu, rapor başlığı kartı.
 - **0.2.27**: alan açıklamaları (ⓘ), aralık düğmeleri, state hapları, Enter ile çalıştırma.
 - **0.2.26**: cilalı rapor sayfası: başlık, simgeler, özetli bölüm kartları, sonuç kartı, state hapları.

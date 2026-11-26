@@ -2,6 +2,10 @@
 
 [English](CHANGELOG.md)
 
+## 0.2.29
+
+- Yeni, daha renkli extension simgesi: mor-mavi-camgöbeği zemin üzerinde küçük bir çubuk grafiğe bakan büyüteç.
+
 ## 0.2.28
 
 - Rapor sayfası görünüşü: formun etrafındaki çerçeve kalktı; dört bölüm sayfada beyaz kart. Seçim düğmeleri (Projeler, Atanan, Aralık, yoğunluk) yumuşak bir şerit; seçili seçenek kabarık beyaz kutu. Kutular ve butonlar aynı yuvarlak köşeleri kullanıyor.
