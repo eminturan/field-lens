@@ -530,6 +530,7 @@ function App({ source, store, queries, initialQueryId, linkFor, mock, t, itemUrl
   };
   const csvButton = (
     <button className="fl-button" disabled={!result || visible.length === 0} onClick={exportCsv}>
+      <Icon name="download" size={14} />
       {filtering ? `${t.exportCsv} (${visible.length})` : t.exportCsv}
     </button>
   );
@@ -561,7 +562,7 @@ function App({ source, store, queries, initialQueryId, linkFor, mock, t, itemUrl
           <section className="fl-report">
             <div className="fl-report-text">
               <h2 className="fl-report-title">{t.reportTitle(result.query.type)}</h2>
-              <span className="fl-muted">
+              <span className="fl-meta-list">
                 {[
                   byRef.get(result.query.dateField)?.name ?? result.query.dateField,
                   `${result.query.from} – ${result.query.to}`,
@@ -569,11 +570,16 @@ function App({ source, store, queries, initialQueryId, linkFor, mock, t, itemUrl
                   ...(result.query.assignee ? [t.assignees[result.query.assignee]] : []),
                   ...(result.query.projects ? [t.scope(result.query.projects)] : []),
                   ...(result.query.conditions ? [t.cond.count(result.query.conditions.length)] : []),
-                ].join(" · ")}
+                ].map((m) => (
+                  <span key={m} className="fl-meta">
+                    {m}
+                  </span>
+                ))}
               </span>
             </div>
             <div className="fl-actions">
               <button className="fl-button" onClick={() => setCollapsed(false)}>
+                <Icon name="edit" size={14} />
                 {t.edit}
               </button>
               {csvButton}
@@ -798,6 +804,7 @@ function App({ source, store, queries, initialQueryId, linkFor, mock, t, itemUrl
                         focusChip.current = f.referenceName;
                       }}
                     >
+                      <Icon name="grip" size={14} />
                       {f.name}
                       <button aria-label={t.remove(f.name)} onClick={() => setColumns(columns.filter((c) => c !== f.referenceName))}>
                         ×
@@ -866,7 +873,9 @@ function App({ source, store, queries, initialQueryId, linkFor, mock, t, itemUrl
                 {running ? t.running : t.run}
               </button>
               {csvButton}
-              {need === "loading" ? <span className="fl-muted">{t.loading}</span> : <span className="fl-muted fl-enter">{t.enterHint}</span>}
+              {need === "loading" ? <span className="fl-muted">{t.loading}</span> : <span className="fl-muted fl-enter">
+                  <kbd className="fl-kbd">Enter</kbd> {t.enterHint}
+                </span>}
               {result && !missing && <span className="fl-muted">{t.count(result.data.rows.length)}</span>}
               <button
                 className="fl-button fl-reset"

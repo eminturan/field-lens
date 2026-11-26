@@ -2,6 +2,13 @@
 
 [Türkçe](CHANGELOG.tr.md)
 
+## 0.2.28
+
+- Report page look: no frame around the form; the four sections are white cards on the page. Choice buttons (Projects, Assigned to, Range, density) are a soft track where the chosen option is a raised white box. Inputs and buttons share rounded corners.
+- Columns are grey tags with a grip icon; the add-column box is dashed.
+- The Run bar is its own card and stays at the bottom of the screen while a long form scrolls. "Enter" is shown as a key.
+- The report header is a card with its criteria as small pills; Edit and Export CSV have icons. Summary cards are equal width without the colored top border.
+
 ## 0.2.27
 
 - Report page: an ⓘ next to Projects, Date field, Range, Assigned to, Extra conditions and Columns explains the field. It uses the Azure DevOps tooltip and also opens with the keyboard.

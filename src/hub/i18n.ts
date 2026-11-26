@@ -330,7 +330,7 @@ export const STRINGS: Record<Lang, Strings> = {
     filterCol: (n) => `${n} kolonunda filtrele`,
     filterPlaceholder: "Filtrele",
     colFilters: "Kolon filtreleri",
-    enterHint: "Enter ile çalıştır",
+    enterHint: "ile çalıştır",
     help: {
       label: "Açıklama",
       projects: "Bu proje: yalnızca bu proje. Tüm projeler: erişimin olan her proje. Birden çok projede tabloya Proje kolonu eklenir.",
@@ -507,7 +507,7 @@ export const STRINGS: Record<Lang, Strings> = {
     filterCol: (n) => `Filter ${n}`,
     filterPlaceholder: "Filter",
     colFilters: "Column filters",
-    enterHint: "Press Enter to run",
+    enterHint: "to run",
     help: {
       label: "Help",
       projects: "This project: only this project. All projects: every project you can access. With several projects a Project column is added.",

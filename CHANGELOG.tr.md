@@ -2,6 +2,13 @@
 
 [English](CHANGELOG.md)
 
+## 0.2.28
+
+- Rapor sayfası görünüşü: formun etrafındaki çerçeve kalktı; dört bölüm sayfada beyaz kart. Seçim düğmeleri (Projeler, Atanan, Aralık, yoğunluk) yumuşak bir şerit; seçili seçenek kabarık beyaz kutu. Kutular ve butonlar aynı yuvarlak köşeleri kullanıyor.
+- Kolonlar tutma simgeli gri etiketler; kolon ekleme kutusu kesik çizgili.
+- Çalıştır çubuğu ayrı bir kart ve uzun formda ekranın altında görünür kalıyor. "Enter" tuş görünümünde.
+- Rapor başlığı kart; ölçütler küçük haplar halinde, Düzenle ve CSV indir simgeli. Özet kartları eşit genişlikte, renkli üst şerit yok.
+
 ## 0.2.27
 
 - Rapor sayfası: Projeler, Tarih alanı, Aralık, Atanan, Ek koşullar ve Kolonlar etiketinin yanındaki ⓘ alanı açıklıyor. Azure DevOps ipucunu kullanıyor, klavyeyle de açılıyor.

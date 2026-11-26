@@ -1058,3 +1058,161 @@ section > .fl-button {
 .fl-enter {
   font-size: 12px;
 }
+
+/* ---- Görsel cila 2: düz form, tek tip kontroller, sabit eylem çubuğu ---- */
+:root {
+  --fl-line: var(--component-grid-cell-bottom-border-color, rgba(0, 0, 0, 0.12));
+  --fl-surface: var(--callout-background-color, #fff);
+  --fl-track: var(--palette-black-alpha-4, rgba(0, 0, 0, 0.05));
+  --fl-tint: rgba(var(--palette-primary, 0, 120, 212), 0.1);
+}
+
+.fl-input,
+.fl-button {
+  border-radius: 6px;
+}
+
+/* Dış panel çerçevesi kalkar; bölümler sayfada beyaz kart */
+.fl-panel {
+  padding: 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+}
+
+.fl-sec {
+  padding: 14px 16px 16px;
+  border: 1px solid var(--fl-line);
+  border-radius: 12px;
+  background: var(--fl-surface);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+/* Seçim düğmeleri: gri şerit, seçili seçenek beyaz kutu */
+.fl-segment {
+  flex-wrap: wrap;
+  gap: 2px;
+  padding: 3px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--fl-track);
+}
+
+.fl-segment button {
+  height: 26px;
+  padding: 0 10px;
+  border-radius: 6px;
+  color: var(--text-secondary-color, rgba(0, 0, 0, 0.6));
+}
+
+.fl-segment button:hover:not(:disabled) {
+  color: inherit;
+}
+
+.fl-segment button + button {
+  border-left: 0;
+}
+
+.fl-segment button[aria-pressed="true"] {
+  background: var(--fl-surface);
+  color: inherit;
+  font-weight: 600;
+  box-shadow: 0 0 0 1px var(--fl-line), 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+/* Kolon etiketleri: tutma simgeli, sürüklenebildiği belli */
+.fl-chip {
+  height: 28px;
+  padding: 0 4px 0 6px;
+  border: 0;
+  border-radius: 6px;
+  background: var(--fl-track);
+  cursor: grab;
+}
+
+.fl-chip > .fl-icon {
+  color: var(--text-secondary-color, rgba(0, 0, 0, 0.45));
+}
+
+.fl-sec .fl-group .fl-picker .fl-input {
+  border-style: dashed;
+}
+
+/* Eylem çubuğu: uzun formda ekranın altında görünür kalır */
+.fl-panel > .fl-actions {
+  position: sticky;
+  bottom: 8px;
+  z-index: 3;
+  padding: 10px 14px;
+  border: 1px solid var(--fl-line);
+  border-radius: 12px;
+  background: var(--fl-surface);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+}
+
+.fl-panel .fl-reset {
+  border-color: transparent;
+  background: none;
+}
+
+.fl-kbd {
+  padding: 1px 6px;
+  border: 1px solid var(--fl-line);
+  border-radius: 4px;
+  background: var(--fl-track);
+  font-family: inherit;
+  font-size: 11px;
+}
+
+/* Rapor başlığı kart; ölçütler küçük haplar */
+.fl-report {
+  align-items: center;
+  padding: 14px 16px;
+  border: 1px solid var(--fl-line);
+  border-radius: 12px;
+  background: var(--fl-surface);
+}
+
+.fl-report-title {
+  font-size: 18px;
+}
+
+.fl-meta-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.fl-meta {
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--fl-track);
+  font-size: 12px;
+  color: var(--text-secondary-color, rgba(0, 0, 0, 0.6));
+}
+
+/* Özet kartları: eşit genişlik, çerçevesiz, oran çubuğu state renginde */
+.fl-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+}
+
+.fl-card {
+  min-width: 0;
+  padding: 12px 14px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: var(--fl-surface);
+  box-shadow: 0 0 0 1px var(--fl-line);
+}
+
+.fl-card-num {
+  font-size: 26px;
+}
+
+.fl-card[aria-pressed="true"] {
+  outline: 0;
+  background: var(--fl-tint);
+  box-shadow: 0 0 0 2px var(--communication-foreground, #0078d4);
+}
