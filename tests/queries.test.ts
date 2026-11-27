@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { applyQuery, canEdit, DEFAULT_COLUMNS, filterRows, fold, nameError, searchFields, parseQueries, SavedQuery, settingsKey } from "../src/hub/logic";
+import { queryStore } from "../src/hub/queryBar";
 
 const q = (over: Partial<SavedQuery>): SavedQuery => ({ id: "1", name: "A", shared: false, ownerId: "me", ownerName: "Ben", settings: {}, ...over });
 
@@ -98,5 +99,31 @@ describe("case-insensitive search with Turkish I/ı", () => {
   });
   it("nameError sees GIT and git as the same name", () => {
     expect(nameError("git", [{ id: "1", name: "GIT", shared: false, ownerId: "", ownerName: "", settings: {} }])).toBe("duplicate");
+  });
+});
+
+describe("last and default query values", () => {
+  const memValues = () => {
+    const m = new Map<string, string>();
+    return { m, v: { get: async (k: string, s: boolean) => m.get(`${s}:${k}`), set: async (k: string, val: string, s: boolean) => void m.set(`${s}:${k}`, val) } };
+  };
+  const noDocs = { get: async () => [], set: async (_s: boolean, d: unknown) => d, del: async () => undefined };
+  it("keeps the last query per person and the default per project", async () => {
+    const { m, v } = memValues();
+    const qs = queryStore(noDocs, { id: "u", name: "U" }, v);
+    await qs.setLast("q1");
+    await qs.setDefault("q2");
+    expect(await qs.getLast()).toBe("q1");
+    expect(await qs.getDefault()).toBe("q2");
+    expect(m.get("false:lastQuery")).toBe("q1");
+    expect(m.get("true:defaultQuery")).toBe("q2");
+  });
+  it("marks a deliberate empty start and ignores junk values", async () => {
+    const { m, v } = memValues();
+    const qs = queryStore(noDocs, { id: "u", name: "U" }, v);
+    await qs.setLast(undefined);
+    expect(await qs.getLast()).toBe("-");
+    m.set("true:defaultQuery", "x".repeat(500));
+    expect(await qs.getDefault()).toBeUndefined();
   });
 });

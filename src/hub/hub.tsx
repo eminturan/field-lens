@@ -18,7 +18,7 @@ import { createRestSource, DataSource, RunResult } from "./api";
 import { fullDay } from "./chart";
 import { FieldPicker } from "./fieldPicker";
 import { RulePreview } from "./rulePreview";
-import { copyText, Docs, localDocs, QueryBar, QueryStore, queryStore } from "./queryBar";
+import { copyText, Docs, localDocs, QueryBar, QueryStore, queryStore, Values } from "./queryBar";
 import { ConditionsEditor } from "./conditions";
 import { Icon, IconName } from "./icons";
 import { Help } from "./help";
@@ -43,6 +43,8 @@ import {
   deltaText,
   initials,
   plainClick,
+  emptySuggestions,
+  Suggestion,
   Query,
   compileRule,
   DERIVED,
@@ -243,7 +245,10 @@ function App({ source, store, queries, initialQueryId, linkFor, mock, t, itemUrl
   const [autoRun, setAutoRun] = React.useState(false);
   const knownProjects = () => (projectNames.length ? projectNames : undefined);
   /** Sorgunun kapsamındaki türleri yükleyip formu doldurur (tür, kapsamdaki listeye göre doğrulanır). */
-  const pickQuery = async (q: SavedQuery | undefined, run?: boolean) => {
+  /** Açılışta kendiliğinden yüklenen sorgu (son sorgu ya da proje varsayılanı); şeritte gösterilir. */
+  const [autoNote, setAutoNote] = React.useState<{ name: string; why: "last" | "default" }>();
+  const pickQuery = async (q: SavedQuery | undefined, run?: boolean, why?: "link" | "last" | "default") => {
+    setAutoNote(q && (why === "last" || why === "default") ? { name: q.name, why } : undefined);
     setQueryId(q?.id);
     if (!q || !types) return;
     const p = sanitizeSettings(q.settings, [], fields, knownProjects()).projects;
@@ -406,6 +411,26 @@ function App({ source, store, queries, initialQueryId, linkFor, mock, t, itemUrl
 
   /** İlk tık onay ister, ikincisi sıfırlar (iframe'de window.confirm engellenebilir). */
   const [confirmReset, setConfirmReset] = React.useState(false);
+  /** Boş sonuçtaki öneri: ayarı genişletir ve raporu yeniden çalıştırır (form da güncellenir). */
+  const applySuggestion = (k: Suggestion) => {
+    if (k === "range") choosePreset("last90");
+    if (k === "states") setStates(stateList);
+    if (k === "assignee") setAssignee(undefined);
+    if (k === "conditions") setConditions([]);
+    if (k === "projects") chooseProjects("all");
+    setAutoRun(true);
+  };
+
+  /** Açılışta yüklenen sorguyu bırakıp boş formla başlar; bir dahaki açılışta da sorgu yüklenmez. */
+  const startBlank = () => {
+    setAutoNote(undefined);
+    queries.setLast(undefined);
+    setQueryId(undefined);
+    applySettings({}, types ?? []);
+    clearResults();
+    setAutoRun(false);
+  };
+
   const resetAll = () => {
     if (!confirmReset) return setConfirmReset(true);
     setConfirmReset(false);
@@ -561,6 +586,15 @@ function App({ source, store, queries, initialQueryId, linkFor, mock, t, itemUrl
           </MessageCard>
         )}
         {!types && !loadError && <div className="fl-empty">{t.loading}</div>}
+        {autoNote && (
+          <div className="fl-autonote" role="status">
+            <Icon name="history" size={16} />
+            {autoNote.why === "last" ? t.q.loadedLast(autoNote.name) : t.q.loadedDefault(autoNote.name)}
+            <button className="fl-linkbtn" onClick={startBlank}>
+              {t.q.startBlank}
+            </button>
+          </div>
+        )}
         {types && <QueryBar store={queries} t={t.q} current={current} selectedId={queryId} onSelect={pickQuery} initialId={initialQueryId} linkFor={linkFor} />}
         {types && result && collapsed && !running && (
           <section className="fl-report">
@@ -898,7 +932,29 @@ function App({ source, store, queries, initialQueryId, linkFor, mock, t, itemUrl
         {runError && <MessageCard severity={MessageCardSeverity.Error}>{t.runError(runError)}</MessageCard>}
         {running && <Skeleton cards={Math.min(states.length + 1, 6)} cols={Math.min(Math.max(columns.length, 3), 8)} label={t.running} />}
         {!running && result?.data.truncated && <MessageCard severity={MessageCardSeverity.Warning}>{t.truncated}</MessageCard>}
-        {!running && result && result.data.rows.length === 0 && <div className="fl-empty">{t.empty}</div>}
+        {!running && result && result.data.rows.length === 0 && (
+          <div className="fl-empty-card">
+            <span className="fl-empty-icon">
+              <Icon name="searchOff" size={22} />
+            </span>
+            <div className="fl-empty-title">{t.empty}</div>
+            <div className="fl-sug-list">
+              {emptySuggestions({
+                preset,
+                states: states.length,
+                allStates: stateList.length,
+                assignee,
+                conditions: conditions.length,
+                projects,
+              }).map((k) => (
+                <button key={k} className="fl-sug" onClick={() => applySuggestion(k)}>
+                  <Icon name="plus" size={14} />
+                  {k === "states" ? t.suggest.states(stateList.length) : k === "conditions" ? t.suggest.conditions(conditions.length) : t.suggest[k]}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
         {!running && result && allRows.length > 0 && (
           <div className="fl-summary" role="group" aria-label={t.summary}>
             <button
@@ -1181,6 +1237,13 @@ async function start() {
     // Kişisel sorgular kullanıcı kapsamında, paylaşılanlar her proje için ayrı bir ortak koleksiyonda.
     const coll = (shared: boolean) => (shared ? `queries-${projectInfo.id}` : "queries");
     const scope = (shared: boolean) => ({ scopeType: shared ? "Default" : "User" });
+    // Son sorgu kişiye, proje varsayılanı projeye özel; ikisi de proje kimliğiyle anahtarlanır.
+    const values: Values = {
+      get: async (k, shared) => (await manager).getValue(`${k}-${projectInfo.id}`, scope(shared)),
+      set: async (k, v, shared) => {
+        await (await manager).setValue(`${k}-${projectInfo.id}`, v, scope(shared));
+      },
+    };
     const docs: Docs = {
       get: async (shared) => (await manager).getDocuments(coll(shared), scope(shared)),
       set: async (shared, doc) => (await manager).setDocument(coll(shared), doc, scope(shared)),
@@ -1193,7 +1256,7 @@ async function start() {
       {
         source: createRestSource(baseUrl, () => SDK.getAccessToken(), project),
         store,
-        queries: queryStore(docs, { id: me.id, name: me.displayName || me.name }),
+        queries: queryStore(docs, { id: me.id, name: me.displayName || me.name }, values),
         initialQueryId: params.query || undefined,
         linkFor: (id) => `${base}${encodeURIComponent(project)}/_apps/hub/turanemin.field-lens.hub?query=${encodeURIComponent(id)}`,
         mock: false,

@@ -2,6 +2,12 @@
 
 [English](CHANGELOG.md)
 
+## 0.2.33
+
+- Boş sonuçta yalnızca işe yarayacak tek tıklık öneriler çıkıyor: son 90 güne genişlet, tüm state'ler, atanan: herkes, ek koşulları kaldır, tüm projelerde ara. Ayar değişiyor ve rapor yeniden çalışıyor.
+- Rapor sayfası son kayıtlı sorgunu hatırlıyor; bir sonraki açılışta yükleyip çalıştırıyor. Üstteki şerit bunu söylüyor ve "Boş formla başla" seçeneği veriyor.
+- Paylaşılan sorgunun sahibi onu **Proje varsayılanı** (★) yapabiliyor. Henüz sorgu seçmemiş herkes sayfayı açınca bu sorgu çalışıyor. Projede tek varsayılan olur; yenisi eskisinin yerine geçer. Açılış sırası: sorgu bağlantısı, son sorgun, proje varsayılanı, son form ayarların.
+
 ## 0.2.32
 
 - Rapor sayfasında ya da Yaklaşanlar widget'ında iş öğesi ID'sine tıklamak kaydı sayfanın üzerinde Azure DevOps iş öğesi penceresinde açıyor; kapatınca rapor olduğu gibi kalıyor. Ctrl/⌘/Shift ile ya da orta tuşla tıklamak yine yeni sekmede açıyor. Pencere açılamazsa kayıt yeni sekmede açılıyor.

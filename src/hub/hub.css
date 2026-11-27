@@ -1266,3 +1266,86 @@ section > .fl-button {
   text-decoration: underline;
   cursor: pointer;
 }
+
+/* Boş sonuç: öneri kartı */
+.fl-empty-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 28px 16px;
+  border: 1px solid var(--fl-line);
+  border-radius: 12px;
+  background: var(--fl-surface);
+  text-align: center;
+}
+
+.fl-empty-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: var(--fl-track);
+  color: var(--text-secondary-color, rgba(0, 0, 0, 0.55));
+}
+
+.fl-empty-title {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.fl-sug-list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.fl-sug {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 30px;
+  padding: 0 12px;
+  border: 1px solid var(--fl-line);
+  border-radius: 999px;
+  background: var(--fl-surface);
+  color: inherit;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.fl-sug > .fl-icon {
+  color: var(--communication-foreground, #0078d4);
+}
+
+.fl-sug:hover {
+  border-color: var(--communication-foreground, #0078d4);
+}
+
+.fl-sug:focus-visible {
+  outline: 2px solid var(--communication-foreground, #0078d4);
+  outline-offset: 2px;
+}
+
+/* Açılışta yüklenen sorgu bilgisi */
+.fl-autonote {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: var(--fl-tint);
+  color: var(--communication-foreground, #0078d4);
+  font-size: 13px;
+}
+
+/* Proje varsayılanı yıldızı */
+.fl-star[aria-pressed="true"] > .fl-icon {
+  fill: #d9a400;
+  color: #d9a400;
+}

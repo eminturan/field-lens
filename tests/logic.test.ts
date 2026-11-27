@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { applyRule, buildWiql, chunk, compileRule, crossCount, DERIVED, deriveRows, dayBuckets, monthBuckets, monthsRange, upcomingRange, countStates, deltaText, initials, plainClick, previousRange, weekBuckets, csvRows, filterRows, sortRows, Field, formatCell, moveItem, pageSlice, presetRange, Query, sanitizeSettings, searchFields, toCsv } from "../src/hub/logic";
+import { applyRule, buildWiql, chunk, compileRule, crossCount, DERIVED, deriveRows, dayBuckets, monthBuckets, monthsRange, upcomingRange, countStates, deltaText, emptySuggestions, initials, plainClick, previousRange, weekBuckets, csvRows, filterRows, sortRows, Field, formatCell, moveItem, pageSlice, presetRange, Query, sanitizeSettings, searchFields, toCsv } from "../src/hub/logic";
 
 const q: Query = {
   type: "Kart",
@@ -383,5 +383,18 @@ describe("plainClick", () => {
     expect(plainClick({ ...click, metaKey: true })).toBe(false);
     expect(plainClick({ ...click, shiftKey: true })).toBe(false);
     expect(plainClick({ ...click, button: 1 })).toBe(false);
+  });
+});
+
+describe("emptySuggestions", () => {
+  const narrow = { preset: "thisMonth" as const, states: 1, allStates: 4, assignee: "me" as const, conditions: 2, projects: undefined };
+  it("offers every change that could bring results back", () => {
+    expect(emptySuggestions(narrow)).toEqual(["range", "states", "assignee", "conditions", "projects"]);
+  });
+  it("leaves out what is already as wide as it gets", () => {
+    expect(emptySuggestions({ preset: "last90", states: 4, allStates: 4, assignee: undefined, conditions: 0, projects: "all" })).toEqual([]);
+  });
+  it("does not touch a custom range", () => {
+    expect(emptySuggestions({ ...narrow, preset: "custom" })).not.toContain("range");
   });
 });

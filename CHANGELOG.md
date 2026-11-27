@@ -2,6 +2,12 @@
 
 [Türkçe](CHANGELOG.tr.md)
 
+## 0.2.33
+
+- Empty results show one-click suggestions that are only offered when they can help: widen to the last 90 days, all states, assigned to anyone, remove extra conditions, search all projects. The setting changes and the report runs again.
+- The report page remembers your last saved query and loads and runs it next time; a strip says so and offers "Start with an empty form".
+- The owner of a shared query can make it the **Project default** (★). Anyone who hasn't picked a query yet gets it when they open the page. One default per project; a new one replaces the old. Order on opening: query link, your last query, project default, your last form.
+
 ## 0.2.32
 
 - Clicking a work item ID on the report page or in the Upcoming widget opens it in the Azure DevOps work item dialog over the page; closing it leaves the report as it was. Ctrl/⌘/Shift-click or middle-click still opens a new tab. If the dialog is not available, the item opens in a new tab.

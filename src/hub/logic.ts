@@ -166,6 +166,19 @@ export function presetRange(preset: Exclude<Preset, "custom">, now: Date): { fro
 
 const ENTITIES: Record<string, string> = { amp: "&", lt: "<", gt: ">", quot: '"', "#39": "'", nbsp: " " };
 
+export type Suggestion = "range" | "states" | "assignee" | "conditions" | "projects";
+
+/** Boş sonuçta önerilecek genişletmeler; zaten en geniş olanlar (ör. 90 gün, tüm state'ler) önerilmez. Özel aralığa dokunulmaz. */
+export function emptySuggestions(q: { preset: Preset; states: number; allStates: number; assignee?: Assignee; conditions: number; projects?: Projects }): Suggestion[] {
+  const out: Suggestion[] = [];
+  if (q.preset !== "last90" && q.preset !== "custom") out.push("range");
+  if (q.states < q.allStates) out.push("states");
+  if (q.assignee) out.push("assignee");
+  if (q.conditions > 0) out.push("conditions");
+  if (q.projects !== "all") out.push("projects");
+  return out;
+}
+
 /** Sade sol tık mı? Ctrl/⌘/Shift/Alt ya da orta tuş "yeni sekmede aç" demektir, tarayıcıya bırakılır. */
 export function plainClick(e: { button: number; ctrlKey: boolean; metaKey: boolean; shiftKey: boolean; altKey: boolean }): boolean {
   return e.button === 0 && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey;

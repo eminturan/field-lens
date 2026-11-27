@@ -46,6 +46,7 @@ Bir proje açın → **Boards** → **Field Lens**. Widget: **Dashboards → Edi
 
 ## Sürüm notları
 
+- **0.2.33**: boş sonuçta öneriler, son sorguyu hatırlama, proje varsayılanı sorgu (★).
 - **0.2.32**: iş öğeleri Azure DevOps penceresinde açılıyor; düzenli sonuç araç satırı.
 - **0.2.31**: widget ve ayarları yeni görünümde.
 - **0.2.30**: rapor sayfası logosu yeni simgeyle uyumlu.

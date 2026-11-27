@@ -11,6 +11,12 @@ export interface Docs {
   del(shared: boolean, id: string): Promise<void>;
 }
 
+/** Tek değerler: shared=false kişiye özel, true proje genelinde (ör. son sorgu, proje varsayılanı). */
+export interface Values {
+  get(key: string, shared: boolean): Promise<unknown>;
+  set(key: string, value: string, shared: boolean): Promise<void>;
+}
+
 export interface User {
   id: string;
   name: string;
@@ -21,6 +27,12 @@ export interface QueryStore {
   list(): Promise<SavedQuery[]>;
   put(q: SavedQuery): Promise<SavedQuery>;
   remove(q: SavedQuery): Promise<void>;
+  /** Kişinin en son seçtiği sorgu; "-" = bilerek sorgusuz başladı, yok = henüz hiç seçmedi. */
+  getLast(): Promise<string | undefined>;
+  setLast(id: string | undefined): Promise<void>;
+  /** Projenin varsayılan (paylaşılan) sorgusu. */
+  getDefault(): Promise<string | undefined>;
+  setDefault(id: string | undefined): Promise<void>;
 }
 
 /** Örnek veri modunda sorgular tarayıcıda; sahiplik denensin diye ortak listede başkasının bir sorgusu hazır gelir. */
@@ -58,7 +70,32 @@ export function localDocs(): Docs {
   };
 }
 
-export function queryStore(docs: Docs, user: User): QueryStore {
+/** Örnek veri modunda tek değerler de tarayıcıda. */
+export function localValues(): Values {
+  const key = (k: string, shared: boolean) => `field-lens-${shared ? "shared" : "user"}-${k}`;
+  return {
+    get: async (k, shared) => {
+      try {
+        return localStorage.getItem(key(k, shared)) ?? undefined;
+      } catch {
+        return undefined;
+      }
+    },
+    set: async (k, v, shared) => {
+      try {
+        localStorage.setItem(key(k, shared), v);
+      } catch {
+        // saklanamıyor
+      }
+    },
+  };
+}
+
+// Okunan değer güvenilmez: yalnızca makul uzunlukta bir metin kabul edilir.
+const idOf = (v: unknown) => (typeof v === "string" && v && v.length <= 100 ? v : undefined);
+
+export function queryStore(docs: Docs, user: User, values: Values = localValues()): QueryStore {
+  const value = (k: string, shared: boolean) => values.get(k, shared).then(idOf, () => undefined);
   // shortcut: okunamayan liste boş sayılır (henüz hiç belge yokken servis 404 dönebiliyor); ağ hatası da boş liste gibi görünür.
   const read = (shared: boolean) => docs.get(shared).then((d) => parseQueries(d, shared), () => []);
   return {
@@ -66,6 +103,11 @@ export function queryStore(docs: Docs, user: User): QueryStore {
     list: async () => [...(await read(false)), ...(await read(true))],
     put: async (q) => parseQueries([await docs.set(q.shared, q)], q.shared)[0] ?? q,
     remove: (q) => docs.del(q.shared, q.id),
+    getLast: () => value("lastQuery", false),
+    // "-": kişi bilerek sorgusuz başladı; o zaman proje varsayılanı da yüklenmez.
+    setLast: (id) => values.set("lastQuery", id ?? "-", false).catch(() => undefined),
+    getDefault: () => value("defaultQuery", true),
+    setDefault: (id) => values.set("defaultQuery", id ?? "", true),
   };
 }
 
@@ -80,8 +122,8 @@ interface Props {
   /** Formdaki o anki ayarlar. */
   current: Settings;
   selectedId?: string;
-  /** run: bağlantıyla açıldı, sorgu yüklenince rapor çalıştırılsın. */
-  onSelect(q: SavedQuery | undefined, run?: boolean): void;
+  /** run: açılışta yüklendi, rapor çalıştırılsın; why: neden yüklendiği (bağlantı, son sorgu, proje varsayılanı). */
+  onSelect(q: SavedQuery | undefined, run?: boolean, why?: "link" | "last" | "default"): void;
   /** Sayfa bir sorgu bağlantısıyla açıldıysa o sorgunun id'si. */
   initialId?: string;
   linkFor(id: string): string;
@@ -115,15 +157,45 @@ export function QueryBar({ store, t, current, selectedId, onSelect, initialId, l
   const [busy, setBusy] = React.useState(false);
   const [note, setNote] = React.useState<{ text: string; error?: boolean; link?: string }>();
 
+  const [defaultId, setDefaultId] = React.useState<string>();
   const reload = React.useCallback(() => store.list().then((l) => (setList(l), l)), [store]);
+  // Açılış sırası: bağlantıdaki sorgu, yoksa kişinin son sorgusu, yoksa projenin varsayılanı.
   React.useEffect(() => {
-    reload().then((l) => {
-      if (!initialId) return;
-      const q = l.find((x) => x.id === initialId);
-      if (q) onSelect(q, true);
-      else setNote({ text: t.notFound, error: true });
+    Promise.all([reload(), store.getLast(), store.getDefault()]).then(([l, last, def]) => {
+      setDefaultId(def);
+      if (initialId) {
+        const q = l.find((x) => x.id === initialId);
+        if (q) onSelect(q, true, "link");
+        else setNote({ text: t.notFound, error: true });
+        return;
+      }
+      if (last === "-") return;
+      const mineLast = last ? l.find((x) => x.id === last) : undefined;
+      const team = def ? l.find((x) => x.id === def && x.shared) : undefined;
+      if (mineLast) onSelect(mineLast, true, "last");
+      else if (team) onSelect(team, true, "default");
     });
   }, [reload]);
+
+  /** Kullanıcının seçtiği sorgu sonraki açılış için hatırlanır. */
+  const choose = (q: SavedQuery | undefined) => {
+    store.setLast(q?.id);
+    onSelect(q);
+  };
+  const toggleDefault = async () => {
+    if (!selected) return;
+    const next = defaultId === selected.id ? undefined : selected.id;
+    setBusy(true);
+    try {
+      await store.setDefault(next);
+      setDefaultId(next);
+      setNote({ text: next ? t.defaultSet : t.defaultCleared });
+    } catch (e) {
+      setNote({ text: t.failed(message(e)), error: true });
+    } finally {
+      setBusy(false);
+    }
+  };
 
   const copyLink = async () => {
     if (!selected) return;
@@ -150,7 +222,7 @@ export function QueryBar({ store, t, current, selectedId, onSelect, initialId, l
     try {
       const saved = await store.put(q);
       setList((l) => [...l.filter((x) => x.id !== saved.id), saved].sort((a, b) => a.name.localeCompare(b.name, "tr")));
-      onSelect(saved);
+      choose(saved);
       setMode(undefined);
       setNote({ text: done });
     } catch (e) {
@@ -179,7 +251,8 @@ export function QueryBar({ store, t, current, selectedId, onSelect, initialId, l
     try {
       await store.remove(selected);
       setList((l) => l.filter((x) => x.id !== selected.id));
-      onSelect(undefined);
+      if (defaultId === selected.id) await store.setDefault(undefined).then(() => setDefaultId(undefined), () => undefined);
+      choose(undefined);
       setMode(undefined);
       setNote(undefined);
     } catch (e) {
@@ -189,7 +262,8 @@ export function QueryBar({ store, t, current, selectedId, onSelect, initialId, l
     }
   };
 
-  const label = (q: SavedQuery) => (q.shared && q.ownerId !== store.user.id && q.ownerName ? `${q.name} — ${q.ownerName}` : q.name);
+  const label = (q: SavedQuery) =>
+    (q.id === defaultId ? "★ " : "") + (q.shared && q.ownerId !== store.user.id && q.ownerName ? `${q.name} — ${q.ownerName}` : q.name);
 
   return (
     <section className="fl-panel fl-queries">
@@ -206,7 +280,7 @@ export function QueryBar({ store, t, current, selectedId, onSelect, initialId, l
             onChange={(e) => {
               setMode(undefined);
               setNote(undefined);
-              onSelect(list.find((q) => q.id === e.target.value));
+              choose(list.find((q) => q.id === e.target.value));
             }}
           >
             <option value="">{t.none}</option>
@@ -239,6 +313,12 @@ export function QueryBar({ store, t, current, selectedId, onSelect, initialId, l
         {editable && (
           <button className="fl-button" disabled={busy || !dirty} onClick={() => selected && write({ ...selected, settings: current }, t.saved)}>
             {t.save}
+          </button>
+        )}
+        {selected?.shared && editable && (
+          <button className="fl-button fl-star" disabled={busy} aria-pressed={defaultId === selected.id} title={t.defaultTip} onClick={toggleDefault}>
+            <Icon name="star" />
+            {t.makeDefault}
           </button>
         )}
         {selected && (

@@ -98,6 +98,13 @@ export interface QueryStrings {
   linkManual: string;
   linkPersonal: string;
   notFound: string;
+  makeDefault: string;
+  defaultTip: string;
+  defaultSet: string;
+  defaultCleared: string;
+  loadedLast: (name: string) => string;
+  loadedDefault: (name: string) => string;
+  startBlank: string;
 }
 
 export interface RuleStrings {
@@ -187,6 +194,7 @@ export interface Strings {
   comfortable: string;
   compact: string;
   empty: string;
+  suggest: { range: string; states: (n: number) => string; assignee: string; conditions: (n: number) => string; projects: string };
   need: { type: string; dateField: string; states: string; range: string; columns: string; projects: string; conditions: string };
   projects: string;
   projectModes: Record<"this" | "all" | "some", string>;
@@ -241,6 +249,13 @@ export const STRINGS: Record<Lang, Strings> = {
       linkManual: "Bağlantı kopyalanamadı; aşağıdan seçip kopyalayın.",
       linkPersonal: "Bu kişisel bir sorgu: bağlantı yalnızca sizin için çalışır. Ekiple paylaşmak için Farklı kaydet ile projeyle paylaşın.",
       notFound: "Bağlantıdaki sorgu bulunamadı: silinmiş ya da size paylaşılmamış olabilir.",
+      makeDefault: "Proje varsayılanı",
+      defaultTip: "Projede henüz sorgu seçmemiş herkes sayfayı açınca bu sorgu çalışır. Projede tek varsayılan olur; yenisi eskisinin yerine geçer.",
+      defaultSet: "Bu sorgu artık projenin varsayılanı.",
+      defaultCleared: "Proje varsayılanı kaldırıldı.",
+      loadedLast: (name) => `Son kullandığın sorgu yüklendi ve çalıştırıldı: ${name}`,
+      loadedDefault: (name) => `Projenin varsayılan sorgusu yüklendi ve çalıştırıldı: ${name}`,
+      startBlank: "Boş formla başla",
       ownerOnly: (o) => `${o} oluşturdu; yalnızca o düzenleyip silebilir. Kendi kopyanız için Farklı kaydet'i kullanın.`,
     },
     rule: {
@@ -363,6 +378,13 @@ export const STRINGS: Record<Lang, Strings> = {
     comfortable: "Rahat",
     compact: "Sıkı",
     empty: "Bu filtrelerle kayıt bulunamadı.",
+    suggest: {
+      range: "Son 90 güne genişlet",
+      states: (n) => `Tüm state'ler (${n})`,
+      assignee: "Atanan: Herkes",
+      conditions: (n) => `Ek koşulları kaldır (${n})`,
+      projects: "Tüm projelerde ara",
+    },
     need: {
       type: "Work item türü seçin.",
       dateField: "Tarih alanı seçin.",
@@ -418,6 +440,13 @@ export const STRINGS: Record<Lang, Strings> = {
       linkManual: "Couldn't copy the link; select and copy it below.",
       linkPersonal: "This is a personal query, so the link only works for you. To share it with the team, use Save as and share it with the project.",
       notFound: "The query in the link wasn't found. It may have been deleted or not shared with you.",
+      makeDefault: "Project default",
+      defaultTip: "Anyone in the project who hasn't picked a query yet gets this one when they open the page. There is one default per project; a new one replaces the old.",
+      defaultSet: "This query is now the project default.",
+      defaultCleared: "Project default removed.",
+      loadedLast: (name) => `Your last query was loaded and run: ${name}`,
+      loadedDefault: (name) => `The project's default query was loaded and run: ${name}`,
+      startBlank: "Start with an empty form",
       ownerOnly: (o) => `Created by ${o}; only they can edit or delete it. Use Save as for your own copy.`,
     },
     rule: {
@@ -540,6 +569,13 @@ export const STRINGS: Record<Lang, Strings> = {
     comfortable: "Comfortable",
     compact: "Compact",
     empty: "No items match these filters.",
+    suggest: {
+      range: "Widen to the last 90 days",
+      states: (n) => `All states (${n})`,
+      assignee: "Assigned to: anyone",
+      conditions: (n) => `Remove extra conditions (${n})`,
+      projects: "Search all projects",
+    },
     need: {
       type: "Choose a work item type.",
       dateField: "Choose a date field.",
